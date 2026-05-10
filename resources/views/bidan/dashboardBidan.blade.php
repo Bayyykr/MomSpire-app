@@ -70,7 +70,7 @@
 									<div class="fw-semibold" style="font-size: 0.95rem;">{{ $user->name }}</div>
 									<div class="text-muted small">{{ $user->email }}</div>
 								</div>
-								<span class="badge text-bg-light text-nowrap">{{ $user->created_at?->diffForHumans() }}</span>
+								<span class="badge text-bg-light text-nowrap">{{ $user->created_at ? \Illuminate\Support\Carbon::parse($user->created_at)->diffForHumans() : '-' }}</span>
 							</div>
 						@empty
 							<div class="text-muted">Belum ada pengguna baru.</div>

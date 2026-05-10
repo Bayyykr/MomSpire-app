@@ -109,13 +109,8 @@ class DataKiaController extends Controller
             'no_catatan_medik_rs_anak' => $clean($request->no_catatan_medik_rs_anak),
         ]);
 
-        // 6. Riwayat Kesehatan
+        // 6. Riwayat Kesehatan (Nakes fields excluded to prevent overwrite)
         $dataKia->riwayat()->updateOrCreate([], [
-            'usia_ibu' => $clean($request->usia_ibu),
-            'kehamilan_ke' => $clean($request->kehamilan_ke),
-            'jumlah_anak_hidup' => $clean($request->jumlah_anak_hidup),
-            'riwayat_keguguran' => $clean($request->riwayat_keguguran),
-            'riwayat_penyakit_ibu' => $clean($request->riwayat_penyakit_ibu),
             'hpht' => $clean($request->hpht),
             'htp' => $clean($request->htp),
             // Existing fields from old migration that I kept in riwayat
@@ -134,8 +129,16 @@ class DataKiaController extends Controller
 
     public function exportPdf($id)
     {
-        abort_unless(auth()->check() && auth()->user()->role === 'admin', 403);
+        $user = auth()->user();
+        abort_unless($user, 403);
+
         $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat'])->findOrFail($id);
+
+        if ($user->role === 'pengguna') {
+            abort_unless($dataKia->user_id === $user->id, 403);
+        } else {
+            abort_unless(in_array($user->role, ['admin', 'bidan', 'dokter']), 403);
+        }
 
         $originalPath  = resource_path('views/buku/Buku KIA (Permenkes).pdf');
         $convertedPath = storage_path('app/buku_kia_converted.pdf');
@@ -167,11 +170,16 @@ class DataKiaController extends Controller
             if ($pageNo === 1) {
                 // COVER MAPPING
                 $ibu = $dataKia->ibu;
-                $pdf->SetXY(148, 181); $pdf->Write(0, $ibu->nama ?? '');
-                $pdf->SetXY(93, 132); $pdf->Write(0, $dataKia->faskes_dikeluarkan ?? '');
-                $pdf->SetXY(303, 132); $pdf->Write(0, $dataKia->kab_kota_dikeluarkan ?? '');
-                $pdf->SetXY(93, 94); $pdf->Write(0, $dataKia->tanggal_dikeluarkan ? date('d-m-Y', strtotime($dataKia->tanggal_dikeluarkan)) : '');
-                $pdf->SetXY(303, 94); $pdf->Write(0, $dataKia->provinsi_dikeluarkan ?? '');
+                $pdf->SetXY(51, 222);
+                $pdf->Write(0, $ibu->nama ?? '');
+                $pdf->SetXY(32, 240);
+                $pdf->Write(0, $dataKia->faskes_dikeluarkan ?? '');
+                $pdf->SetXY(106, 240);
+                $pdf->Write(0, $dataKia->kab_kota_dikeluarkan ?? '');
+                $pdf->SetXY(32, 253);
+                $pdf->Write(0, $dataKia->tanggal_dikeluarkan ? date('d-m-Y', strtotime($dataKia->tanggal_dikeluarkan)) : '');
+                $pdf->SetXY(106, 253);
+                $pdf->Write(0, $dataKia->provinsi_dikeluarkan ?? '');
             }
 
             if ($pageNo === 2) {
@@ -332,6 +340,22 @@ class DataKiaController extends Controller
                 $pdf->Write(0, $layanan->no_catatan_medik_rs_suami ?? '-');
                 $pdf->SetXY(312, 199);
                 $pdf->Write(0, $layanan->no_catatan_medik_rs_anak ?? '-');
+
+                // --- SEKSI RIWAYAT KESEHATAN IBU (Halaman 2 Bawah) ---
+                $riwayat = $dataKia->riwayat;
+                if ($riwayat) {
+                    $pdf->SetXY(240, 220); $pdf->Write(0, ($riwayat->usia_ibu ?? '-') . ' Tahun');
+                    $pdf->SetXY(240, 225); $pdf->Write(0, $riwayat->kehamilan_ke ?? '-');
+                    $pdf->SetXY(240, 231); $pdf->Write(0, $riwayat->jumlah_anak_hidup ?? '-');
+                    $pdf->SetXY(240, 237); $pdf->Write(0, $riwayat->riwayat_keguguran ?? '-');
+                    $pdf->SetXY(240, 241); $pdf->MultiCell(100, 4, $riwayat->riwayat_penyakit_ibu ?? '-', 0, 'L');
+                } else {
+                    $pdf->SetXY(240, 220); $pdf->Write(0, '-');
+                    $pdf->SetXY(240, 225); $pdf->Write(0, '-');
+                    $pdf->SetXY(240, 227); $pdf->Write(0, '-');
+                    $pdf->SetXY(240, 229); $pdf->Write(0, '-');
+                    $pdf->SetXY(240, 246); $pdf->Write(0, '-');
+                }
             }
         }
 
@@ -339,5 +363,44 @@ class DataKiaController extends Controller
             'Content-Type'        => 'application/pdf',
             'Content-Disposition' => 'inline; filename="Buku_KIA_' . ($dataKia->ibu->nama ?? 'Identitas') . '.pdf"',
         ]);
+    }
+
+    public function indexNakes()
+    {
+        $role = auth()->user()->role;
+        $dataKias = DataKia::with(['ibu'])->latest()->get();
+        
+        return view('nakes.kia-index', compact('dataKias', 'role'));
+    }
+
+    public function editRiwayat($id)
+    {
+        $role = auth()->user()->role;
+        $dataKia = DataKia::with(['ibu', 'riwayat'])->findOrFail($id);
+        
+        return view('nakes.kia-edit-riwayat', compact('dataKia', 'role'));
+    }
+
+    public function saveRiwayat(Request $request, $id)
+    {
+        $dataKia = DataKia::findOrFail($id);
+        
+        $clean = function($val) {
+            return $val === '' ? null : $val;
+        };
+
+        $dataKia->riwayat()->updateOrCreate(
+            ['data_kia_id' => $dataKia->id],
+            [
+                'usia_ibu' => $clean($request->usia_ibu),
+                'kehamilan_ke' => $clean($request->kehamilan_ke),
+                'jumlah_anak_hidup' => $clean($request->jumlah_anak_lahir_hidup),
+                'riwayat_keguguran' => $clean($request->riwayat_keguguran),
+                'riwayat_penyakit_ibu' => $clean($request->riwayat_penyakit_ibu),
+            ]
+        );
+
+        $role = auth()->user()->role;
+        return redirect()->route($role . '.kia')->with('success', 'Riwayat kesehatan berhasil diperbarui.');
     }
 }

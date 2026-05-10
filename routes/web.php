@@ -246,6 +246,22 @@ Route::get('/debug-pdf/{id}', function ($id) {
             $pdf->Write(0, $layanan->no_catatan_medik_rs_suami ?? '-');
             $pdf->SetXY(312, 199);
             $pdf->Write(0, $layanan->no_catatan_medik_rs_anak ?? '-');
+
+            // --- SEKSI RIWAYAT KESEHATAN IBU (Halaman 2 Bawah) ---
+            $riwayat = $dataKia->riwayat;
+            if ($riwayat) {
+                $pdf->SetXY(240, 220); $pdf->Write(0, ($riwayat->usia_ibu ?? '-') . ' Tahun');
+                $pdf->SetXY(240, 225); $pdf->Write(0, $riwayat->kehamilan_ke ?? '-');
+                $pdf->SetXY(240, 231); $pdf->Write(0, $riwayat->jumlah_anak_hidup ?? '-');
+                $pdf->SetXY(240, 237); $pdf->Write(0, $riwayat->riwayat_keguguran ?? '-');
+                $pdf->SetXY(240, 241); $pdf->MultiCell(100, 4, $riwayat->riwayat_penyakit_ibu ?? '-', 0, 'L');
+            } else {
+                $pdf->SetXY(240, 220); $pdf->Write(0, '-');
+                $pdf->SetXY(240, 225); $pdf->Write(0, '-');
+                $pdf->SetXY(240, 227); $pdf->Write(0, '-');
+                $pdf->SetXY(240, 229); $pdf->Write(0, '-');
+                $pdf->SetXY(240, 246); $pdf->Write(0, '-');
+            }
         }
     }
 
@@ -599,6 +615,10 @@ Route::middleware(['auth'])->group(function () {
         ]);
     })->name('bidan.dashboard');
 
+    Route::get('/bidan/kia', [\App\Http\Controllers\DataKiaController::class, 'indexNakes'])->name('bidan.kia');
+    Route::get('/bidan/kia/{id}/edit-riwayat', [\App\Http\Controllers\DataKiaController::class, 'editRiwayat'])->name('bidan.kia.edit_riwayat');
+    Route::post('/bidan/kia/{id}/save-riwayat', [\App\Http\Controllers\DataKiaController::class, 'saveRiwayat'])->name('bidan.kia.save_riwayat');
+
     Route::get('/dokter/dashboard', function () use ($ensureRole) {
         $ensureRole('dokter');
 
@@ -610,6 +630,10 @@ Route::middleware(['auth'])->group(function () {
             'recentDokter' => DB::table('dokter')->latest('created_at')->take(5)->get(['name', 'email', 'created_at']),
         ]);
     })->name('dokter.dashboard');
+
+    Route::get('/dokter/kia', [\App\Http\Controllers\DataKiaController::class, 'indexNakes'])->name('dokter.kia');
+    Route::get('/dokter/kia/{id}/edit-riwayat', [\App\Http\Controllers\DataKiaController::class, 'editRiwayat'])->name('dokter.kia.edit_riwayat');
+    Route::post('/dokter/kia/{id}/save-riwayat', [\App\Http\Controllers\DataKiaController::class, 'saveRiwayat'])->name('dokter.kia.save_riwayat');
 
     Route::get('/bidan/settings', function () use ($ensureRole) {
         $ensureRole('bidan');
@@ -688,7 +712,7 @@ Route::get('/pengguna/dashboard', function () use ($ensureUserRole) {
     }
 
     // Use the modernized pengguna dashboard view
-    return view('pengguna.dashboardPengguna');
+    return view('pengguna.dashboardPengguna', compact('dataKia'));
 })->name('pengguna.dashboard');
 
 Route::get('/pengguna/artikel', function () use ($ensureUserRole) {

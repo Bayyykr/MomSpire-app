@@ -565,7 +565,13 @@
 					<div class="flex-grow-1">
 						<div class="action-badge mb-2">BUKU KIA</div>
 						<h5 class="fw-bold mb-2">BUKU KIA</h5>
-						<p class="text-muted mb-0" style="font-size: 0.95rem;">Buka panduan Kesehatan Ibu dan Anak untuk akses informasi yang lebih jelas, rapi, dan nyaman dibaca.</p>
+						<p class="text-muted mb-2" style="font-size: 0.95rem;">Buka panduan Kesehatan Ibu dan Anak untuk akses informasi yang lebih jelas, rapi, dan nyaman dibaca.</p>
+						<div class="d-flex gap-2">
+							<span class="btn btn-sm bg-pink-light text-pink-primary fw-bold rounded-pill px-3">Sudah Terisi</span>
+							<a href="{{ route('admin.kia.export_pdf', $dataKia->id) }}" target="_blank" class="btn btn-sm btn-outline-pink fw-bold rounded-pill px-3">
+								<i class="bi bi-file-earmark-pdf me-1"></i> Cetak PDF
+							</a>
+						</div>
 					</div>
 				</div>
 			</a>

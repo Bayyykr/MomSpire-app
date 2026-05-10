@@ -391,32 +391,6 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="md:col-span-2">
                             <h4 class="text-sm font-bold text-purple-600 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                <span class="w-8 h-[2px] bg-purple-600"></span> Riwayat Singkat Kesehatan Ibu
-                            </h4>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-sm font-black text-gray-700 uppercase tracking-wider">Usia Ibu (Tahun)</label>
-                            <input type="number" x-model="formData.usia_ibu" class="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-purple-500 outline-none transition-all font-medium">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-sm font-black text-gray-700 uppercase tracking-wider">Kehamilan Ke-</label>
-                            <input type="text" x-model="formData.kehamilan_ke" class="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-purple-500 outline-none transition-all font-medium">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-sm font-black text-gray-700 uppercase tracking-wider">Jumlah Anak Hidup</label>
-                            <input type="number" x-model="formData.jumlah_anak_hidup" class="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-purple-500 outline-none transition-all font-medium">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-sm font-black text-gray-700 uppercase tracking-wider">Riwayat Keguguran</label>
-                            <input type="number" x-model="formData.riwayat_keguguran" class="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-purple-500 outline-none transition-all font-medium">
-                        </div>
-                        <div class="md:col-span-2 space-y-2">
-                            <label class="text-sm font-black text-gray-700 uppercase tracking-wider">Riwayat Penyakit Ibu</label>
-                            <textarea x-model="formData.riwayat_penyakit_ibu" rows="2" class="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-purple-500 outline-none transition-all font-medium" placeholder="Contoh: Asma, Hipertensi, Jantung, dll"></textarea>
-                        </div>
-
-                        <div class="md:col-span-2 mt-6">
-                            <h4 class="text-sm font-bold text-purple-600 uppercase tracking-widest mb-4 flex items-center gap-2">
                                 <span class="w-8 h-[2px] bg-purple-600"></span> Data Kehamilan Saat Ini
                             </h4>
                         </div>
@@ -548,12 +522,7 @@
                 puskesmas_domisili_anak: {!! json_encode($dataKia->layanan->puskesmas_domisili_anak ?? '') !!},
                 no_catatan_medik_rs_anak: {!! json_encode($dataKia->layanan->no_catatan_medik_rs_anak ?? '') !!},
 
-                // Step 6: Riwayat Kesehatan
-                usia_ibu: {!! json_encode($dataKia->riwayat->usia_ibu ?? '') !!},
-                kehamilan_ke: {!! json_encode($dataKia->riwayat->kehamilan_ke ?? '') !!},
-                jumlah_anak_hidup: {!! json_encode($dataKia->riwayat->jumlah_anak_hidup ?? '') !!},
-                riwayat_keguguran: {!! json_encode($dataKia->riwayat->riwayat_keguguran ?? '') !!},
-                riwayat_penyakit_ibu: {!! json_encode($dataKia->riwayat->riwayat_penyakit_ibu ?? '') !!},
+                // Step 6: Riwayat Kesehatan (Nakes only fields removed)
                 hpht: {!! json_encode($dataKia->riwayat->hpht ?? '') !!},
                 htp: {!! json_encode($dataKia->riwayat->htp ?? '') !!},
                 lingkar_lengan_atas: {!! json_encode($dataKia->riwayat->lingkar_lengan_atas ?? '') !!},
@@ -570,12 +539,12 @@
                     3: 'Identitas Suami/Keluarga',
                     4: 'Identitas Anak',
                     5: 'Layanan & Pembiayaan',
-                    6: 'Riwayat Kesehatan'
+                    6: 'Data Kehamilan'
                 }[s];
             },
 
             getStepShortName(s) {
-                return { 1: 'Buku', 2: 'Ibu', 3: 'Suami', 4: 'Anak', 5: 'Layanan', 6: 'Riwayat' }[s];
+                return { 1: 'Buku', 2: 'Ibu', 3: 'Suami', 4: 'Anak', 5: 'Layanan', 6: 'Hamil' }[s];
             },
 
             getStepDescription(s) {
@@ -585,7 +554,7 @@
                     3: 'Informasi lengkap mengenai Suami atau Penanggung Jawab.',
                     4: 'Informasi identitas Anak (jika sudah ada).',
                     5: 'Fasilitas kesehatan domisili dan data asuransi.',
-                    6: 'Riwayat medis dan data kehamilan saat ini.'
+                    6: 'Estimasi HPHT dan HTP kehamilan saat ini.'
                 }[s];
             },
 

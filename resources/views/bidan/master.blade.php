@@ -45,6 +45,10 @@
 					<i class="bi bi-grid-1x2-fill"></i>
 					<span>Dashboard</span>
 				</a>
+				<a href="{{ route('bidan.kia') }}" class="nav-link {{ request()->routeIs('bidan.kia*') ? 'active' : '' }}">
+					<i class="bi bi-book-half"></i>
+					<span>Buku KIA</span>
+				</a>
 				<a href="{{ route('bidan.settings') }}" class="nav-link {{ request()->routeIs('bidan.settings') ? 'active' : '' }}">
 					<i class="bi bi-gear-fill"></i>
 					<span>Pengaturan</span>
