@@ -39,7 +39,7 @@ Route::get('/who-am-i', function () {
 
 // DEBUG: Test PDF export tanpa auth - HAPUS setelah testing
 Route::get('/debug-pdf/{id}', function ($id) {
-    $dataKia = \App\Models\DataKia::with(['ibu', 'suami', 'layanan', 'ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils'])->findOrFail($id);
+    $dataKia = \App\Models\DataKia::with(['ibu', 'suami', 'layanan', 'ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan'])->findOrFail($id);
 
     $originalPath = resource_path('views/buku/Buku KIA (Permenkes).pdf');
     $convertedPath = storage_path('app/buku_kia_converted.pdf');
@@ -510,6 +510,79 @@ Route::get('/debug-pdf/{id}', function ($id) {
                             $pdf->Text($xMap['kader_info'], $visualY, $item->kader_info);
                         }
                     }
+                }
+            }
+        }
+
+        if ($pageNo === 11) {
+            // PERSIAPAN MELAHIRKAN (Page 11 - Landscape Format - Left Page)
+            $p = $dataKia->persiapanMelahirkan;
+            if ($p) {
+                // PEMETAAN MANUAL KOORDINAT X UNTUK CHECKBOX (Silakan sesuaikan!)
+                $checkboxX = [
+                    'col1' => 32, // Kolom Kiri Checkbox
+                    'col2' => 102, // Kolom Kanan Checkbox
+                ];
+
+                // PEMETAAN MANUAL KOORDINAT Y UNTUK BARIS 1 SAMPAI 5 (Silakan sesuaikan!)
+                $rowY = [
+                    1 => 155,
+                    2 => 173.5,
+                    3 => 192,
+                    4 => 210,
+                    5 => 232.7,
+                ];
+
+                $pdf->SetTextColor(0, 0, 0);
+
+                // Centang Kolom Kiri
+                $pdf->SetFont('ZapfDingbats', '', 10);
+                if ($p->tanya_tanggal_perkiraan) {
+                    $pdf->Text($checkboxX['col1'], $rowY[1], chr(51));
+                }
+                if ($p->minta_dampingi) {
+                    $pdf->Text($checkboxX['col1'], $rowY[2], chr(51));
+                }
+                if ($p->siap_tabungan) {
+                    $pdf->Text($checkboxX['col1'], $rowY[3], chr(51));
+                }
+                if ($p->kartu_jkn) {
+                    $pdf->Text($checkboxX['col1'], $rowY[4], chr(51));
+                }
+                if ($p->tempat_melahirkan) {
+                    $pdf->Text($checkboxX['col1'], $rowY[5], chr(51));
+                }
+
+                // Centang Kolom Kanan
+                if ($p->siap_ktp_kk) {
+                    $pdf->Text($checkboxX['col2'], $rowY[1], chr(51));
+                }
+                if ($p->siap_pendonor) {
+                    $pdf->Text($checkboxX['col2'], $rowY[2], chr(51));
+                }
+                if ($p->siap_kendaraan) {
+                    $pdf->Text($checkboxX['col2'], $rowY[3], chr(51));
+                }
+                if ($p->sepakat_stiker_p4k) {
+                    $pdf->Text($checkboxX['col2'], $rowY[4], chr(51));
+                }
+                if ($p->rencana_kb) {
+                    $pdf->Text($checkboxX['col2'], $rowY[5], chr(51));
+                }
+
+                // Gambar Isian Teks (Tanggal, Bulan, Tahun, Metode KB)
+                $pdf->SetFont('Arial', '', 9);
+                if (!empty($p->hpl_tanggal)) {
+                    $pdf->Text(49, $rowY[1] + 9, $p->hpl_tanggal); // Baris HPL bawah dikit atau sebaris
+                }
+                if (!empty($p->hpl_bulan)) {
+                    $pdf->Text(68.3, $rowY[1] + 9, $p->hpl_bulan);
+                }
+                if (!empty($p->hpl_tahun)) {
+                    $pdf->Text(90, $rowY[1] + 9, $p->hpl_tahun);
+                }
+                if (!empty($p->metode_kb)) {
+                    $pdf->Text(135, $rowY[5] + 4.5, $p->metode_kb);
                 }
             }
         }
@@ -1012,6 +1085,11 @@ Route::get('/pengguna/kelas-ibu', [\App\Http\Controllers\DataKiaController::clas
     ->middleware('auth')->name('pengguna.kelas_ibu');
 Route::post('/pengguna/kelas-ibu/save', [\App\Http\Controllers\DataKiaController::class, 'kelasIbuStore'])
     ->middleware('auth')->name('pengguna.kelas_ibu.save');
+
+Route::get('/pengguna/persiapan-melahirkan', [\App\Http\Controllers\DataKiaController::class, 'persiapanIndex'])
+    ->middleware('auth')->name('pengguna.persiapan');
+Route::post('/pengguna/persiapan-melahirkan/save', [\App\Http\Controllers\DataKiaController::class, 'persiapanStore'])
+    ->middleware('auth')->name('pengguna.persiapan.save');
 
 Route::post('/pengguna/kia/wizard/save', [\App\Http\Controllers\DataKiaController::class, 'saveWizard'])
     ->middleware('auth')->name('pengguna.kia.wizard.save');

@@ -23,4 +23,5 @@ class DataKia extends Model
     public function ttdTrackings() { return $this->hasMany(KiaTtdTracking::class, 'data_kia_id'); }
     public function pemantauanMingguans() { return $this->hasMany(KiaPemantauanMingguan::class, 'data_kia_id'); }
     public function absenKelasIbuHamils() { return $this->hasMany(KiaAbsenKelasIbuHamil::class, 'data_kia_id'); }
+    public function persiapanMelahirkan() { return $this->hasOne(KiaPersiapanMelahirkan::class, 'data_kia_id'); }
 }

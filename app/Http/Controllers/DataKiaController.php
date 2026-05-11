@@ -133,11 +133,11 @@ class DataKiaController extends Controller
         $user = auth()->user();
         abort_unless($user, 403);
 
-        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils'])
+        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan'])
             ->findOrFail($id);
 
-        // Pastikan relasi ttdTrackings, pemantauanMingguans, dan absenKelasIbuHamils selalu segar
-        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils']);
+        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, dan persiapanMelahirkan selalu segar
+        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan']);
 
         if ($user->role === 'pengguna') {
             abort_unless($dataKia->user_id === $user->id, 403);
@@ -629,6 +629,79 @@ class DataKiaController extends Controller
                 }
             }
         }
+
+        if ($pageNo === 11) {
+            // PERSIAPAN MELAHIRKAN (Page 11 - Landscape Format - Left Page)
+            $p = $dataKia->persiapanMelahirkan;
+            if ($p) {
+                // PEMETAAN MANUAL KOORDINAT X UNTUK CHECKBOX (Silakan sesuaikan!)
+                $checkboxX = [
+                    'col1' => 32, // Kolom Kiri Checkbox
+                    'col2' => 102, // Kolom Kanan Checkbox
+                ];
+
+                // PEMETAAN MANUAL KOORDINAT Y UNTUK BARIS 1 SAMPAI 5 (Silakan sesuaikan!)
+                $rowY = [
+                    1 => 155,
+                    2 => 173.5,
+                    3 => 192,
+                    4 => 210,
+                    5 => 232.7,
+                ];
+
+                $pdf->SetTextColor(0, 0, 0);
+
+                // Centang Kolom Kiri
+                $pdf->SetFont('ZapfDingbats', '', 10);
+                if ($p->tanya_tanggal_perkiraan) {
+                    $pdf->Text($checkboxX['col1'], $rowY[1], chr(51));
+                }
+                if ($p->minta_dampingi) {
+                    $pdf->Text($checkboxX['col1'], $rowY[2], chr(51));
+                }
+                if ($p->siap_tabungan) {
+                    $pdf->Text($checkboxX['col1'], $rowY[3], chr(51));
+                }
+                if ($p->kartu_jkn) {
+                    $pdf->Text($checkboxX['col1'], $rowY[4], chr(51));
+                }
+                if ($p->tempat_melahirkan) {
+                    $pdf->Text($checkboxX['col1'], $rowY[5], chr(51));
+                }
+
+                // Centang Kolom Kanan
+                if ($p->siap_ktp_kk) {
+                    $pdf->Text($checkboxX['col2'], $rowY[1], chr(51));
+                }
+                if ($p->siap_pendonor) {
+                    $pdf->Text($checkboxX['col2'], $rowY[2], chr(51));
+                }
+                if ($p->siap_kendaraan) {
+                    $pdf->Text($checkboxX['col2'], $rowY[3], chr(51));
+                }
+                if ($p->sepakat_stiker_p4k) {
+                    $pdf->Text($checkboxX['col2'], $rowY[4], chr(51));
+                }
+                if ($p->rencana_kb) {
+                    $pdf->Text($checkboxX['col2'], $rowY[5], chr(51));
+                }
+
+                // Gambar Isian Teks (Tanggal, Bulan, Tahun, Metode KB)
+                $pdf->SetFont('Arial', '', 9);
+                if (!empty($p->hpl_tanggal)) {
+                    $pdf->Text(49, $rowY[1] + 9, $p->hpl_tanggal); // Baris HPL bawah dikit atau sebaris
+                }
+                if (!empty($p->hpl_bulan)) {
+                    $pdf->Text(68.3, $rowY[1] + 9, $p->hpl_bulan);
+                }
+                if (!empty($p->hpl_tahun)) {
+                    $pdf->Text(90, $rowY[1] + 9, $p->hpl_tahun);
+                }
+                if (!empty($p->metode_kb)) {
+                    $pdf->Text(135, $rowY[5] + 4.5, $p->metode_kb);
+                }
+            }
+        }
     }
 
         return response($pdf->Output('S'), 200, [
@@ -786,6 +859,56 @@ class DataKiaController extends Controller
         );
 
         return back()->with('success', 'Data absensi kelas ibu hamil ke-' . $request->kehadiran_ke . ' berhasil disimpan.');
+    }
+
+    public function persiapanIndex()
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::with('persiapanMelahirkan')->where('user_id', $userId)->first();
+
+        if (!$dataKia) {
+            return redirect()->route('pengguna.buku_kia')->with('info', 'Silakan lengkapi screening Buku KIA terlebih dahulu.');
+        }
+
+        $persiapan = $dataKia->persiapanMelahirkan;
+
+        return view('pengguna.kia-persiapan', compact('dataKia', 'persiapan'));
+    }
+
+    public function persiapanStore(Request $request)
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
+
+        $fields = [
+            'tanya_tanggal_perkiraan',
+            'minta_dampingi',
+            'siap_tabungan',
+            'kartu_jkn',
+            'tempat_melahirkan',
+            'siap_ktp_kk',
+            'siap_pendonor',
+            'siap_kendaraan',
+            'sepakat_stiker_p4k',
+            'rencana_kb',
+        ];
+
+        $data = [];
+        foreach ($fields as $field) {
+            $data[$field] = $request->has($field);
+        }
+
+        $data['hpl_tanggal'] = $request->hpl_tanggal;
+        $data['hpl_bulan']   = $request->hpl_bulan;
+        $data['hpl_tahun']   = $request->hpl_tahun;
+        $data['metode_kb']   = $request->metode_kb;
+
+        $dataKia->persiapanMelahirkan()->updateOrCreate(
+            ['data_kia_id' => $dataKia->id],
+            $data
+        );
+
+        return back()->with('success', 'Persiapan melahirkan berhasil disimpan.');
     }
 }
 

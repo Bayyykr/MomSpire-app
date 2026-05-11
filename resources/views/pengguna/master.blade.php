@@ -95,6 +95,10 @@
 					<i class="bi bi-people-fill"></i>
 					<span>Kelas Ibu Hamil</span>
 				</a>
+				<a href="{{ route('pengguna.persiapan') }}" class="nav-link {{ request()->routeIs('pengguna.persiapan') ? 'active' : '' }}">
+					<i class="bi bi-journal-check"></i>
+					<span>Persiapan Melahirkan</span>
+				</a>
 			</div>
 			<div class="nav-section">
 				<span class="nav-label">SISTEM</span>
