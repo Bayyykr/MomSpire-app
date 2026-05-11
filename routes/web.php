@@ -39,7 +39,7 @@ Route::get('/who-am-i', function () {
 
 // DEBUG: Test PDF export tanpa auth - HAPUS setelah testing
 Route::get('/debug-pdf/{id}', function ($id) {
-    $dataKia = \App\Models\DataKia::with(['ibu', 'suami', 'layanan', 'ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan'])->findOrFail($id);
+    $dataKia = \App\Models\DataKia::with(['ibu', 'suami', 'layanan', 'ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'prosesMelahirkan'])->findOrFail($id);
 
     $originalPath = resource_path('views/buku/Buku KIA (Permenkes).pdf');
     $convertedPath = storage_path('app/buku_kia_converted.pdf');
@@ -586,6 +586,35 @@ Route::get('/debug-pdf/{id}', function ($id) {
                 }
             }
         }
+
+        if ($pageNo === 14) {
+            // PROSES MELAHIRKAN (Page 14 - Landscape Format - Left Page)
+            $p = $dataKia->prosesMelahirkan;
+            if ($p) {
+                // KOORDINAT INDIVIDUAL UNTUK SETIAP CHECKBOX (Dapat diubah sendiri-sendiri!)
+                $coords = [
+                    // Kolom Kiri
+                    'mulas_teratur'         => ['x' => 32.0, 'y' => 177.7],
+                    'durasi_persalinan'     => ['x' => 32.0, 'y' => 195.7],
+                    'hak_pendamping'        => ['x' => 32.0, 'y' => 223.5],
+                    'hak_posisi'            => ['x' => 32.0, 'y' => 237.5],
+
+                    // Kolom Kanan
+                    'ingin_bab'             => ['x' => 102.0, 'y' => 177.7],
+                    'kurangi_sakit'         => ['x' => 102.0, 'y' => 191.2],
+                    'inisiasi_menyusu_dini' => ['x' => 102.0, 'y' => 209.5],
+                ];
+
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->SetFont('ZapfDingbats', '', 10);
+
+                foreach ($coords as $field => $coord) {
+                    if ($p->$field) {
+                        $pdf->Text($coord['x'], $coord['y'], $coord['char'] ?? chr(51));
+                    }
+                }
+            }
+        }
     }
 
     return response($pdf->Output('S'), 200, [
@@ -1090,6 +1119,11 @@ Route::get('/pengguna/persiapan-melahirkan', [\App\Http\Controllers\DataKiaContr
     ->middleware('auth')->name('pengguna.persiapan');
 Route::post('/pengguna/persiapan-melahirkan/save', [\App\Http\Controllers\DataKiaController::class, 'persiapanStore'])
     ->middleware('auth')->name('pengguna.persiapan.save');
+
+Route::get('/pengguna/proses-melahirkan', [\App\Http\Controllers\DataKiaController::class, 'prosesIndex'])
+    ->middleware('auth')->name('pengguna.proses');
+Route::post('/pengguna/proses-melahirkan/save', [\App\Http\Controllers\DataKiaController::class, 'prosesStore'])
+    ->middleware('auth')->name('pengguna.proses.save');
 
 Route::post('/pengguna/kia/wizard/save', [\App\Http\Controllers\DataKiaController::class, 'saveWizard'])
     ->middleware('auth')->name('pengguna.kia.wizard.save');

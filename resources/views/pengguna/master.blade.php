@@ -99,6 +99,10 @@
 					<i class="bi bi-journal-check"></i>
 					<span>Persiapan Melahirkan</span>
 				</a>
+				<a href="{{ route('pengguna.proses') }}" class="nav-link {{ request()->routeIs('pengguna.proses') ? 'active' : '' }}">
+					<i class="bi bi-heart-pulse"></i>
+					<span>Proses Melahirkan</span>
+				</a>
 			</div>
 			<div class="nav-section">
 				<span class="nav-label">SISTEM</span>

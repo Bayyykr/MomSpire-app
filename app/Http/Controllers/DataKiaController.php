@@ -133,11 +133,11 @@ class DataKiaController extends Controller
         $user = auth()->user();
         abort_unless($user, 403);
 
-        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan'])
+        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'prosesMelahirkan'])
             ->findOrFail($id);
 
-        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, dan persiapanMelahirkan selalu segar
-        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan']);
+        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, persiapanMelahirkan, dan prosesMelahirkan selalu segar
+        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'prosesMelahirkan']);
 
         if ($user->role === 'pengguna') {
             abort_unless($dataKia->user_id === $user->id, 403);
@@ -702,6 +702,35 @@ class DataKiaController extends Controller
                 }
             }
         }
+
+        if ($pageNo === 14) {
+            // PROSES MELAHIRKAN (Page 14 - Landscape Format - Left Page)
+            $p = $dataKia->prosesMelahirkan;
+            if ($p) {
+                // KOORDINAT INDIVIDUAL UNTUK SETIAP CHECKBOX (Dapat diubah sendiri-sendiri!)
+                $coords = [
+                    // Kolom Kiri
+                    'mulas_teratur'         => ['x' => 32.0, 'y' => 177.7],
+                    'durasi_persalinan'     => ['x' => 32.0, 'y' => 195.7],
+                    'hak_pendamping'        => ['x' => 32.0, 'y' => 223.5],
+                    'hak_posisi'            => ['x' => 32.0, 'y' => 237.5],
+
+                    // Kolom Kanan
+                    'ingin_bab'             => ['x' => 102.0, 'y' => 177.7],
+                    'kurangi_sakit'         => ['x' => 102.0, 'y' => 191.2],
+                    'inisiasi_menyusu_dini' => ['x' => 102.0, 'y' => 209.5],
+                ];
+
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->SetFont('ZapfDingbats', '', 10);
+
+                foreach ($coords as $field => $coord) {
+                    if ($p->$field) {
+                        $pdf->Text($coord['x'], $coord['y'], $coord['char'] ?? chr(51));
+                    }
+                }
+            }
+        }
     }
 
         return response($pdf->Output('S'), 200, [
@@ -909,6 +938,48 @@ class DataKiaController extends Controller
         );
 
         return back()->with('success', 'Persiapan melahirkan berhasil disimpan.');
+    }
+
+    public function prosesIndex()
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::with('prosesMelahirkan')->where('user_id', $userId)->first();
+
+        if (!$dataKia) {
+            return redirect()->route('pengguna.buku_kia')->with('info', 'Silakan lengkapi screening Buku KIA terlebih dahulu.');
+        }
+
+        $proses = $dataKia->prosesMelahirkan;
+
+        return view('pengguna.kia-proses', compact('dataKia', 'proses'));
+    }
+
+    public function prosesStore(Request $request)
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
+
+        $fields = [
+            'mulas_teratur',
+            'durasi_persalinan',
+            'hak_pendamping',
+            'hak_posisi',
+            'ingin_bab',
+            'kurangi_sakit',
+            'inisiasi_menyusu_dini',
+        ];
+
+        $data = [];
+        foreach ($fields as $field) {
+            $data[$field] = $request->has($field);
+        }
+
+        $dataKia->prosesMelahirkan()->updateOrCreate(
+            ['data_kia_id' => $dataKia->id],
+            $data
+        );
+
+        return back()->with('success', 'Proses melahirkan berhasil disimpan.');
     }
 }
 
