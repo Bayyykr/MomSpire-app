@@ -136,8 +136,8 @@ class DataKiaController extends Controller
         $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings'])
             ->findOrFail($id);
 
-        // Pastikan relasi ttdTrackings selalu segar
-        $dataKia->load('ttdTrackings');
+        // Pastikan relasi ttdTrackings dan pemantauanMingguans selalu segar
+        $dataKia->load(['ttdTrackings', 'pemantauanMingguans']);
 
         if ($user->role === 'pengguna') {
             abort_unless($dataKia->user_id === $user->id, 403);
@@ -456,10 +456,138 @@ class DataKiaController extends Controller
                         // 3. Bulan / Tahun (Sesuai koordinat pas Anda - JANGAN DIUBAH)
                         $pdf->SetFont('Arial', '', 9);
                         $pdf->RotatedText($visualX, 236.5, $tracking->bulan_tahun ?? '', 90);
+                }
+            }
+        }
+
+        if ($pageNo === 7) {
+            // LEMBAR PEMANTAUAN TRIMESTER I & II (Page 7 - Landscape Format)
+            $pemantauans = $dataKia->pemantauanMingguans->keyBy('minggu_ke');
+
+            // PEMETAAN MANUAL KOORDINAT X UNTUK 11 KOLOM (Silakan sesuaikan jika ada yang bergeser!)
+            $xMap = [
+                'pemeriksaan_kehamilan' => 35.0,  // Kolom 1
+                'kelas_ibu_hamil'       => 55.0,  // Kolom 2
+                'demam_lebih_2_hari'    => 75.0,  // Kolom 3
+                'pusing_sakit_kepala'   => 95.0,  // Kolom 4
+                'sulit_tidur_cemas'     => 115.0, // Kolom 5
+                'risiko_tb'             => 195.0, // Kolom 6 (Halaman Kanan)
+                'gerakan_bayi'          => 215.0, // Kolom 7
+                'nyeri_perut_hebat'     => 235.0, // Kolom 8
+                'keluar_cairan_lahir'   => 255.0, // Kolom 9
+                'sakit_saat_kencing'    => 275.0, // Kolom 10
+                'diare_berulang'        => 295.0, // Kolom 11
+            ];
+
+            // PEMETAAN MANUAL KOORDINAT Y UNTUK MINGGU 4 SAMPAI 24
+            $yMap = [
+                4  => 95.0,
+                5  => 100.0,
+                6  => 105.0,
+                7  => 110.0,
+                8  => 115.0,
+                9  => 120.0,
+                10 => 125.0,
+                11 => 130.0,
+                12 => 135.0,
+                13 => 140.0,
+                14 => 145.0,
+                15 => 150.0,
+                16 => 155.0,
+                17 => 160.0,
+                18 => 165.0,
+                19 => 170.0,
+                20 => 175.0,
+                21 => 180.0,
+                22 => 185.0,
+                23 => 190.0,
+                24 => 195.0,
+            ];
+
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetFont('ZapfDingbats', '', 10);
+
+            foreach (range(4, 24) as $w) {
+                $p = $pemantauans->get($w);
+                if ($p) {
+                    $visualY = $yMap[$w] ?? null;
+                    if ($visualY) {
+                        // Plot setiap indikator jika dicentang
+                        foreach ($xMap as $field => $visualX) {
+                            // Untuk minggu 4-24, kolom gerakan_bayi diabaikan karena abu-abu di buku KIA
+                            if ($field === 'gerakan_bayi' && $w <= 24) {
+                                continue;
+                            }
+
+                            if ($p->{$field}) {
+                                $pdf->Text($visualX, $visualY, chr(51));
+                            }
+                        }
                     }
                 }
             }
         }
+
+        if ($pageNo === 8) {
+            // LEMBAR PEMANTAUAN TRIMESTER II & III (Page 8 - Landscape Format)
+            $pemantauans = $dataKia->pemantauanMingguans->keyBy('minggu_ke');
+
+            // PEMETAAN MANUAL KOORDINAT X UNTUK 11 KOLOM (Silakan sesuaikan jika ada yang bergeser!)
+            $xMap = [
+                'pemeriksaan_kehamilan' => 35.0,  // Kolom 1
+                'kelas_ibu_hamil'       => 55.0,  // Kolom 2
+                'demam_lebih_2_hari'    => 75.0,  // Kolom 3
+                'pusing_sakit_kepala'   => 95.0,  // Kolom 4
+                'sulit_tidur_cemas'     => 115.0, // Kolom 5
+                'risiko_tb'             => 195.0, // Kolom 6 (Halaman Kanan)
+                'gerakan_bayi'          => 215.0, // Kolom 7
+                'nyeri_perut_hebat'     => 235.0, // Kolom 8
+                'keluar_cairan_lahir'   => 255.0, // Kolom 9
+                'sakit_saat_kencing'    => 275.0, // Kolom 10
+                'diare_berulang'        => 295.0, // Kolom 11
+            ];
+
+            // PEMETAAN MANUAL KOORDINAT Y UNTUK MINGGU 25 SAMPAI 42
+            $yMap = [
+                25 => 95.0,
+                26 => 100.0,
+                27 => 105.0,
+                28 => 110.0,
+                29 => 115.0,
+                30 => 120.0,
+                31 => 125.0,
+                32 => 130.0,
+                33 => 135.0,
+                34 => 140.0,
+                35 => 145.0,
+                36 => 150.0,
+                37 => 155.0,
+                38 => 160.0,
+                39 => 165.0,
+                40 => 170.0,
+                41 => 175.0,
+                42 => 180.0,
+            ];
+
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetFont('ZapfDingbats', '', 10);
+
+            foreach (range(25, 42) as $w) {
+                $p = $pemantauans->get($w);
+                if ($p) {
+                    $visualY = $yMap[$w] ?? null;
+                    if ($visualY) {
+                        // Plot setiap indikator jika dicentang
+                        foreach ($xMap as $field => $visualX) {
+                            if ($p->{$field}) {
+                                $pdf->Text($visualX, $visualY, chr(51));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
         return response($pdf->Output('S'), 200, [
             'Content-Type' => 'application/pdf',
@@ -536,6 +664,50 @@ class DataKiaController extends Controller
         );
 
         return back()->with('success', 'Catatan minum TTD bulan ke-' . $bulanKe . ' berhasil disimpan.');
+    }
+
+    public function pemantauanIndex()
+    {
+        abort_unless(auth()->check() && auth()->user()->role === 'pengguna', 403);
+
+        $dataKia = DataKia::with('pemantauanMingguans')->firstOrCreate(['user_id' => auth()->id()]);
+        $pemantauans = $dataKia->pemantauanMingguans->keyBy('minggu_ke');
+
+        return view('pengguna.kia-pemantauan', compact('dataKia', 'pemantauans'));
+    }
+
+    public function pemantauanStore(Request $request)
+    {
+        abort_unless(auth()->check() && auth()->user()->role === 'pengguna', 403);
+        $dataKia = DataKia::firstOrCreate(['user_id' => auth()->id()]);
+
+        $mingguKe = intval($request->minggu_ke);
+
+        $fields = [
+            'pemeriksaan_kehamilan',
+            'kelas_ibu_hamil',
+            'demam_lebih_2_hari',
+            'pusing_sakit_kepala',
+            'sulit_tidur_cemas',
+            'risiko_tb',
+            'gerakan_bayi',
+            'nyeri_perut_hebat',
+            'keluar_cairan_lahir',
+            'sakit_saat_kencing',
+            'diare_berulang',
+        ];
+
+        $data = [];
+        foreach ($fields as $field) {
+            $data[$field] = $request->has($field);
+        }
+
+        $dataKia->pemantauanMingguans()->updateOrCreate(
+            ['minggu_ke' => $mingguKe],
+            $data
+        );
+
+        return back()->with('success', 'Catatan pemantauan minggu ke-' . $mingguKe . ' berhasil disimpan.');
     }
 }
 

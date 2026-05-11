@@ -87,6 +87,10 @@
 					<i class="bi bi-calendar-check-fill"></i>
 					<span>Catat Minum TTD</span>
 				</a>
+				<a href="{{ route('pengguna.pemantauan') }}" class="nav-link {{ request()->routeIs('pengguna.pemantauan') ? 'active' : '' }}">
+					<i class="bi bi-heart-pulse-fill"></i>
+					<span>Pemantauan Ibu Hamil</span>
+				</a>
 			</div>
 			<div class="nav-section">
 				<span class="nav-label">SISTEM</span>

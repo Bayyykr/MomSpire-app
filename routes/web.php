@@ -39,7 +39,7 @@ Route::get('/who-am-i', function () {
 
 // DEBUG: Test PDF export tanpa auth - HAPUS setelah testing
 Route::get('/debug-pdf/{id}', function ($id) {
-    $dataKia = \App\Models\DataKia::with(['ibu', 'suami', 'layanan', 'ttdTrackings'])->findOrFail($id);
+    $dataKia = \App\Models\DataKia::with(['ibu', 'suami', 'layanan', 'ttdTrackings', 'pemantauanMingguans'])->findOrFail($id);
 
     $originalPath = resource_path('views/buku/Buku KIA (Permenkes).pdf');
     $convertedPath = storage_path('app/buku_kia_converted.pdf');
@@ -340,6 +340,134 @@ Route::get('/debug-pdf/{id}', function ($id) {
                     // 3. Bulan / Tahun (Sesuai koordinat pas Anda - JANGAN DIUBAH)
                     $pdf->SetFont('Arial', '', 9);
                     $pdf->RotatedText($visualX, 236.5, $tracking->bulan_tahun ?? '', 90);
+                }
+            }
+        }
+
+        if ($pageNo === 7) {
+            // LEMBAR PEMANTAUAN TRIMESTER I & II (Page 7 - Landscape Format)
+            $pemantauans = $dataKia->pemantauanMingguans->keyBy('minggu_ke');
+
+            // PEMETAAN MANUAL KOORDINAT X UNTUK 11 KOLOM (Silakan sesuaikan jika ada yang bergeser!)
+            $xMap = [
+                'pemeriksaan_kehamilan' => 55,  // Kolom 1
+                'kelas_ibu_hamil'       => 82,  // Kolom 2
+                'demam_lebih_2_hari'    => 108,  // Kolom 3
+                'pusing_sakit_kepala'   => 133,  // Kolom 4
+                'sulit_tidur_cemas'     => 158, // Kolom 5
+                'risiko_tb'             => 215, // Kolom 6 (Halaman Kanan)
+                'gerakan_bayi'          => 240, // Kolom 7
+                'nyeri_perut_hebat'     => 263, // Kolom 8
+                'keluar_cairan_lahir'   => 286, // Kolom 9
+                'sakit_saat_kencing'    => 310, // Kolom 10
+                'diare_berulang'        => 335, // Kolom 11
+            ];
+
+            // PEMETAAN MANUAL KOORDINAT Y UNTUK MINGGU 4 SAMPAI 24
+            $yMap = [
+                4  => 123,
+                5  => 129,
+                6  => 136,
+                7  => 142,
+                8  => 148,
+                9  => 154,
+                10 => 160,
+                11 => 167,
+                12 => 173,
+                13 => 180,
+                14 => 186,
+                15 => 192,
+                16 => 199,
+                17 => 205,
+                18 => 211,
+                19 => 217,
+                20 => 224,
+                21 => 230,
+                22 => 237,
+                23 => 243,
+                24 => 249,
+            ];
+
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetFont('ZapfDingbats', '', 10);
+
+            foreach (range(4, 24) as $w) {
+                $p = $pemantauans->get($w);
+                if ($p) {
+                    $visualY = $yMap[$w] ?? null;
+                    if ($visualY) {
+                        // Plot setiap indikator jika dicentang
+                        foreach ($xMap as $field => $visualX) {
+                            // Untuk minggu 4-24, kolom gerakan_bayi diabaikan karena abu-abu di buku KIA
+                            if ($field === 'gerakan_bayi' && $w <= 24) {
+                                continue;
+                            }
+
+                            if ($p->{$field}) {
+                                $pdf->Text($visualX, $visualY, chr(51));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($pageNo === 8) {
+            // LEMBAR PEMANTAUAN TRIMESTER II & III (Page 8 - Landscape Format)
+            $pemantauans = $dataKia->pemantauanMingguans->keyBy('minggu_ke');
+
+            // PEMETAAN MANUAL KOORDINAT X UNTUK 11 KOLOM (Silakan sesuaikan jika ada yang bergeser!)
+            $xMap = [
+                'pemeriksaan_kehamilan' => 55,  // Kolom 1
+                'kelas_ibu_hamil'       => 82,  // Kolom 2
+                'demam_lebih_2_hari'    => 108,  // Kolom 3
+                'pusing_sakit_kepala'   => 133,  // Kolom 4
+                'sulit_tidur_cemas'     => 158, // Kolom 5
+                'risiko_tb'             => 215, // Kolom 6 (Halaman Kanan)
+                'gerakan_bayi'          => 239, // Kolom 7
+                'nyeri_perut_hebat'     => 263, // Kolom 8
+                'keluar_cairan_lahir'   => 286, // Kolom 9
+                'sakit_saat_kencing'    => 310, // Kolom 10
+                'diare_berulang'        => 335, // Kolom 11
+            ];
+
+            // PEMETAAN MANUAL KOORDINAT Y UNTUK MINGGU 25 SAMPAI 42
+            $yMap = [
+                25  => 123,
+                26  => 131,
+                27  => 139,
+                28  => 146,
+                29  => 153,
+                30  => 161,
+                31  => 168,
+                32  => 176,
+                33  => 183,
+                34  => 190,
+                35  => 198,
+                36  => 205,
+                37  => 212,
+                38  => 220,
+                39  => 227,
+                40  => 234,
+                41  => 242,
+                42  => 249,
+            ];
+
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetFont('ZapfDingbats', '', 10);
+
+            foreach (range(25, 42) as $w) {
+                $p = $pemantauans->get($w);
+                if ($p) {
+                    $visualY = $yMap[$w] ?? null;
+                    if ($visualY) {
+                        // Plot setiap indikator jika dicentang
+                        foreach ($xMap as $field => $visualX) {
+                            if ($p->{$field}) {
+                                $pdf->Text($visualX, $visualY, chr(51));
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -832,6 +960,11 @@ Route::get('/pengguna/ttd', [\App\Http\Controllers\DataKiaController::class, 'tt
     ->middleware('auth')->name('pengguna.ttd');
 Route::post('/pengguna/ttd/save', [\App\Http\Controllers\DataKiaController::class, 'ttdStore'])
     ->middleware('auth')->name('pengguna.ttd.store');
+
+Route::get('/pengguna/pemantauan', [\App\Http\Controllers\DataKiaController::class, 'pemantauanIndex'])
+    ->middleware('auth')->name('pengguna.pemantauan');
+Route::post('/pengguna/pemantauan/save', [\App\Http\Controllers\DataKiaController::class, 'pemantauanStore'])
+    ->middleware('auth')->name('pengguna.pemantauan.save');
 
 Route::post('/pengguna/kia/wizard/save', [\App\Http\Controllers\DataKiaController::class, 'saveWizard'])
     ->middleware('auth')->name('pengguna.kia.wizard.save');
