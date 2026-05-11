@@ -91,6 +91,10 @@
 					<i class="bi bi-heart-pulse-fill"></i>
 					<span>Pemantauan Ibu Hamil</span>
 				</a>
+				<a href="{{ route('pengguna.kelas_ibu') }}" class="nav-link {{ request()->routeIs('pengguna.kelas_ibu') ? 'active' : '' }}">
+					<i class="bi bi-people-fill"></i>
+					<span>Kelas Ibu Hamil</span>
+				</a>
 			</div>
 			<div class="nav-section">
 				<span class="nav-label">SISTEM</span>

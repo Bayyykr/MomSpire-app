@@ -39,7 +39,7 @@ Route::get('/who-am-i', function () {
 
 // DEBUG: Test PDF export tanpa auth - HAPUS setelah testing
 Route::get('/debug-pdf/{id}', function ($id) {
-    $dataKia = \App\Models\DataKia::with(['ibu', 'suami', 'layanan', 'ttdTrackings', 'pemantauanMingguans'])->findOrFail($id);
+    $dataKia = \App\Models\DataKia::with(['ibu', 'suami', 'layanan', 'ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils'])->findOrFail($id);
 
     $originalPath = resource_path('views/buku/Buku KIA (Permenkes).pdf');
     $convertedPath = storage_path('app/buku_kia_converted.pdf');
@@ -466,6 +466,48 @@ Route::get('/debug-pdf/{id}', function ($id) {
                             if ($p->{$field}) {
                                 $pdf->Text($visualX, $visualY, chr(51));
                             }
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($pageNo === 9) {
+            // ABSENSI KEHADIRAN KELAS IBU HAMIL (Page 9 - Landscape Format - Right Page)
+            $absensi = $dataKia->absenKelasIbuHamils->keyBy('kehadiran_ke');
+
+            // PEMETAAN MANUAL KOORDINAT X UNTUK KOLOM (Silakan sesuaikan!)
+            $xMap = [
+                'tanggal'    => 222, // Kolom Tanggal
+                'kader_info' => 303, // Kolom Tanggal, Nama & Paraf Kader
+            ];
+
+            // PEMETAAN MANUAL KOORDINAT Y UNTUK BARIS 1 SAMPAI 9
+            $yMap = [
+                1 => 178,
+                2 => 186.5,
+                3 => 195.5,
+                4 => 204.5,
+                5 => 213.5,
+                6 => 222.5,
+                7 => 231,
+                8 => 240,
+                9 => 248,
+            ];
+
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetFont('Arial', '', 9);
+
+            foreach (range(1, 9) as $i) {
+                $item = $absensi->get($i);
+                if ($item) {
+                    $visualY = $yMap[$i] ?? null;
+                    if ($visualY) {
+                        if (!empty($item->tanggal)) {
+                            $pdf->Text($xMap['tanggal'], $visualY, $item->tanggal);
+                        }
+                        if (!empty($item->kader_info)) {
+                            $pdf->Text($xMap['kader_info'], $visualY, $item->kader_info);
                         }
                     }
                 }
@@ -965,6 +1007,11 @@ Route::get('/pengguna/pemantauan', [\App\Http\Controllers\DataKiaController::cla
     ->middleware('auth')->name('pengguna.pemantauan');
 Route::post('/pengguna/pemantauan/save', [\App\Http\Controllers\DataKiaController::class, 'pemantauanStore'])
     ->middleware('auth')->name('pengguna.pemantauan.save');
+
+Route::get('/pengguna/kelas-ibu', [\App\Http\Controllers\DataKiaController::class, 'kelasIbuIndex'])
+    ->middleware('auth')->name('pengguna.kelas_ibu');
+Route::post('/pengguna/kelas-ibu/save', [\App\Http\Controllers\DataKiaController::class, 'kelasIbuStore'])
+    ->middleware('auth')->name('pengguna.kelas_ibu.save');
 
 Route::post('/pengguna/kia/wizard/save', [\App\Http\Controllers\DataKiaController::class, 'saveWizard'])
     ->middleware('auth')->name('pengguna.kia.wizard.save');

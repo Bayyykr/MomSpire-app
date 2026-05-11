@@ -133,11 +133,11 @@ class DataKiaController extends Controller
         $user = auth()->user();
         abort_unless($user, 403);
 
-        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings'])
+        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils'])
             ->findOrFail($id);
 
-        // Pastikan relasi ttdTrackings dan pemantauanMingguans selalu segar
-        $dataKia->load(['ttdTrackings', 'pemantauanMingguans']);
+        // Pastikan relasi ttdTrackings, pemantauanMingguans, dan absenKelasIbuHamils selalu segar
+        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils']);
 
         if ($user->role === 'pengguna') {
             abort_unless($dataKia->user_id === $user->id, 403);
@@ -466,42 +466,42 @@ class DataKiaController extends Controller
 
             // PEMETAAN MANUAL KOORDINAT X UNTUK 11 KOLOM (Silakan sesuaikan jika ada yang bergeser!)
             $xMap = [
-                'pemeriksaan_kehamilan' => 35.0,  // Kolom 1
-                'kelas_ibu_hamil'       => 55.0,  // Kolom 2
-                'demam_lebih_2_hari'    => 75.0,  // Kolom 3
-                'pusing_sakit_kepala'   => 95.0,  // Kolom 4
-                'sulit_tidur_cemas'     => 115.0, // Kolom 5
-                'risiko_tb'             => 195.0, // Kolom 6 (Halaman Kanan)
-                'gerakan_bayi'          => 215.0, // Kolom 7
-                'nyeri_perut_hebat'     => 235.0, // Kolom 8
-                'keluar_cairan_lahir'   => 255.0, // Kolom 9
-                'sakit_saat_kencing'    => 275.0, // Kolom 10
-                'diare_berulang'        => 295.0, // Kolom 11
+                'pemeriksaan_kehamilan' => 55,  // Kolom 1
+                'kelas_ibu_hamil'       => 82,  // Kolom 2
+                'demam_lebih_2_hari'    => 108,  // Kolom 3
+                'pusing_sakit_kepala'   => 133,  // Kolom 4
+                'sulit_tidur_cemas'     => 158, // Kolom 5
+                'risiko_tb'             => 215, // Kolom 6 (Halaman Kanan)
+                'gerakan_bayi'          => 240, // Kolom 7
+                'nyeri_perut_hebat'     => 263, // Kolom 8
+                'keluar_cairan_lahir'   => 286, // Kolom 9
+                'sakit_saat_kencing'    => 310, // Kolom 10
+                'diare_berulang'        => 335, // Kolom 11
             ];
 
             // PEMETAAN MANUAL KOORDINAT Y UNTUK MINGGU 4 SAMPAI 24
             $yMap = [
-                4  => 95.0,
-                5  => 100.0,
-                6  => 105.0,
-                7  => 110.0,
-                8  => 115.0,
-                9  => 120.0,
-                10 => 125.0,
-                11 => 130.0,
-                12 => 135.0,
-                13 => 140.0,
-                14 => 145.0,
-                15 => 150.0,
-                16 => 155.0,
-                17 => 160.0,
-                18 => 165.0,
-                19 => 170.0,
-                20 => 175.0,
-                21 => 180.0,
-                22 => 185.0,
-                23 => 190.0,
-                24 => 195.0,
+                4  => 123,
+                5  => 129,
+                6  => 136,
+                7  => 142,
+                8  => 148,
+                9  => 154,
+                10 => 160,
+                11 => 167,
+                12 => 173,
+                13 => 180,
+                14 => 186,
+                15 => 192,
+                16 => 199,
+                17 => 205,
+                18 => 211,
+                19 => 217,
+                20 => 224,
+                21 => 230,
+                22 => 237,
+                23 => 243,
+                24 => 249,
             ];
 
             $pdf->SetTextColor(0, 0, 0);
@@ -534,39 +534,39 @@ class DataKiaController extends Controller
 
             // PEMETAAN MANUAL KOORDINAT X UNTUK 11 KOLOM (Silakan sesuaikan jika ada yang bergeser!)
             $xMap = [
-                'pemeriksaan_kehamilan' => 35.0,  // Kolom 1
-                'kelas_ibu_hamil'       => 55.0,  // Kolom 2
-                'demam_lebih_2_hari'    => 75.0,  // Kolom 3
-                'pusing_sakit_kepala'   => 95.0,  // Kolom 4
-                'sulit_tidur_cemas'     => 115.0, // Kolom 5
-                'risiko_tb'             => 195.0, // Kolom 6 (Halaman Kanan)
-                'gerakan_bayi'          => 215.0, // Kolom 7
-                'nyeri_perut_hebat'     => 235.0, // Kolom 8
-                'keluar_cairan_lahir'   => 255.0, // Kolom 9
-                'sakit_saat_kencing'    => 275.0, // Kolom 10
-                'diare_berulang'        => 295.0, // Kolom 11
+                'pemeriksaan_kehamilan' => 55,  // Kolom 1
+                'kelas_ibu_hamil'       => 82,  // Kolom 2
+                'demam_lebih_2_hari'    => 108,  // Kolom 3
+                'pusing_sakit_kepala'   => 133,  // Kolom 4
+                'sulit_tidur_cemas'     => 158, // Kolom 5
+                'risiko_tb'             => 215, // Kolom 6 (Halaman Kanan)
+                'gerakan_bayi'          => 239, // Kolom 7
+                'nyeri_perut_hebat'     => 263, // Kolom 8
+                'keluar_cairan_lahir'   => 286, // Kolom 9
+                'sakit_saat_kencing'    => 310, // Kolom 10
+                'diare_berulang'        => 335, // Kolom 11
             ];
 
             // PEMETAAN MANUAL KOORDINAT Y UNTUK MINGGU 25 SAMPAI 42
             $yMap = [
-                25 => 95.0,
-                26 => 100.0,
-                27 => 105.0,
-                28 => 110.0,
-                29 => 115.0,
-                30 => 120.0,
-                31 => 125.0,
-                32 => 130.0,
-                33 => 135.0,
-                34 => 140.0,
-                35 => 145.0,
-                36 => 150.0,
-                37 => 155.0,
-                38 => 160.0,
-                39 => 165.0,
-                40 => 170.0,
-                41 => 175.0,
-                42 => 180.0,
+                25  => 123,
+                26  => 131,
+                27  => 139,
+                28  => 146,
+                29  => 153,
+                30  => 161,
+                31  => 168,
+                32  => 176,
+                33  => 183,
+                34  => 190,
+                35  => 198,
+                36  => 205,
+                37  => 212,
+                38  => 220,
+                39  => 227,
+                40  => 234,
+                41  => 242,
+                42  => 249,
             ];
 
             $pdf->SetTextColor(0, 0, 0);
@@ -582,6 +582,48 @@ class DataKiaController extends Controller
                             if ($p->{$field}) {
                                 $pdf->Text($visualX, $visualY, chr(51));
                             }
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($pageNo === 9) {
+            // ABSENSI KEHADIRAN KELAS IBU HAMIL (Page 9 - Landscape Format - Right Page)
+            $absensi = $dataKia->absenKelasIbuHamils->keyBy('kehadiran_ke');
+
+            // PEMETAAN MANUAL KOORDINAT X UNTUK KOLOM (Silakan sesuaikan!)
+            $xMap = [
+                'tanggal'    => 222, // Kolom Tanggal
+                'kader_info' => 303, // Kolom Tanggal, Nama & Paraf Kader
+            ];
+
+            // PEMETAAN MANUAL KOORDINAT Y UNTUK BARIS 1 SAMPAI 9
+            $yMap = [
+                1 => 178,
+                2 => 186.5,
+                3 => 195.5,
+                4 => 204.5,
+                5 => 213.5,
+                6 => 222.5,
+                7 => 231,
+                8 => 240,
+                9 => 248,
+            ];
+
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetFont('Arial', '', 9);
+
+            foreach (range(1, 9) as $i) {
+                $item = $absensi->get($i);
+                if ($item) {
+                    $visualY = $yMap[$i] ?? null;
+                    if ($visualY) {
+                        if (!empty($item->tanggal)) {
+                            $pdf->Text($xMap['tanggal'], $visualY, $item->tanggal);
+                        }
+                        if (!empty($item->kader_info)) {
+                            $pdf->Text($xMap['kader_info'], $visualY, $item->kader_info);
                         }
                     }
                 }
@@ -708,6 +750,42 @@ class DataKiaController extends Controller
         );
 
         return back()->with('success', 'Catatan pemantauan minggu ke-' . $mingguKe . ' berhasil disimpan.');
+    }
+
+    public function kelasIbuIndex()
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::with('absenKelasIbuHamils')->where('user_id', $userId)->first();
+
+        if (!$dataKia) {
+            return redirect()->route('pengguna.buku_kia')->with('info', 'Silakan lengkapi screening Buku KIA terlebih dahulu.');
+        }
+
+        $absen = $dataKia->absenKelasIbuHamils->keyBy('kehadiran_ke');
+
+        return view('pengguna.kia-kelas-ibu', compact('dataKia', 'absen'));
+    }
+
+    public function kelasIbuStore(Request $request)
+    {
+        $request->validate([
+            'kehadiran_ke' => 'required|integer|between:1,9',
+            'tanggal'      => 'nullable|string|max:100',
+            'kader_info'   => 'nullable|string|max:255',
+        ]);
+
+        $userId = auth()->id();
+        $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
+
+        $dataKia->absenKelasIbuHamils()->updateOrCreate(
+            ['kehadiran_ke' => $request->kehadiran_ke],
+            [
+                'tanggal'    => $request->tanggal,
+                'kader_info' => $request->kader_info,
+            ]
+        );
+
+        return back()->with('success', 'Data absensi kelas ibu hamil ke-' . $request->kehadiran_ke . ' berhasil disimpan.');
     }
 }
 
