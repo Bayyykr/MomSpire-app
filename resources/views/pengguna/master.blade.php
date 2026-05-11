@@ -22,6 +22,7 @@
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 	<link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+	<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 	@vite(['resources/css/style.css', 'resources/js/script.js'])
 	<style>
 		:root{ --muted:#6b7280; --accent1:#6d28d9; --accent2:#ec4899; --accent3:#ff8c42; }
@@ -81,6 +82,10 @@
 				<a href="{{ route('pengguna.konsultasi') }}" class="nav-link {{ request()->routeIs('pengguna.konsultasi') ? 'active' : '' }}">
 					<i class="bi bi-chat-dots-fill"></i>
 					<span>Konsultasi</span>
+				</a>
+				<a href="{{ route('pengguna.ttd') }}" class="nav-link {{ request()->routeIs('pengguna.ttd') ? 'active' : '' }}">
+					<i class="bi bi-calendar-check-fill"></i>
+					<span>Catat Minum TTD</span>
 				</a>
 			</div>
 			<div class="nav-section">

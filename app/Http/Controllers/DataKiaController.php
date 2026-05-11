@@ -11,10 +11,10 @@ class DataKiaController extends Controller
     public function wizard()
     {
         abort_unless(auth()->check() && auth()->user()->role === 'pengguna', 403);
-        
+
         $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat'])
             ->firstOrCreate(['user_id' => auth()->id()]);
-            
+
         return view('pengguna.kia-wizard', compact('dataKia'));
     }
 
@@ -24,7 +24,8 @@ class DataKiaController extends Controller
         $dataKia = DataKia::firstOrCreate(['user_id' => auth()->id()]);
 
         // Helper to convert empty strings to null
-        $clean = function($val) { return $val === '' ? null : $val; };
+        $clean = function ($val) {
+            return $val === '' ? null : $val; };
 
         // 1. Core Data
         $dataKia->update([
@@ -93,7 +94,7 @@ class DataKiaController extends Controller
             'asuransi_lain' => $clean($request->asuransi_lain),
             'no_asuransi_lain' => $clean($request->no_asuransi_lain),
             'tanggal_berlaku_asuransi_lain' => $clean($request->tanggal_berlaku_asuransi_lain),
-            
+
             // Suami
             'asuransi_suami' => $clean($request->asuransi_suami),
             'no_asuransi_suami' => $clean($request->no_asuransi_suami),
@@ -132,7 +133,11 @@ class DataKiaController extends Controller
         $user = auth()->user();
         abort_unless($user, 403);
 
-        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat'])->findOrFail($id);
+        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings'])
+            ->findOrFail($id);
+
+        // Pastikan relasi ttdTrackings selalu segar
+        $dataKia->load('ttdTrackings');
 
         if ($user->role === 'pengguna') {
             abort_unless($dataKia->user_id === $user->id, 403);
@@ -140,9 +145,9 @@ class DataKiaController extends Controller
             abort_unless(in_array($user->role, ['admin', 'bidan', 'dokter']), 403);
         }
 
-        $originalPath  = resource_path('views/buku/Buku KIA (Permenkes).pdf');
+        $originalPath = resource_path('views/buku/Buku KIA (Permenkes).pdf');
         $convertedPath = storage_path('app/buku_kia_converted.pdf');
-        $scriptPath    = base_path('scripts/convert_pdf_fpdi.py');
+        $scriptPath = base_path('scripts/convert_pdf_fpdi.py');
 
         if (!file_exists($originalPath)) {
             abort(404, 'File template PDF tidak ditemukan.');
@@ -155,7 +160,7 @@ class DataKiaController extends Controller
             }
         }
 
-        $pdf = new \setasign\Fpdi\Fpdi();
+        $pdf = new MyFpdi();
         $pageCount = $pdf->setSourceFile($convertedPath);
 
         for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
@@ -318,18 +323,24 @@ class DataKiaController extends Controller
                 // Baris 21: No. Reg. Kohort Ibu
                 $pdf->SetXY(240, 166);
                 $pdf->Write(0, $layanan->no_reg_kohort_ibu ?? '-');
-                $pdf->SetXY(276, 166); $pdf->Write(0, '-');
-                $pdf->SetXY(312, 166); $pdf->Write(0, '-');
+                $pdf->SetXY(276, 166);
+                $pdf->Write(0, '-');
+                $pdf->SetXY(312, 166);
+                $pdf->Write(0, '-');
 
                 // Baris 22: No. Reg. Kohort Bayi
-                $pdf->SetXY(240, 176); $pdf->Write(0, '-');
-                $pdf->SetXY(276, 176); $pdf->Write(0, '-');
+                $pdf->SetXY(240, 176);
+                $pdf->Write(0, '-');
+                $pdf->SetXY(276, 176);
+                $pdf->Write(0, '-');
                 $pdf->SetXY(312, 176);
                 $pdf->Write(0, $layanan->no_reg_kohort_bayi ?? '-');
 
                 // Baris 23: No. Reg. Kohort Balita
-                $pdf->SetXY(240, 186); $pdf->Write(0, '-');
-                $pdf->SetXY(276, 186); $pdf->Write(0, '-');
+                $pdf->SetXY(240, 186);
+                $pdf->Write(0, '-');
+                $pdf->SetXY(276, 186);
+                $pdf->Write(0, '-');
                 $pdf->SetXY(312, 186);
                 $pdf->Write(0, $layanan->no_reg_kohort_balita ?? '-');
 
@@ -344,23 +355,114 @@ class DataKiaController extends Controller
                 // --- SEKSI RIWAYAT KESEHATAN IBU (Halaman 2 Bawah) ---
                 $riwayat = $dataKia->riwayat;
                 if ($riwayat) {
-                    $pdf->SetXY(240, 220); $pdf->Write(0, ($riwayat->usia_ibu ?? '-') . ' Tahun');
-                    $pdf->SetXY(240, 225); $pdf->Write(0, $riwayat->kehamilan_ke ?? '-');
-                    $pdf->SetXY(240, 231); $pdf->Write(0, $riwayat->jumlah_anak_hidup ?? '-');
-                    $pdf->SetXY(240, 237); $pdf->Write(0, $riwayat->riwayat_keguguran ?? '-');
-                    $pdf->SetXY(240, 241); $pdf->MultiCell(100, 4, $riwayat->riwayat_penyakit_ibu ?? '-', 0, 'L');
+                    $pdf->SetXY(240, 220);
+                    $pdf->Write(0, ($riwayat->usia_ibu ?? '-') . ' Tahun');
+                    $pdf->SetXY(240, 225);
+                    $pdf->Write(0, $riwayat->kehamilan_ke ?? '-');
+                    $pdf->SetXY(240, 231);
+                    $pdf->Write(0, $riwayat->jumlah_anak_hidup ?? '-');
+                    $pdf->SetXY(240, 237);
+                    $pdf->Write(0, $riwayat->riwayat_keguguran ?? '-');
+                    $pdf->SetXY(240, 241);
+                    $pdf->MultiCell(100, 4, $riwayat->riwayat_penyakit_ibu ?? '-', 0, 'L');
                 } else {
-                    $pdf->SetXY(240, 220); $pdf->Write(0, '-');
-                    $pdf->SetXY(240, 225); $pdf->Write(0, '-');
-                    $pdf->SetXY(240, 227); $pdf->Write(0, '-');
-                    $pdf->SetXY(240, 229); $pdf->Write(0, '-');
-                    $pdf->SetXY(240, 246); $pdf->Write(0, '-');
+                    $pdf->SetXY(240, 220);
+                    $pdf->Write(0, '-');
+                    $pdf->SetXY(240, 225);
+                    $pdf->Write(0, '-');
+                    $pdf->SetXY(240, 227);
+                    $pdf->Write(0, '-');
+                    $pdf->SetXY(240, 229);
+                    $pdf->Write(0, '-');
+                    $pdf->SetXY(240, 246);
+                    $pdf->Write(0, '-');
+                }
+            }
+
+            if ($pageNo === 5) {
+                // TTD TRACKING MAPPING (Page 5 - Vertical Format)
+                $trackings = $dataKia->ttdTrackings->keyBy('bulan_ke');
+
+                // PEMETAAN MANUAL KOORDINAT X (Bisa Anda ubah satu-persatu secara bebas jika ada kolom bulan yang kurang pas!)
+                $xMap = [
+                    1  => 257.5,  // Bulan 1
+                    2  => 266.35, // Bulan 2
+                    3  => 276.2,  // Bulan 3
+                    4  => 286.05, // Bulan 4
+                    5  => 295.9,  // Bulan 5
+                    6  => 305.75, // Bulan 6
+                    7  => 315.6,  // Bulan 7
+                    8  => 325.45, // Bulan 8
+                    9  => 335.3,  // Bulan 9
+                    10 => 345.15, // Bulan 10
+                ];
+
+                // PEMETAAN MANUAL KOORDINAT Y (Bisa Anda ubah satu-persatu secara bebas jika ada baris yang kurang pas!)
+                $yMap = [
+                    1  => 211, // Hari 1
+                    2  => 206, // Hari 2
+                    3  => 200, // Hari 3
+                    4  => 195, // Hari 4
+                    5  => 189.5, // Hari 5
+                    6  => 184, // Hari 6
+                    7  => 178.5, // Hari 7
+                    8  => 173.5, // Hari 8
+                    9  => 168, // Hari 9
+                    10 => 163, // Hari 10
+                    11 => 157, // Hari 11
+                    12 => 152, // Hari 12
+                    13 => 146, // Hari 13
+                    14 => 141, // Hari 14
+                    15 => 136, // Hari 15
+                    16 => 130, // Hari 16
+                    17 => 125, // Hari 17
+                    18 => 119.5, // Hari 18
+                    19 => 114, // Hari 19
+                    20 => 109, // Hari 20
+                    21 => 103.5, // Hari 21
+                    22 => 98,  // Hari 22
+                    23 => 92.5,  // Hari 23
+                    24 => 87,  // Hari 24
+                    25 => 81.5,  // Hari 25
+                    26 => 76,  // Hari 26
+                    27 => 70.5,  // Hari 27
+                    28 => 65.5,  // Hari 28
+                    29 => 60,  // Hari 29
+                    30 => 54.5,  // Hari 30
+                    31 => 49,  // Hari 31
+                ];
+
+                $pdf->SetTextColor(0, 0, 0);
+
+                foreach (range(1, 10) as $m) {
+                    $tracking = $trackings->get($m);
+                    if ($tracking) {
+                        $visualX = $xMap[$m] ?? 257.5;
+
+                        // 1. Plot Checkmarks (Hari 1-31)
+                        $pdf->SetFont('ZapfDingbats', '', 9);
+                        for ($i = 1; $i <= 31; $i++) {
+                            if ($tracking->{"h$i"}) {
+                                $visualY = $yMap[$i] ?? 211.0;
+                                // Cetak tepat di tengah kotak dengan mengimbangi efek rotasi (-4.5)
+                                $pdf->RotatedText($visualX, $visualY - 4.5, chr(51), 90);
+                            }
+                        }
+
+                        // 2. Usia Kehamilan (Sesuai koordinat pas Anda - JANGAN DIUBAH)
+                        $pdf->SetFont('Arial', '', 9);
+                        $pdf->RotatedText($visualX, 218, $tracking->usia_kehamilan ?? '', 90);
+
+                        // 3. Bulan / Tahun (Sesuai koordinat pas Anda - JANGAN DIUBAH)
+                        $pdf->SetFont('Arial', '', 9);
+                        $pdf->RotatedText($visualX, 236.5, $tracking->bulan_tahun ?? '', 90);
+                    }
                 }
             }
         }
 
         return response($pdf->Output('S'), 200, [
-            'Content-Type'        => 'application/pdf',
+            'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="Buku_KIA_' . ($dataKia->ibu->nama ?? 'Identitas') . '.pdf"',
         ]);
     }
@@ -369,7 +471,7 @@ class DataKiaController extends Controller
     {
         $role = auth()->user()->role;
         $dataKias = DataKia::with(['ibu'])->latest()->get();
-        
+
         return view('nakes.kia-index', compact('dataKias', 'role'));
     }
 
@@ -377,15 +479,15 @@ class DataKiaController extends Controller
     {
         $role = auth()->user()->role;
         $dataKia = DataKia::with(['ibu', 'riwayat'])->findOrFail($id);
-        
+
         return view('nakes.kia-edit-riwayat', compact('dataKia', 'role'));
     }
 
     public function saveRiwayat(Request $request, $id)
     {
         $dataKia = DataKia::findOrFail($id);
-        
-        $clean = function($val) {
+
+        $clean = function ($val) {
             return $val === '' ? null : $val;
         };
 
@@ -403,4 +505,79 @@ class DataKiaController extends Controller
         $role = auth()->user()->role;
         return redirect()->route($role . '.kia')->with('success', 'Riwayat kesehatan berhasil diperbarui.');
     }
+    public function ttdIndex()
+    {
+        abort_unless(auth()->check() && auth()->user()->role === 'pengguna', 403);
+
+        $dataKia = DataKia::with('ttdTrackings')->firstOrCreate(['user_id' => auth()->id()]);
+        $trackings = $dataKia->ttdTrackings->keyBy('bulan_ke');
+
+        return view('pengguna.kia-ttd', compact('dataKia', 'trackings'));
+    }
+
+    public function ttdStore(Request $request)
+    {
+        abort_unless(auth()->check() && auth()->user()->role === 'pengguna', 403);
+        $dataKia = DataKia::firstOrCreate(['user_id' => auth()->id()]);
+
+        $bulanKe = $request->bulan_ke;
+        $data = [
+            'usia_kehamilan' => $request->usia_kehamilan,
+            'bulan_tahun' => $request->bulan_tahun,
+        ];
+
+        for ($i = 1; $i <= 31; $i++) {
+            $data["h$i"] = $request->has("h$i");
+        }
+
+        $dataKia->ttdTrackings()->updateOrCreate(
+            ['bulan_ke' => $bulanKe],
+            $data
+        );
+
+        return back()->with('success', 'Catatan minum TTD bulan ke-' . $bulanKe . ' berhasil disimpan.');
+    }
 }
+
+if (!class_exists('MyFpdi')) {
+    class MyFpdi extends \setasign\Fpdi\Fpdi
+    {
+        protected $angle = 0;
+
+        function Rotate($angle, $x = -1, $y = -1)
+        {
+            if ($x == -1)
+                $x = $this->x;
+            if ($y == -1)
+                $y = $this->y;
+            if ($this->angle != 0)
+                $this->_out('Q');
+            $this->angle = $angle;
+            if ($angle != 0) {
+                $angle *= M_PI / 180;
+                $c = cos($angle);
+                $s = sin($angle);
+                $cx = $x * $this->k;
+                $cy = ($this->h - $y) * $this->k;
+                $this->_out(sprintf('q %.5F %.5F %.5F %.5F %.2F %.2F cm 1 0 0 1 %.2F %.2F cm', $c, $s, -$s, $c, $cx, $cy, -$cx, -$cy));
+            }
+        }
+
+        function RotatedText($x, $y, $txt, $angle)
+        {
+            $this->Rotate($angle, $x, $y);
+            $this->Text($x, $y, $txt);
+            $this->Rotate(0);
+        }
+
+        function _endpage()
+        {
+            if ($this->angle != 0) {
+                $this->angle = 0;
+                $this->_out('Q');
+            }
+            parent::_endpage();
+        }
+    }
+}
+

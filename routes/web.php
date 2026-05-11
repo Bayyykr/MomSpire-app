@@ -39,7 +39,7 @@ Route::get('/who-am-i', function () {
 
 // DEBUG: Test PDF export tanpa auth - HAPUS setelah testing
 Route::get('/debug-pdf/{id}', function ($id) {
-    $dataKia = \App\Models\DataKia::with(['ibu', 'suami'])->findOrFail($id);
+    $dataKia = \App\Models\DataKia::with(['ibu', 'suami', 'layanan', 'ttdTrackings'])->findOrFail($id);
 
     $originalPath = resource_path('views/buku/Buku KIA (Permenkes).pdf');
     $convertedPath = storage_path('app/buku_kia_converted.pdf');
@@ -61,7 +61,7 @@ Route::get('/debug-pdf/{id}', function ($id) {
         }
     }
 
-    $pdf = new \setasign\Fpdi\Fpdi();
+    $pdf = new MyFpdi();
     $pageCount = $pdf->setSourceFile($convertedPath);
 
     for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
@@ -261,6 +261,86 @@ Route::get('/debug-pdf/{id}', function ($id) {
                 $pdf->SetXY(240, 227); $pdf->Write(0, '-');
                 $pdf->SetXY(240, 229); $pdf->Write(0, '-');
                 $pdf->SetXY(240, 246); $pdf->Write(0, '-');
+            }
+        }
+        if ($pageNo === 5) {
+            // TTD TRACKING MAPPING (Page 5 - Vertical Format)
+            $trackings = $dataKia->ttdTrackings->keyBy('bulan_ke');
+            
+            // PEMETAAN MANUAL KOORDINAT X (Bisa Anda ubah satu-persatu secara bebas jika ada kolom bulan yang kurang pas!)
+            $xMap = [
+                1  => 257.5,  // Bulan 1
+                2  => 266.35, // Bulan 2
+                3  => 276.2,  // Bulan 3
+                4  => 286.05, // Bulan 4
+                5  => 295.9,  // Bulan 5
+                6  => 305.75, // Bulan 6
+                7  => 315.6,  // Bulan 7
+                8  => 325.45, // Bulan 8
+                9  => 335.3,  // Bulan 9
+                10 => 345.15, // Bulan 10
+            ];
+
+            // PEMETAAN MANUAL KOORDINAT Y (Bisa Anda ubah satu-persatu secara bebas jika ada baris yang kurang pas!)
+            $yMap = [
+                1  => 211, // Hari 1
+                2  => 206, // Hari 2
+                3  => 200, // Hari 3
+                4  => 195, // Hari 4
+                5  => 189.5, // Hari 5
+                6  => 184, // Hari 6
+                7  => 178.5, // Hari 7
+                8  => 173.5, // Hari 8
+                9  => 168, // Hari 9
+                10 => 163, // Hari 10
+                11 => 157, // Hari 11
+                12 => 152, // Hari 12
+                13 => 146, // Hari 13
+                14 => 141, // Hari 14
+                15 => 136, // Hari 15
+                16 => 130, // Hari 16
+                17 => 125, // Hari 17
+                18 => 119.5, // Hari 18
+                19 => 114, // Hari 19
+                20 => 109, // Hari 20
+                21 => 103.5, // Hari 21
+                22 => 98,  // Hari 22
+                23 => 92.5,  // Hari 23
+                24 => 87,  // Hari 24
+                25 => 81.5,  // Hari 25
+                26 => 76,  // Hari 26
+                27 => 70.5,  // Hari 27
+                28 => 65.5,  // Hari 28
+                29 => 60,  // Hari 29
+                30 => 54.5,  // Hari 30
+                31 => 49,  // Hari 31
+            ];
+
+            $pdf->SetTextColor(0, 0, 0);
+
+            foreach (range(1, 10) as $m) {
+                $tracking = $trackings->get($m);
+                if ($tracking) {
+                    $visualX = $xMap[$m] ?? 257.5;
+                    
+                    // 1. Plot Checkmarks (Hari 1-31)
+                    $pdf->SetFont('ZapfDingbats', '', 9);
+                    for ($i = 1; $i <= 31; $i++) {
+                        if ($tracking->{"h$i"}) {
+                            $visualY = $yMap[$i] ?? 211.0;
+                            // Cetak tepat di tengah kotak dengan mengimbangi efek rotasi (-4.5)
+                            $pdf->RotatedText($visualX, $visualY - 4.5, chr(51), 90);
+                        }
+                    }
+
+                    // 2. Usia Kehamilan (Sesuai koordinat pas Anda - JANGAN DIUBAH)
+                    $pdf->SetFont('Arial', '', 9);
+                    $pdf->RotatedText($visualX, 218, $tracking->usia_kehamilan ?? '', 90);
+
+                    // 3. Bulan / Tahun (Sesuai koordinat pas Anda - JANGAN DIUBAH)
+                    $pdf->SetFont('Arial', '', 9);
+                    $pdf->RotatedText($visualX, 236.5, $tracking->bulan_tahun ?? '', 90);
+                }
             }
         }
     }
@@ -748,6 +828,11 @@ Route::get('/pengguna/status-kehamilan', function () use ($ensureUserRole) {
 Route::get('/pengguna/buku-kia', [\App\Http\Controllers\DataKiaController::class, 'wizard'])
     ->middleware('auth')->name('pengguna.buku_kia');
 
+Route::get('/pengguna/ttd', [\App\Http\Controllers\DataKiaController::class, 'ttdIndex'])
+    ->middleware('auth')->name('pengguna.ttd');
+Route::post('/pengguna/ttd/save', [\App\Http\Controllers\DataKiaController::class, 'ttdStore'])
+    ->middleware('auth')->name('pengguna.ttd.store');
+
 Route::post('/pengguna/kia/wizard/save', [\App\Http\Controllers\DataKiaController::class, 'saveWizard'])
     ->middleware('auth')->name('pengguna.kia.wizard.save');
 
@@ -779,3 +864,46 @@ Route::post('/logout', function (Illuminate\Http\Request $request) {
     $request->session()->regenerateToken();
     return redirect('/');
 })->name('logout');
+
+if (!class_exists('MyFpdi')) {
+    class MyFpdi extends \setasign\Fpdi\Fpdi
+    {
+        protected $angle = 0;
+
+        function Rotate($angle, $x = -1, $y = -1)
+        {
+            if ($x == -1)
+                $x = $this->x;
+            if ($y == -1)
+                $y = $this->y;
+            if ($this->angle != 0)
+                $this->_out('Q');
+            $this->angle = $angle;
+            if ($angle != 0) {
+                $angle *= M_PI / 180;
+                $c = cos($angle);
+                $s = sin($angle);
+                $cx = $x * $this->k;
+                $cy = ($this->h - $y) * $this->k;
+                $this->_out(sprintf('q %.5F %.5F %.5F %.5F %.2F %.2F cm 1 0 0 1 %.2F %.2F cm', $c, $s, -$s, $c, $cx, $cy, -$cx, -$cy));
+            }
+        }
+
+        function RotatedText($x, $y, $txt, $angle)
+        {
+            $this->Rotate($angle, $x, $y);
+            $this->Text($x, $y, $txt);
+            $this->Rotate(0);
+        }
+
+        function _endpage()
+        {
+            if ($this->angle != 0) {
+                $this->angle = 0;
+                $this->_out('Q');
+            }
+            parent::_endpage();
+        }
+    }
+}
+
