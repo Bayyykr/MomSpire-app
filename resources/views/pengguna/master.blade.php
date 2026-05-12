@@ -103,6 +103,10 @@
 					<i class="bi bi-heart-pulse"></i>
 					<span>Proses Melahirkan</span>
 				</a>
+				<a href="{{ route('pengguna.nifas') }}" class="nav-link {{ request()->routeIs('pengguna.nifas') ? 'active' : '' }}">
+					<i class="bi bi-calendar2-heart"></i>
+					<span>Pemantauan Ibu Nifas</span>
+				</a>
 			</div>
 			<div class="nav-section">
 				<span class="nav-label">SISTEM</span>
