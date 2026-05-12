@@ -698,7 +698,7 @@ class DataKiaController extends Controller
                     $pdf->Text(90, $rowY[1] + 9, $p->hpl_tahun);
                 }
                 if (!empty($p->metode_kb)) {
-                    $pdf->Text(135, $rowY[5] + 4.5, $p->metode_kb);
+                    $pdf->Text(143, $rowY[5] + 9, $p->metode_kb);
                 }
             }
         }
