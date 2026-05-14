@@ -133,11 +133,11 @@ class DataKiaController extends Controller
         $user = auth()->user();
         abort_unless($user, 403);
 
-        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir'])
+        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis'])
             ->findOrFail($id);
 
-        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, persiapanMelahirkan, pemantauanIbuNifas, keluargaBerencana, dan bayiBaruLahir selalu segar
-        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir']);
+        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, persiapanMelahirkan, pemantauanIbuNifas, keluargaBerencana, bayiBaruLahir, dan pemantauanBayis selalu segar
+        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis']);
 
         if ($user->role === 'pengguna') {
             abort_unless($dataKia->user_id === $user->id, 403);
@@ -473,6 +473,52 @@ class DataKiaController extends Controller
         );
 
         return back()->with('success', 'Ceklist pemeriksaan bayi baru lahir berhasil disimpan.');
+    }
+
+    public function pemantauanBayiIndex()
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::with('pemantauanBayis')->where('user_id', $userId)->first();
+
+        if (!$dataKia) {
+            return redirect()->route('pengguna.buku_kia')->with('info', 'Silakan lengkapi screening Buku KIA terlebih dahulu.');
+        }
+
+        $pemantauans = $dataKia->pemantauanBayis->keyBy('hari_ke');
+
+        return view('pengguna.kia-pemantauan-bayi', compact('dataKia', 'pemantauans'));
+    }
+
+    public function pemantauanBayiStore(Request $request)
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
+
+        $data = [
+            'sesak_napas'      => $request->has('sesak_napas'),
+            'aktivitas_lemah'  => $request->has('aktivitas_lemah'),
+            'warna_kulit_biru' => $request->has('warna_kulit_biru'),
+            'hisapan_lemah'    => $request->has('hisapan_lemah'),
+            'kejang'           => $request->has('kejang'),
+            'suhu_abnormal'    => $request->has('suhu_abnormal'),
+            'bab_abnormal'     => $request->has('bab_abnormal'),
+            'kencing_sedikit'  => $request->has('kencing_sedikit'),
+            'tali_pusat_merah' => $request->has('tali_pusat_merah'),
+            'mata_merah'       => $request->has('mata_merah'),
+            'kulit_bintil'     => $request->has('kulit_bintil'),
+            'belum_imunisasi'  => $request->has('belum_imunisasi'),
+        ];
+
+        if ($request->has('paraf_kader_nakes')) {
+            $data['paraf_kader_nakes'] = $request->paraf_kader_nakes;
+        }
+
+        $dataKia->pemantauanBayis()->updateOrCreate(
+            ['data_kia_id' => $dataKia->id, 'hari_ke' => $request->hari_ke],
+            $data
+        );
+
+        return back()->with('success', 'Catatan pemantauan harian bayi hari ke-' . $request->hari_ke . ' berhasil disimpan.');
     }
 }
 

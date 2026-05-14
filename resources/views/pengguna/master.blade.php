@@ -111,6 +111,10 @@
 					<i class="bi bi-person-hearts"></i>
 					<span>Bayi Baru Lahir</span>
 				</a>
+				<a href="{{ route('pengguna.pemantauan_bayi') }}" class="nav-link {{ request()->routeIs('pengguna.pemantauan_bayi') ? 'active' : '' }}">
+					<i class="bi bi-calendar2-check"></i>
+					<span>Pemantauan Bayi 0-28 Hari</span>
+				</a>
 			</div>
 			<div class="nav-section">
 				<span class="nav-label">SISTEM</span>

@@ -783,6 +783,128 @@ class KiaPdfService
                     }
                 }
             }
+
+            // 13. PEMANTAUAN BAYI SECTION A (Halaman 23)
+            if ($pageNo === 23) {
+                $records = $dataKia->pemantauanBayis;
+                if ($records && count($records) > 0) {
+                    $yMap = [
+                        'sesak_napas'      => 222,
+                        'aktivitas_lemah'  => 192,
+                        'warna_kulit_biru' => 162,
+                        'hisapan_lemah'    => 132,
+                        'kejang'           => 102,
+                        'suhu_abnormal'    => 72,
+                        'paraf'            => 56.5,
+                    ];
+
+                    $xMap = [
+                        1  => 97.5,  2  => 107, 3  => 116, 4  => 125, 5  => 134,
+                        6  => 143, 7  => 151, 8  => 160, 9  => 169, 10 => 209,
+                        11 => 216.5, 12 => 224.5, 13 => 232, 14 => 240, 15 => 247,
+                        16 => 255, 17 => 262, 18 => 270, 19 => 278, 20 => 285,
+                        21 => 292, 22 => 300, 23 => 308, 24 => 315, 25 => 323,
+                        26 => 331, 27 => 338, 28 => 346,
+                    ];
+
+                    $pdf->SetTextColor(0, 0, 0);
+
+                    foreach ($records as $r) {
+                        $day = $r->hari_ke;
+                        $x = $xMap[$day] ?? null;
+
+                        if (!$x) {
+                            continue;
+                        }
+
+                        $pdf->SetFont('ZapfDingbats', '', 10);
+                        if ($r->sesak_napas) {
+                            $pdf->RotatedText($x, $yMap['sesak_napas'], chr(51), 90);
+                        }
+                        if ($r->aktivitas_lemah) {
+                            $pdf->RotatedText($x, $yMap['aktivitas_lemah'], chr(51), 90);
+                        }
+                        if ($r->warna_kulit_biru) {
+                            $pdf->RotatedText($x, $yMap['warna_kulit_biru'], chr(51), 90);
+                        }
+                        if ($r->hisapan_lemah) {
+                            $pdf->RotatedText($x, $yMap['hisapan_lemah'], chr(51), 90);
+                        }
+                        if ($r->kejang) {
+                            $pdf->RotatedText($x, $yMap['kejang'], chr(51), 90);
+                        }
+                        if ($r->suhu_abnormal) {
+                            $pdf->RotatedText($x, $yMap['suhu_abnormal'], chr(51), 90);
+                        }
+
+                        if (!empty($r->paraf_kader_nakes)) {
+                            $pdf->SetFont('Arial', '', 4);
+                            $pdf->RotatedText($x, $yMap['paraf'], $r->paraf_kader_nakes, 90);
+                        }
+                    }
+                }
+            }
+
+            // 14. PEMANTAUAN BAYI SECTION B (Halaman 24)
+            if ($pageNo === 24) {
+                $records = $dataKia->pemantauanBayis;
+                if ($records && count($records) > 0) {
+                    $yMap = [
+                        'bab_abnormal'     => 222,
+                        'kencing_sedikit'  => 192,
+                        'tali_pusat_merah' => 162,
+                        'mata_merah'       => 132,
+                        'kulit_bintil'     => 102,
+                        'belum_imunisasi'  => 72,
+                        'paraf'            => 56.5,
+                    ];
+
+                    $xMap = [
+                        1  => 97.5,  2  => 107, 3  => 116, 4  => 125, 5  => 134,
+                        6  => 143, 7  => 151, 8  => 160, 9  => 169, 10 => 209,
+                        11 => 216.5, 12 => 224.5, 13 => 232, 14 => 240, 15 => 247,
+                        16 => 255, 17 => 262, 18 => 270, 19 => 278, 20 => 285,
+                        21 => 292, 22 => 300, 23 => 308, 24 => 315, 25 => 323,
+                        26 => 331, 27 => 338, 28 => 346,
+                    ];
+
+                    $pdf->SetTextColor(0, 0, 0);
+
+                    foreach ($records as $r) {
+                        $day = $r->hari_ke;
+                        $x = $xMap[$day] ?? null;
+
+                        if (!$x) {
+                            continue;
+                        }
+
+                        $pdf->SetFont('ZapfDingbats', '', 10);
+                        if ($r->bab_abnormal) {
+                            $pdf->RotatedText($x, $yMap['bab_abnormal'], chr(51), 90);
+                        }
+                        if ($r->kencing_sedikit) {
+                            $pdf->RotatedText($x, $yMap['kencing_sedikit'], chr(51), 90);
+                        }
+                        if ($r->tali_pusat_merah) {
+                            $pdf->RotatedText($x, $yMap['tali_pusat_merah'], chr(51), 90);
+                        }
+                        if ($r->mata_merah) {
+                            $pdf->RotatedText($x, $yMap['mata_merah'], chr(51), 90);
+                        }
+                        if ($r->kulit_bintil) {
+                            $pdf->RotatedText($x, $yMap['kulit_bintil'], chr(51), 90);
+                        }
+                        if ($r->belum_imunisasi) {
+                            $pdf->RotatedText($x, $yMap['belum_imunisasi'], chr(51), 90);
+                        }
+
+                        if (!empty($r->paraf_kader_nakes)) {
+                            $pdf->SetFont('Arial', '', 4);
+                            $pdf->RotatedText($x, $yMap['paraf'], $r->paraf_kader_nakes, 90);
+                        }
+                    }
+                }
+            }
         }
 
         return $pdf->Output('S');
