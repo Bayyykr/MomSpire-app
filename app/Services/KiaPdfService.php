@@ -1311,6 +1311,66 @@ class KiaPdfService
                     }
                 }
             }
+
+            // 22. TUMBUH KEMBANG BAYI 12-18 BULAN & 18-24 BULAN (Halaman 36)
+            if ($pageNo === 36) {
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->SetFont('ZapfDingbats', '', 10);
+
+                // A. Tumbuh Kembang 12 - 18 Bulan (Sisi Kiri)
+                $perk18 = $dataKia->perkembanganBayi18Bulan;
+                if ($perk18) {
+                    $xYa18 = 153.5;
+                    $xTidak18 = 165.5;
+
+                    $yPerk18 = [
+                        'berdiri_tanpa_pegangan' => 195,
+                        'bungkuk_pungut_mainan'  => 203,
+                        'jalan_mundur_5_langkah' => 210.5,
+                        'panggil_papa_mama'      => 217.5,
+                        'tumpuk_2_kubus'         => 224.5,
+                        'masuk_kubus_kotak'      => 232,
+                        'tunjuk_tanpa_nangis'    => 239.5,
+                        'rasa_cemburu'           => 248,
+                    ];
+
+                    foreach ($yPerk18 as $field => $y) {
+                        $val = $perk18->{$field};
+                        if ($val === true) {
+                            $pdf->Text($xYa18, $y, chr(51));
+                        } elseif ($val === false) {
+                            $pdf->Text($xTidak18, $y, chr(51));
+                        }
+                    }
+                }
+
+                // B. Tumbuh Kembang 18 - 24 Bulan (Sisi Kanan)
+                $perk24 = $dataKia->perkembanganBayi24Bulan;
+                if ($perk24) {
+                    $xYa24 = 329;
+                    $xTidak24 = 341;
+
+                    $yPerk24 = [
+                        'berdiri_30_detik'       => 184,
+                        'jalan_tanpa_huyung'     => 193,
+                        'tumpuk_4_kubus'         => 202,
+                        'pungut_benda_kecil'     => 211,
+                        'gelinding_bola'         => 220,
+                        'sebut_3_6_kata'         => 229,
+                        'bantu_pekerjaan_rumah'  => 238,
+                        'pegang_cangkir_sendiri' => 247,
+                    ];
+
+                    foreach ($yPerk24 as $field => $y) {
+                        $val = $perk24->{$field};
+                        if ($val === true) {
+                            $pdf->Text($xYa24, $y, chr(51));
+                        } elseif ($val === false) {
+                            $pdf->Text($xTidak24, $y, chr(51));
+                        }
+                    }
+                }
+            }
         }
 
         return $pdf->Output('S');

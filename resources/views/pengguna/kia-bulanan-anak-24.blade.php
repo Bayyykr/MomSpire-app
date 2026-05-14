@@ -2,10 +2,10 @@
 
 @section('title', 'Pemantauan Anak 1 - 2 Tahun - MomSpire')
 @section('header_title', 'Anak Umur 1 - 2 Tahun')
-@section('header_subtitle', 'Catat pemantauan bulanan kesehatan anak secara mandiri dari bulan ke-12 hingga ke-23.')
+@section('header_subtitle', 'Catat pemantauan bulanan kesehatan dan perkembangan anak secara mandiri dari bulan ke-12 hingga ke-23.')
 
 @section('content')
-<div class="row g-4" x-data="{ activeMonth: {{ session('active_month', 12) }} }">
+<div class="row g-4" x-data="{ activeTab: '{{ session('active_tab', 'bulanan') }}', activeMonth: {{ session('active_month', 12) }} }">
     <!-- Info Banner -->
     <div class="col-12">
         <div class="card border-0 shadow-sm rounded-4 bg-gradient-info text-white p-4">
@@ -15,9 +15,30 @@
                 </div>
                 <div>
                     <h6 class="fw-bold mb-1">🥘 Menu Makanan Keluarga & Pemantauan Bulanan (Usia 1 - 2 Tahun)</h6>
-                    <p class="mb-0 small opacity-90">Pada usia ini, anak mulai dapat mengonsumsi makanan keluarga yang bergizi seperti Nasi Lemak / Nasi Uduk / Sup Ayam Makaroni. Lakukan pemantauan kesehatan setiap bulan secara rutin. Jika timbul gejala bahaya seperti sesak napas, panas tinggi, atau keluar cairan dari telinga, segera periksakan ke fasilitas kesehatan terdekat.</p>
+                    <p class="mb-0 small opacity-90">Pada usia ini, anak mulai dapat mengonsumsi makanan keluarga yang bergizi seperti Nasi Lemak / Nasi Uduk / Sup Ayam Makaroni. Lakukan pemantauan kesehatan setiap bulan secara rutin serta perhatikan tahapan tumbuh kembang anak. Segera bawa ke Faskes jika anak belum bisa melakukan kemampuan sesuai usianya.</p>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="col-12">
+        <div class="d-flex justify-content-center gap-3 border-bottom pb-3 flex-wrap">
+            <button @click="activeTab = 'bulanan'" 
+                    :class="activeTab === 'bulanan' ? 'btn-gradient-primary text-white shadow' : 'btn-outline-secondary'"
+                    class="btn btn-lg rounded-pill px-4 transition-all fw-semibold mb-2">
+                <i class="bi bi-calendar2-event me-2"></i> Pemantauan Bulanan (Bulan 12-23)
+            </button>
+            <button @click="activeTab = 'perkembangan18'" 
+                    :class="activeTab === 'perkembangan18' ? 'btn-gradient-primary text-white shadow' : 'btn-outline-secondary'"
+                    class="btn btn-lg rounded-pill px-4 transition-all fw-semibold mb-2">
+                <i class="bi bi-check2-square me-2"></i> Tumbuh Kembang (12 - 18 Bulan)
+            </button>
+            <button @click="activeTab = 'perkembangan24'" 
+                    :class="activeTab === 'perkembangan24' ? 'btn-gradient-primary text-white shadow' : 'btn-outline-secondary'"
+                    class="btn btn-lg rounded-pill px-4 transition-all fw-semibold mb-2">
+                <i class="bi bi-check2-all me-2"></i> Tumbuh Kembang (18 - 24 Bulan)
+            </button>
         </div>
     </div>
 
@@ -36,8 +57,8 @@
         </div>
     @endif
 
-    <!-- ================= PEMANTAUAN BULANAN (12 - 23) ================= -->
-    <div class="col-12">
+    <!-- ================= TAB 1: PEMANTAUAN BULANAN (12 - 23) ================= -->
+    <div class="col-12" x-show="activeTab === 'bulanan'" x-transition>
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
             <div class="card-header bg-white border-0 p-4 pb-0 d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
@@ -133,6 +154,240 @@
                         </form>
                     </div>
                 @endforeach
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= TAB 2: PERKEMBANGAN 12 - 18 BULAN ================= -->
+    <div class="col-12" x-show="activeTab === 'perkembangan18'" x-transition>
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+            <div class="card-header bg-white border-0 p-4 pb-0">
+                <h5 class="fw-bold mb-1 text-gradient">Pantau Tumbuh Kembang Bayi Umur 12 - 18 Bulan</h5>
+                <p class="text-muted small mb-0">Beri tanda centang pada kolom Ya/Tidak. Jika anak belum bisa melakukan salah satu hal berikut, segera bawa ke Puskesmas.</p>
+            </div>
+
+            <div class="card-body p-4">
+                @php $p18 = $perkembangan18 ?? null; @endphp
+                <form action="{{ route('pengguna.perkembangan_bayi_18_bulan.save') }}" method="POST">
+                    @csrf
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle mb-4">
+                            <thead class="table-warning text-dark text-center">
+                                <tr>
+                                    <th style="width: 60px;" class="py-3">No.</th>
+                                    <th class="py-3 text-start">Penanda Perkembangan Anak</th>
+                                    <th style="width: 100px;" class="py-3">Ya</th>
+                                    <th style="width: 100px;" class="py-3">Tidak</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">1</td>
+                                    <td class="fw-medium">Anak bisa berdiri sendiri tanpa berpegangan?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="berdiri_tanpa_pegangan" value="1" class="form-check-input fs-4" {{ (isset($p18->berdiri_tanpa_pegangan) && $p18->berdiri_tanpa_pegangan == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="berdiri_tanpa_pegangan" value="0" class="form-check-input fs-4" {{ (isset($p18->berdiri_tanpa_pegangan) && $p18->berdiri_tanpa_pegangan == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">2</td>
+                                    <td class="fw-medium">Anak bisa membungkuk memungut mainan kemudian berdiri kembali?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="bungkuk_pungut_mainan" value="1" class="form-check-input fs-4" {{ (isset($p18->bungkuk_pungut_mainan) && $p18->bungkuk_pungut_mainan == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="bungkuk_pungut_mainan" value="0" class="form-check-input fs-4" {{ (isset($p18->bungkuk_pungut_mainan) && $p18->bungkuk_pungut_mainan == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">3</td>
+                                    <td class="fw-medium">Anak bisa berjalan mundur lima langkah?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="jalan_mundur_5_langkah" value="1" class="form-check-input fs-4" {{ (isset($p18->jalan_mundur_5_langkah) && $p18->jalan_mundur_5_langkah == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="jalan_mundur_5_langkah" value="0" class="form-check-input fs-4" {{ (isset($p18->jalan_mundur_5_langkah) && $p18->jalan_mundur_5_langkah == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">4</td>
+                                    <td class="fw-medium">Anak bisa memanggil ayah dengan kata "papa", memanggil ibu dengan kata "mama"?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="panggil_papa_mama" value="1" class="form-check-input fs-4" {{ (isset($p18->panggil_papa_mama) && $p18->panggil_papa_mama == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="panggil_papa_mama" value="0" class="form-check-input fs-4" {{ (isset($p18->panggil_papa_mama) && $p18->panggil_papa_mama == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">5</td>
+                                    <td class="fw-medium">Anak bisa menumpuk dua kubus?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="tumpuk_2_kubus" value="1" class="form-check-input fs-4" {{ (isset($p18->tumpuk_2_kubus) && $p18->tumpuk_2_kubus == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="tumpuk_2_kubus" value="0" class="form-check-input fs-4" {{ (isset($p18->tumpuk_2_kubus) && $p18->tumpuk_2_kubus == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">6</td>
+                                    <td class="fw-medium">Anak bisa memasukkan kubus di kotak?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="masuk_kubus_kotak" value="1" class="form-check-input fs-4" {{ (isset($p18->masuk_kubus_kotak) && $p18->masuk_kubus_kotak == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="masuk_kubus_kotak" value="0" class="form-check-input fs-4" {{ (isset($p18->masuk_kubus_kotak) && $p18->masuk_kubus_kotak == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">7</td>
+                                    <td class="fw-medium">Anak bisa menunjuk apa yang diinginkan tanpa menangis/merengek, anak bisa mengeluarkan suara yang menyenangkan atau menarik tangan ibu?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="tunjuk_tanpa_nangis" value="1" class="form-check-input fs-4" {{ (isset($p18->tunjuk_tanpa_nangis) && $p18->tunjuk_tanpa_nangis == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="tunjuk_tanpa_nangis" value="0" class="form-check-input fs-4" {{ (isset($p18->tunjuk_tanpa_nangis) && $p18->tunjuk_tanpa_nangis == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">8</td>
+                                    <td class="fw-medium">Anak bisa memperlihatkan rasa cemburu/bersaing?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="rasa_cemburu" value="1" class="form-check-input fs-4" {{ (isset($p18->rasa_cemburu) && $p18->rasa_cemburu == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="rasa_cemburu" value="0" class="form-check-input fs-4" {{ (isset($p18->rasa_cemburu) && $p18->rasa_cemburu == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-gradient-primary rounded-pill px-5 py-2 shadow">
+                            <i class="bi bi-save2-fill me-2"></i> Simpan Tumbuh Kembang 12 - 18 Bulan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= TAB 3: PERKEMBANGAN 18 - 24 BULAN ================= -->
+    <div class="col-12" x-show="activeTab === 'perkembangan24'" x-transition>
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+            <div class="card-header bg-white border-0 p-4 pb-0">
+                <h5 class="fw-bold mb-1 text-gradient">Pantau Tumbuh Kembang Bayi Umur 18 - 24 Bulan</h5>
+                <p class="text-muted small mb-0">Beri tanda centang pada kolom Ya/Tidak. Jika anak belum bisa melakukan salah satu hal berikut, segera bawa ke Puskesmas.</p>
+            </div>
+
+            <div class="card-body p-4">
+                @php $p24 = $perkembangan24 ?? null; @endphp
+                <form action="{{ route('pengguna.perkembangan_bayi_24_bulan.save') }}" method="POST">
+                    @csrf
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle mb-4">
+                            <thead class="table-warning text-dark text-center">
+                                <tr>
+                                    <th style="width: 60px;" class="py-3">No.</th>
+                                    <th class="py-3 text-start">Penanda Perkembangan Anak</th>
+                                    <th style="width: 100px;" class="py-3">Ya</th>
+                                    <th style="width: 100px;" class="py-3">Tidak</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">1</td>
+                                    <td class="fw-medium">Anak bisa berdiri sendiri tanpa berpegangan 30 detik?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="berdiri_30_detik" value="1" class="form-check-input fs-4" {{ (isset($p24->berdiri_30_detik) && $p24->berdiri_30_detik == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="berdiri_30_detik" value="0" class="form-check-input fs-4" {{ (isset($p24->berdiri_30_detik) && $p24->berdiri_30_detik == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">2</td>
+                                    <td class="fw-medium">Anak bisa berjalan tanpa terhuyung-huyung?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="jalan_tanpa_huyung" value="1" class="form-check-input fs-4" {{ (isset($p24->jalan_tanpa_huyung) && $p24->jalan_tanpa_huyung == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="jalan_tanpa_huyung" value="0" class="form-check-input fs-4" {{ (isset($p24->jalan_tanpa_huyung) && $p24->jalan_tanpa_huyung == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">3</td>
+                                    <td class="fw-medium">Anak bisa menumpuk 4 buah kubus?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="tumpuk_4_kubus" value="1" class="form-check-input fs-4" {{ (isset($p24->tumpuk_4_kubus) && $p24->tumpuk_4_kubus == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="tumpuk_4_kubus" value="0" class="form-check-input fs-4" {{ (isset($p24->tumpuk_4_kubus) && $p24->tumpuk_4_kubus == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">4</td>
+                                    <td class="fw-medium">Anak bisa memungut benda kecil dengan ibu jari dan jari telunjuk?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="pungut_benda_kecil" value="1" class="form-check-input fs-4" {{ (isset($p24->pungut_benda_kecil) && $p24->pungut_benda_kecil == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="pungut_benda_kecil" value="0" class="form-check-input fs-4" {{ (isset($p24->pungut_benda_kecil) && $p24->pungut_benda_kecil == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">5</td>
+                                    <td class="fw-medium">Anak bisa menggelindingkan bola ke arah sasaran?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="gelinding_bola" value="1" class="form-check-input fs-4" {{ (isset($p24->gelinding_bola) && $p24->gelinding_bola == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="gelinding_bola" value="0" class="form-check-input fs-4" {{ (isset($p24->gelinding_bola) && $p24->gelinding_bola == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">6</td>
+                                    <td class="fw-medium">Anak bisa menyebut 3 - 6 kata yang mempunyai arti?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="sebut_3_6_kata" value="1" class="form-check-input fs-4" {{ (isset($p24->sebut_3_6_kata) && $p24->sebut_3_6_kata == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="sebut_3_6_kata" value="0" class="form-check-input fs-4" {{ (isset($p24->sebut_3_6_kata) && $p24->sebut_3_6_kata == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">7</td>
+                                    <td class="fw-medium">Anak bisa membantu/menirukan pekerjaan rumah tangga?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="bantu_pekerjaan_rumah" value="1" class="form-check-input fs-4" {{ (isset($p24->bantu_pekerjaan_rumah) && $p24->bantu_pekerjaan_rumah == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="bantu_pekerjaan_rumah" value="0" class="form-check-input fs-4" {{ (isset($p24->bantu_pekerjaan_rumah) && $p24->bantu_pekerjaan_rumah == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">8</td>
+                                    <td class="fw-medium">Anak bisa memegang cangkir sendiri, belajar makan-minum sendiri?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="pegang_cangkir_sendiri" value="1" class="form-check-input fs-4" {{ (isset($p24->pegang_cangkir_sendiri) && $p24->pegang_cangkir_sendiri == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="pegang_cangkir_sendiri" value="0" class="form-check-input fs-4" {{ (isset($p24->pegang_cangkir_sendiri) && $p24->pegang_cangkir_sendiri == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-gradient-primary rounded-pill px-5 py-2 shadow">
+                            <i class="bi bi-save2-fill me-2"></i> Simpan Tumbuh Kembang 18 - 24 Bulan
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

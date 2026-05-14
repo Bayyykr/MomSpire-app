@@ -133,11 +133,11 @@ class DataKiaController extends Controller
         $user = auth()->user();
         abort_unless($user, 403);
 
-        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s'])
+        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s', 'perkembanganBayi18Bulan', 'perkembanganBayi24Bulan'])
             ->findOrFail($id);
 
-        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, persiapanMelahirkan, pemantauanIbuNifas, keluargaBerencana, bayiBaruLahir, pemantauanBayis, warnaTinja, absenKelasBalitas, pemantauanMingguanBayis, perkembanganBayi, pemantauanBulananBayis, perkembanganBayi6Bulan, pemantauanBulananBayi12s, perkembanganBayi9Bulan, perkembanganBayi12Bulan, dan pemantauanBulananAnak24s selalu segar
-        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s']);
+        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, persiapanMelahirkan, pemantauanIbuNifas, keluargaBerencana, bayiBaruLahir, pemantauanBayis, warnaTinja, absenKelasBalitas, pemantauanMingguanBayis, perkembanganBayi, pemantauanBulananBayis, perkembanganBayi6Bulan, pemantauanBulananBayi12s, perkembanganBayi9Bulan, perkembanganBayi12Bulan, pemantauanBulananAnak24s, perkembanganBayi18Bulan, dan perkembanganBayi24Bulan selalu segar
+        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s', 'perkembanganBayi18Bulan', 'perkembanganBayi24Bulan']);
 
         if ($user->role === 'pengguna') {
             abort_unless($dataKia->user_id === $user->id, 403);
@@ -826,15 +826,17 @@ class DataKiaController extends Controller
     public function pemantauanBulananAnak24Index()
     {
         $userId = auth()->id();
-        $dataKia = DataKia::with(['pemantauanBulananAnak24s'])->where('user_id', $userId)->first();
+        $dataKia = DataKia::with(['pemantauanBulananAnak24s', 'perkembanganBayi18Bulan', 'perkembanganBayi24Bulan'])->where('user_id', $userId)->first();
 
         if (!$dataKia) {
             return redirect()->route('pengguna.buku_kia')->with('info', 'Silakan lengkapi screening Buku KIA terlebih dahulu.');
         }
 
         $bulanan = $dataKia->pemantauanBulananAnak24s->keyBy('bulan_ke');
+        $perkembangan18 = $dataKia->perkembanganBayi18Bulan;
+        $perkembangan24 = $dataKia->perkembanganBayi24Bulan;
 
-        return view('pengguna.kia-bulanan-anak-24', compact('dataKia', 'bulanan'));
+        return view('pengguna.kia-bulanan-anak-24', compact('dataKia', 'bulanan', 'perkembangan18', 'perkembangan24'));
     }
 
     public function pemantauanBulananAnak24Store(Request $request)
@@ -864,7 +866,54 @@ class DataKiaController extends Controller
         );
 
         return back()->with('success', 'Catatan pemantauan bulanan anak bulan ke-' . $request->bulan_ke . ' berhasil disimpan.')
+            ->with('active_tab', 'bulanan')
             ->with('active_month', $request->bulan_ke);
+    }
+
+    public function perkembanganBayi18BulanStore(Request $request)
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
+
+        $dataKia->perkembanganBayi18Bulan()->updateOrCreate(
+            ['data_kia_id' => $dataKia->id],
+            [
+                'berdiri_tanpa_pegangan' => $request->has('berdiri_tanpa_pegangan') ? ($request->berdiri_tanpa_pegangan === '1') : null,
+                'bungkuk_pungut_mainan'  => $request->has('bungkuk_pungut_mainan') ? ($request->bungkuk_pungut_mainan === '1') : null,
+                'jalan_mundur_5_langkah' => $request->has('jalan_mundur_5_langkah') ? ($request->jalan_mundur_5_langkah === '1') : null,
+                'panggil_papa_mama'      => $request->has('panggil_papa_mama') ? ($request->panggil_papa_mama === '1') : null,
+                'tumpuk_2_kubus'         => $request->has('tumpuk_2_kubus') ? ($request->tumpuk_2_kubus === '1') : null,
+                'masuk_kubus_kotak'      => $request->has('masuk_kubus_kotak') ? ($request->masuk_kubus_kotak === '1') : null,
+                'tunjuk_tanpa_nangis'    => $request->has('tunjuk_tanpa_nangis') ? ($request->tunjuk_tanpa_nangis === '1') : null,
+                'rasa_cemburu'           => $request->has('rasa_cemburu') ? ($request->rasa_cemburu === '1') : null,
+            ]
+        );
+
+        return back()->with('success', 'Checklist perkembangan bayi umur 12 - 18 bulan berhasil disimpan.')
+            ->with('active_tab', 'perkembangan18');
+    }
+
+    public function perkembanganBayi24BulanStore(Request $request)
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
+
+        $dataKia->perkembanganBayi24Bulan()->updateOrCreate(
+            ['data_kia_id' => $dataKia->id],
+            [
+                'berdiri_30_detik'       => $request->has('berdiri_30_detik') ? ($request->berdiri_30_detik === '1') : null,
+                'jalan_tanpa_huyung'     => $request->has('jalan_tanpa_huyung') ? ($request->jalan_tanpa_huyung === '1') : null,
+                'tumpuk_4_kubus'         => $request->has('tumpuk_4_kubus') ? ($request->tumpuk_4_kubus === '1') : null,
+                'pungut_benda_kecil'     => $request->has('pungut_benda_kecil') ? ($request->pungut_benda_kecil === '1') : null,
+                'gelinding_bola'         => $request->has('gelinding_bola') ? ($request->gelinding_bola === '1') : null,
+                'sebut_3_6_kata'         => $request->has('sebut_3_6_kata') ? ($request->sebut_3_6_kata === '1') : null,
+                'bantu_pekerjaan_rumah'  => $request->has('bantu_pekerjaan_rumah') ? ($request->bantu_pekerjaan_rumah === '1') : null,
+                'pegang_cangkir_sendiri' => $request->has('pegang_cangkir_sendiri') ? ($request->pegang_cangkir_sendiri === '1') : null,
+            ]
+        );
+
+        return back()->with('success', 'Checklist perkembangan bayi umur 18 - 24 bulan berhasil disimpan.')
+            ->with('active_tab', 'perkembangan24');
     }
 }
 
