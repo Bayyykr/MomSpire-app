@@ -919,15 +919,40 @@ class DataKiaController extends Controller
     public function pemantauanBulananAnak72Index()
     {
         $userId = auth()->id();
-        $dataKia = DataKia::with(['pemantauanBulananAnak72s'])->where('user_id', $userId)->first();
+        $dataKia = DataKia::with(['pemantauanBulananAnak72s', 'perkembanganAnak36Bulan'])->where('user_id', $userId)->first();
 
         if (!$dataKia) {
             return redirect()->route('pengguna.buku_kia')->with('info', 'Silakan lengkapi screening Buku KIA terlebih dahulu.');
         }
 
         $bulanan = $dataKia->pemantauanBulananAnak72s->keyBy('bulan_ke');
+        $perk36 = $dataKia->perkembanganAnak36Bulan;
 
-        return view('pengguna.kia-bulanan-anak-72', compact('dataKia', 'bulanan'));
+        return view('pengguna.kia-bulanan-anak-72', compact('dataKia', 'bulanan', 'perk36'));
+    }
+
+    public function perkembanganAnak36BulanStore(Request $request)
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
+
+        $dataKia->perkembanganAnak36Bulan()->updateOrCreate(
+            ['data_kia_id' => $dataKia->id],
+            [
+                'naik_tangga'         => $request->has('naik_tangga') ? ($request->naik_tangga === '1') : null,
+                'tendang_bola'        => $request->has('tendang_bola') ? ($request->tendang_bola === '1') : null,
+                'coret_kertas'        => $request->has('coret_kertas') ? ($request->coret_kertas === '1') : null,
+                'bicara_2_kata'       => $request->has('bicara_2_kata') ? ($request->bicara_2_kata === '1') : null,
+                'tunjuk_bagian_tubuh' => $request->has('tunjuk_bagian_tubuh') ? ($request->tunjuk_bagian_tubuh === '1') : null,
+                'sebut_nama_benda'    => $request->has('sebut_nama_benda') ? ($request->sebut_nama_benda === '1') : null,
+                'pungut_mainan'       => $request->has('pungut_mainan') ? ($request->pungut_mainan === '1') : null,
+                'makan_nasi_sendiri'  => $request->has('makan_nasi_sendiri') ? ($request->makan_nasi_sendiri === '1') : null,
+                'lepas_pakaian'       => $request->has('lepas_pakaian') ? ($request->lepas_pakaian === '1') : null,
+            ]
+        );
+
+        return back()->with('success', 'Checklist perkembangan anak umur 2 - 3 tahun berhasil disimpan.')
+            ->with('active_tab', 'perkembangan36');
     }
 
     public function pemantauanBulananAnak72Store(Request $request)

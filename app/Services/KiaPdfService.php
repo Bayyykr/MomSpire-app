@@ -1465,6 +1465,39 @@ class KiaPdfService
                     }
                 }
             }
+
+            // 25. PERAWATAN ANAK UMUR 2 - 3 TAHUN (Halaman 41 Sisi Kanan)
+            if ($pageNo === 41) {
+                $perk36 = $dataKia->perkembanganAnak36Bulan;
+                if ($perk36) {
+                    $pdf->SetTextColor(0, 0, 0);
+                    $pdf->SetFont('ZapfDingbats', '', 10);
+
+                    $xYa36 = 329;
+                    $xTidak36 = 341;
+
+                    $yPerk36 = [
+                        'naik_tangga'         => 175,
+                        'tendang_bola'        => 184,
+                        'coret_kertas'        => 193,
+                        'bicara_2_kata'       => 201,
+                        'tunjuk_bagian_tubuh' => 211,
+                        'sebut_nama_benda'    => 220,
+                        'pungut_mainan'       => 229,
+                        'makan_nasi_sendiri'  => 238,
+                        'lepas_pakaian'       => 247,
+                    ];
+
+                    foreach ($yPerk36 as $field => $y) {
+                        $val = $perk36->{$field};
+                        if ($val === true) {
+                            $pdf->Text($xYa36, $y, chr(51));
+                        } elseif ($val === false) {
+                            $pdf->Text($xTidak36, $y, chr(51));
+                        }
+                    }
+                }
+            }
         }
 
         return $pdf->Output('S');
