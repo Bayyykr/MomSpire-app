@@ -1196,6 +1196,73 @@ class KiaPdfService
                     }
                 }
             }
+
+            // 20. TUMBUH KEMBANG BAYI 6-9 BULAN & 9-12 BULAN (Halaman 33)
+            if ($pageNo === 33) {
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->SetFont('ZapfDingbats', '', 10);
+
+                // A. Tumbuh Kembang 6 - 9 Bulan (Sisi Kiri)
+                $perk9 = $dataKia->perkembanganBayi9Bulan;
+                if ($perk9) {
+                    $xYa9 = 153.5;
+                    $xTidak9 = 165.5;
+
+                    $yPerk9 = [
+                        'duduk_mandiri'       => 188,
+                        'tengkurap_dada'      => 194,
+                        'merangkak'           => 200,
+                        'pindah_benda'        => 206,
+                        'pungut_2_benda'      => 212,
+                        'pungut_kacang'       => 218,
+                        'bersuara_tanpa_arti' => 224,
+                        'cari_mainan'         => 231,
+                        'tepuk_tangan'        => 237,
+                        'lempar_benda'        => 243,
+                        'makan_kue'           => 249,
+                    ];
+
+                    foreach ($yPerk9 as $field => $y) {
+                        $val = $perk9->{$field};
+                        if ($val === true) {
+                            $pdf->Text($xYa9, $y, chr(51));
+                        } elseif ($val === false) {
+                            $pdf->Text($xTidak9, $y, chr(51));
+                        }
+                    }
+                }
+
+                // B. Tumbuh Kembang 9 - 12 Bulan (Sisi Kanan)
+                $perk12 = $dataKia->perkembanganBayi12Bulan;
+                if ($perk12) {
+                    $xYa12 = 329;
+                    $xTidak12 = 341;
+
+                    $yPerk12 = [
+                        'angkat_badan_berdiri' => 178,
+                        'belajar_berdiri'      => 184,
+                        'jalan_dituntun'       => 191,
+                        'ulur_tangan_raih'     => 197,
+                        'genggam_pensil'       => 204,
+                        'masuk_benda_mulut'    => 210,
+                        'tiru_bunyi'           => 217,
+                        'sebut_2_suku_kata'    => 223,
+                        'eksplorasi_sekitar'   => 229,
+                        'reaksi_panggilan'     => 235,
+                        'bermain_cilukba'      => 242,
+                        'kenal_keluarga'       => 248,
+                    ];
+
+                    foreach ($yPerk12 as $field => $y) {
+                        $val = $perk12->{$field};
+                        if ($val === true) {
+                            $pdf->Text($xYa12, $y, chr(51));
+                        } elseif ($val === false) {
+                            $pdf->Text($xTidak12, $y, chr(51));
+                        }
+                    }
+                }
+            }
         }
 
         return $pdf->Output('S');
