@@ -919,7 +919,7 @@ class DataKiaController extends Controller
     public function pemantauanBulananAnak72Index()
     {
         $userId = auth()->id();
-        $dataKia = DataKia::with(['pemantauanBulananAnak72s', 'perkembanganAnak36Bulan', 'perkembanganAnak48Bulan'])->where('user_id', $userId)->first();
+        $dataKia = DataKia::with(['pemantauanBulananAnak72s', 'perkembanganAnak36Bulan', 'perkembanganAnak48Bulan', 'perkembanganAnak60Bulan', 'perkembanganAnak72Bulan'])->where('user_id', $userId)->first();
 
         if (!$dataKia) {
             return redirect()->route('pengguna.buku_kia')->with('info', 'Silakan lengkapi screening Buku KIA terlebih dahulu.');
@@ -928,8 +928,10 @@ class DataKiaController extends Controller
         $bulanan = $dataKia->pemantauanBulananAnak72s->keyBy('bulan_ke');
         $perk36 = $dataKia->perkembanganAnak36Bulan;
         $perk48 = $dataKia->perkembanganAnak48Bulan;
+        $perk60 = $dataKia->perkembanganAnak60Bulan;
+        $perk72 = $dataKia->perkembanganAnak72Bulan;
 
-        return view('pengguna.kia-bulanan-anak-72', compact('dataKia', 'bulanan', 'perk36', 'perk48'));
+        return view('pengguna.kia-bulanan-anak-72', compact('dataKia', 'bulanan', 'perk36', 'perk48', 'perk60', 'perk72'));
     }
 
     public function perkembanganAnak36BulanStore(Request $request)
@@ -982,6 +984,63 @@ class DataKiaController extends Controller
 
         return back()->with('success', 'Checklist perkembangan anak umur 3 - 4 tahun berhasil disimpan.')
             ->with('active_tab', 'perkembangan48');
+    }
+
+    public function perkembanganAnak60BulanStore(Request $request)
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
+
+        $dataKia->perkembanganAnak60Bulan()->updateOrCreate(
+            ['data_kia_id' => $dataKia->id],
+            [
+                'berdiri_1_kaki_6_detik'      => $request->has('berdiri_1_kaki_6_detik') ? ($request->berdiri_1_kaki_6_detik === '1') : null,
+                'lompat_1_kaki'               => $request->has('lompat_1_kaki') ? ($request->lompat_1_kaki === '1') : null,
+                'menari'                      => $request->has('menari') ? ($request->menari === '1') : null,
+                'gambar_tanda_silang'         => $request->has('gambar_tanda_silang') ? ($request->gambar_tanda_silang === '1') : null,
+                'gambar_lingkaran'            => $request->has('gambar_lingkaran') ? ($request->gambar_lingkaran === '1') : null,
+                'gambar_orang_3_bagian'       => $request->has('gambar_orang_3_bagian') ? ($request->gambar_orang_3_bagian === '1') : null,
+                'kancing_baju_boneka'         => $request->has('kancing_baju_boneka') ? ($request->kancing_baju_boneka === '1') : null,
+                'sebut_nama_lengkap'          => $request->has('sebut_nama_lengkap') ? ($request->sebut_nama_lengkap === '1') : null,
+                'senang_sebut_kata_baru'      => $request->has('senang_sebut_kata_baru') ? ($request->senang_sebut_kata_baru === '1') : null,
+                'senang_bertanya'             => $request->has('senang_bertanya') ? ($request->senang_bertanya === '1') : null,
+                'jawab_pertanyaan_kata_benar' => $request->has('jawab_pertanyaan_kata_benar') ? ($request->jawab_pertanyaan_kata_benar === '1') : null,
+                'bicara_mudah_dimengerti'     => $request->has('bicara_mudah_dimengerti') ? ($request->bicara_mudah_dimengerti === '1') : null,
+                'banding_ukuran_bentuk'       => $request->has('banding_ukuran_bentuk') ? ($request->banding_ukuran_bentuk === '1') : null,
+                'sebut_angka_hitung_jari'     => $request->has('sebut_angka_hitung_jari') ? ($request->sebut_angka_hitung_jari === '1') : null,
+            ]
+        );
+
+        return back()->with('success', 'Checklist perkembangan anak umur 4 - 5 tahun berhasil disimpan.')
+            ->with('active_tab', 'perkembangan60');
+    }
+
+    public function perkembanganAnak72BulanStore(Request $request)
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
+
+        $dataKia->perkembanganAnak72Bulan()->updateOrCreate(
+            ['data_kia_id' => $dataKia->id],
+            [
+                'berjalan_lurus'                => $request->has('berjalan_lurus') ? ($request->berjalan_lurus === '1') : null,
+                'berdiri_1_kaki_11_detik'       => $request->has('berdiri_1_kaki_11_detik') ? ($request->berdiri_1_kaki_11_detik === '1') : null,
+                'gambar_6_bagian_orang_lengkap' => $request->has('gambar_6_bagian_orang_lengkap') ? ($request->gambar_6_bagian_orang_lengkap === '1') : null,
+                'tangkap_bola_kecil'            => $request->has('tangkap_bola_kecil') ? ($request->tangkap_bola_kecil === '1') : null,
+                'gambar_segi_empat'             => $request->has('gambar_segi_empat') ? ($request->gambar_segi_empat === '1') : null,
+                'mengerti_lawan_kata'           => $request->has('mengerti_lawan_kata') ? ($request->mengerti_lawan_kata === '1') : null,
+                'mengerti_pembicaraan_7_kata'   => $request->has('mengerti_pembicaraan_7_kata') ? ($request->mengerti_pembicaraan_7_kata === '1') : null,
+                'jawab_bahan_guna_benda'        => $request->has('jawab_bahan_guna_benda') ? ($request->jawab_bahan_guna_benda === '1') : null,
+                'kenal_angka_hitung_5_10'       => $request->has('kenal_angka_hitung_5_10') ? ($request->kenal_angka_hitung_5_10 === '1') : null,
+                'kenal_warna_warni'             => $request->has('kenal_warna_warni') ? ($request->kenal_warna_warni === '1') : null,
+                'ungkapkan_simpati'             => $request->has('ungkapkan_simpati') ? ($request->ungkapkan_simpati === '1') : null,
+                'ikut_aturan_permainan'         => $request->has('ikut_aturan_permainan') ? ($request->ikut_aturan_permainan === '1') : null,
+                'pakaian_sendiri_tanpa_bantu'   => $request->has('pakaian_sendiri_tanpa_bantu') ? ($request->pakaian_sendiri_tanpa_bantu === '1') : null,
+            ]
+        );
+
+        return back()->with('success', 'Checklist perkembangan anak umur 5 - 6 tahun berhasil disimpan.')
+            ->with('active_tab', 'perkembangan72');
     }
 
     public function pemantauanBulananAnak72Store(Request $request)

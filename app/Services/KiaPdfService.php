@@ -1535,6 +1535,80 @@ class KiaPdfService
                     }
                 }
             }
+
+            // 27. PERAWATAN ANAK UMUR 4 - 5 TAHUN & 5 - 6 TAHUN (Halaman 43 Sisi Kiri & Kanan)
+            if ($pageNo === 43) {
+                // Sisi Kiri: Umur 4 - 5 Tahun (60 Bulan)
+                $perk60 = $dataKia->perkembanganAnak60Bulan;
+                if ($perk60) {
+                    $pdf->SetTextColor(0, 0, 0);
+                    $pdf->SetFont('ZapfDingbats', '', 10);
+
+                    $xYa60 = 154;
+                    $xTidak60 = 166;
+
+                    $yPerk60 = [
+                        'berdiri_1_kaki_6_detik'      => 163,
+                        'lompat_1_kaki'               => 169,
+                        'menari'                      => 176,
+                        'gambar_tanda_silang'         => 182,
+                        'gambar_lingkaran'            => 189,
+                        'gambar_orang_3_bagian'       => 196,
+                        'kancing_baju_boneka'         => 202,
+                        'sebut_nama_lengkap'          => 209,
+                        'senang_sebut_kata_baru'      => 215,
+                        'senang_bertanya'             => 222,
+                        'jawab_pertanyaan_kata_benar' => 229,
+                        'bicara_mudah_dimengerti'     => 235,
+                        'banding_ukuran_bentuk'       => 242,
+                        'sebut_angka_hitung_jari'     => 249,
+                    ];
+
+                    foreach ($yPerk60 as $field => $y) {
+                        $val = $perk60->{$field};
+                        if ($val === true) {
+                            $pdf->Text($xYa60, $y, chr(51));
+                        } elseif ($val === false) {
+                            $pdf->Text($xTidak60, $y, chr(51));
+                        }
+                    }
+                }
+
+                // Sisi Kanan: Umur 5 - 6 Tahun (72 Bulan)
+                $perk72 = $dataKia->perkembanganAnak72Bulan;
+                if ($perk72) {
+                    $pdf->SetTextColor(0, 0, 0);
+                    $pdf->SetFont('ZapfDingbats', '', 10);
+
+                    $xYa72 = 329;
+                    $xTidak72 = 341;
+
+                    $yPerk72 = [
+                        'berjalan_lurus'                => 184,
+                        'berdiri_1_kaki_11_detik'       => 189,
+                        'gambar_6_bagian_orang_lengkap' => 195,
+                        'tangkap_bola_kecil'            => 200,
+                        'gambar_segi_empat'             => 206,
+                        'mengerti_lawan_kata'           => 211,
+                        'mengerti_pembicaraan_7_kata'   => 216,
+                        'jawab_bahan_guna_benda'        => 222,
+                        'kenal_angka_hitung_5_10'       => 227,
+                        'kenal_warna_warni'             => 233,
+                        'ungkapkan_simpati'             => 238,
+                        'ikut_aturan_permainan'         => 244,
+                        'pakaian_sendiri_tanpa_bantu'   => 249,
+                    ];
+
+                    foreach ($yPerk72 as $field => $y) {
+                        $val = $perk72->{$field};
+                        if ($val === true) {
+                            $pdf->Text($xYa72, $y, chr(51));
+                        } elseif ($val === false) {
+                            $pdf->Text($xTidak72, $y, chr(51));
+                        }
+                    }
+                }
+            }
         }
 
         return $pdf->Output('S');

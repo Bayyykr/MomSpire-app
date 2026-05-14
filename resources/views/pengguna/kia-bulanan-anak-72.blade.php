@@ -49,10 +49,20 @@
                     class="btn rounded-pill px-4 transition-all fw-semibold mb-2">
                 <i class="bi bi-calendar4 me-2"></i> Usia 4 Tahun
             </button>
+            <button @click="activeTab = 'perkembangan60';" 
+                    :class="activeTab === 'perkembangan60' ? 'btn-gradient-primary text-white shadow' : 'btn-outline-secondary'"
+                    class="btn rounded-pill px-4 transition-all fw-semibold mb-2">
+                <i class="bi bi-person-check-fill me-2"></i> Perkembangan 4-5 Thn
+            </button>
             <button @click="activeTab = 'tahun5'; activeMonth = 60;" 
                     :class="activeTab === 'tahun5' ? 'btn-gradient-primary text-white shadow' : 'btn-outline-secondary'"
                     class="btn rounded-pill px-4 transition-all fw-semibold mb-2">
                 <i class="bi bi-calendar4-week me-2"></i> Usia 5 Tahun
+            </button>
+            <button @click="activeTab = 'perkembangan72';" 
+                    :class="activeTab === 'perkembangan72' ? 'btn-gradient-primary text-white shadow' : 'btn-outline-secondary'"
+                    class="btn rounded-pill px-4 transition-all fw-semibold mb-2">
+                <i class="bi bi-person-check-fill me-2"></i> Perkembangan 5-6 Thn
             </button>
         </div>
     </div>
@@ -357,6 +367,348 @@
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn btn-gradient-primary rounded-pill px-5 py-2 shadow">
                             <i class="bi bi-save2-fill me-2"></i> Simpan Tumbuh Kembang 3 - 4 Tahun
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Perkembangan 4 - 5 Tahun Tab -->
+    <div class="col-12" x-show="activeTab === 'perkembangan60'" x-transition>
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+            <div class="card-header bg-white border-0 p-4 pb-0">
+                <h5 class="fw-bold mb-1 text-gradient">Pantau Tumbuh Kembang Anak Umur 4 - 5 Tahun</h5>
+                <p class="text-muted small mb-0">Beri tanda centang pada kolom Ya/Tidak. Jika anak belum bisa melakukan salah satu hal berikut, segera bawa ke Puskesmas.</p>
+            </div>
+            <div class="card-body p-4">
+                @php $p60 = $perk60 ?? null; @endphp
+                <form action="{{ route('pengguna.perkembangan_anak_60_bulan.save') }}" method="POST">
+                    @csrf
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle mb-4">
+                            <thead class="table-warning text-dark text-center">
+                                <tr>
+                                    <th style="width: 60px;" class="py-3">No.</th>
+                                    <th class="py-3 text-start">Penanda Perkembangan Anak</th>
+                                    <th style="width: 100px;" class="py-3">Ya</th>
+                                    <th style="width: 100px;" class="py-3">Tidak</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">1</td>
+                                    <td class="fw-medium">Anak bisa berdiri 1 kaki 6 detik?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="berdiri_1_kaki_6_detik" value="1" class="form-check-input fs-4" {{ (isset($p60->berdiri_1_kaki_6_detik) && $p60->berdiri_1_kaki_6_detik == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="berdiri_1_kaki_6_detik" value="0" class="form-check-input fs-4" {{ (isset($p60->berdiri_1_kaki_6_detik) && $p60->berdiri_1_kaki_6_detik == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">2</td>
+                                    <td class="fw-medium">Anak bisa melompat-lompat 1 kaki?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="lompat_1_kaki" value="1" class="form-check-input fs-4" {{ (isset($p60->lompat_1_kaki) && $p60->lompat_1_kaki == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="lompat_1_kaki" value="0" class="form-check-input fs-4" {{ (isset($p60->lompat_1_kaki) && $p60->lompat_1_kaki == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">3</td>
+                                    <td class="fw-medium">Anak bisa menari?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="menari" value="1" class="form-check-input fs-4" {{ (isset($p60->menari) && $p60->menari == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="menari" value="0" class="form-check-input fs-4" {{ (isset($p60->menari) && $p60->menari == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">4</td>
+                                    <td class="fw-medium">Anak bisa menggambar tanda silang?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="gambar_tanda_silang" value="1" class="form-check-input fs-4" {{ (isset($p60->gambar_tanda_silang) && $p60->gambar_tanda_silang == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="gambar_tanda_silang" value="0" class="form-check-input fs-4" {{ (isset($p60->gambar_tanda_silang) && $p60->gambar_tanda_silang == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">5</td>
+                                    <td class="fw-medium">Anak bisa menggambar lingkaran?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="gambar_lingkaran" value="1" class="form-check-input fs-4" {{ (isset($p60->gambar_lingkaran) && $p60->gambar_lingkaran == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="gambar_lingkaran" value="0" class="form-check-input fs-4" {{ (isset($p60->gambar_lingkaran) && $p60->gambar_lingkaran == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">6</td>
+                                    <td class="fw-medium">Anak bisa menggambar orang dengan 3 bagian tubuh?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="gambar_orang_3_bagian" value="1" class="form-check-input fs-4" {{ (isset($p60->gambar_orang_3_bagian) && $p60->gambar_orang_3_bagian == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="gambar_orang_3_bagian" value="0" class="form-check-input fs-4" {{ (isset($p60->gambar_orang_3_bagian) && $p60->gambar_orang_3_bagian == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">7</td>
+                                    <td class="fw-medium">Anak bisa mengancing baju atau pakaian boneka?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="kancing_baju_boneka" value="1" class="form-check-input fs-4" {{ (isset($p60->kancing_baju_boneka) && $p60->kancing_baju_boneka == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="kancing_baju_boneka" value="0" class="form-check-input fs-4" {{ (isset($p60->kancing_baju_boneka) && $p60->kancing_baju_boneka == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">8</td>
+                                    <td class="fw-medium">Anak bisa menyebut nama lengkap tanpa dibantu?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="sebut_nama_lengkap" value="1" class="form-check-input fs-4" {{ (isset($p60->sebut_nama_lengkap) && $p60->sebut_nama_lengkap == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="sebut_nama_lengkap" value="0" class="form-check-input fs-4" {{ (isset($p60->sebut_nama_lengkap) && $p60->sebut_nama_lengkap == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">9</td>
+                                    <td class="fw-medium">Anak bisa senang menyebut kata-kata baru?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="senang_sebut_kata_baru" value="1" class="form-check-input fs-4" {{ (isset($p60->senang_sebut_kata_baru) && $p60->senang_sebut_kata_baru == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="senang_sebut_kata_baru" value="0" class="form-check-input fs-4" {{ (isset($p60->senang_sebut_kata_baru) && $p60->senang_sebut_kata_baru == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">10</td>
+                                    <td class="fw-medium">Anak bisa senang bertanya tentang sesuatu?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="senang_bertanya" value="1" class="form-check-input fs-4" {{ (isset($p60->senang_bertanya) && $p60->senang_bertanya == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="senang_bertanya" value="0" class="form-check-input fs-4" {{ (isset($p60->senang_bertanya) && $p60->senang_bertanya == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">11</td>
+                                    <td class="fw-medium">Anak bisa menjawab pertanyaan dengan kata-kata yang benar?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="jawab_pertanyaan_kata_benar" value="1" class="form-check-input fs-4" {{ (isset($p60->jawab_pertanyaan_kata_benar) && $p60->jawab_pertanyaan_kata_benar == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="jawab_pertanyaan_kata_benar" value="0" class="form-check-input fs-4" {{ (isset($p60->jawab_pertanyaan_kata_benar) && $p60->jawab_pertanyaan_kata_benar == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">12</td>
+                                    <td class="fw-medium">Anak bisa bicara yang mudah dimengerti?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="bicara_mudah_dimengerti" value="1" class="form-check-input fs-4" {{ (isset($p60->bicara_mudah_dimengerti) && $p60->bicara_mudah_dimengerti == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="bicara_mudah_dimengerti" value="0" class="form-check-input fs-4" {{ (isset($p60->bicara_mudah_dimengerti) && $p60->bicara_mudah_dimengerti == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">13</td>
+                                    <td class="fw-medium">Anak bisa membandingkan/membedakan sesuatu dari ukuran dan bentuknya?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="banding_ukuran_bentuk" value="1" class="form-check-input fs-4" {{ (isset($p60->banding_ukuran_bentuk) && $p60->banding_ukuran_bentuk == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="banding_ukuran_bentuk" value="0" class="form-check-input fs-4" {{ (isset($p60->banding_ukuran_bentuk) && $p60->banding_ukuran_bentuk == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">14</td>
+                                    <td class="fw-medium">Anak bisa menyebut angka, menghitung jari?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="sebut_angka_hitung_jari" value="1" class="form-check-input fs-4" {{ (isset($p60->sebut_angka_hitung_jari) && $p60->sebut_angka_hitung_jari == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="sebut_angka_hitung_jari" value="0" class="form-check-input fs-4" {{ (isset($p60->sebut_angka_hitung_jari) && $p60->sebut_angka_hitung_jari == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-gradient-primary rounded-pill px-5 py-2 shadow">
+                            <i class="bi bi-save2-fill me-2"></i> Simpan Tumbuh Kembang 4 - 5 Tahun
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Perkembangan 5 - 6 Tahun Tab -->
+    <div class="col-12" x-show="activeTab === 'perkembangan72'" x-transition>
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+            <div class="card-header bg-white border-0 p-4 pb-0">
+                <h5 class="fw-bold mb-1 text-gradient">Pantau Tumbuh Kembang Anak Umur 5 - 6 Tahun</h5>
+                <p class="text-muted small mb-0">Beri tanda centang pada kolom Ya/Tidak. Jika anak belum bisa melakukan salah satu hal berikut, segera bawa ke Puskesmas.</p>
+            </div>
+            <div class="card-body p-4">
+                @php $p72 = $perk72 ?? null; @endphp
+                <form action="{{ route('pengguna.perkembangan_anak_72_bulan.save') }}" method="POST">
+                    @csrf
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle mb-4">
+                            <thead class="table-warning text-dark text-center">
+                                <tr>
+                                    <th style="width: 60px;" class="py-3">No.</th>
+                                    <th class="py-3 text-start">Penanda Perkembangan Anak</th>
+                                    <th style="width: 100px;" class="py-3">Ya</th>
+                                    <th style="width: 100px;" class="py-3">Tidak</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">1</td>
+                                    <td class="fw-medium">Anak bisa berjalan lurus?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="berjalan_lurus" value="1" class="form-check-input fs-4" {{ (isset($p72->berjalan_lurus) && $p72->berjalan_lurus == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="berjalan_lurus" value="0" class="form-check-input fs-4" {{ (isset($p72->berjalan_lurus) && $p72->berjalan_lurus == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">2</td>
+                                    <td class="fw-medium">Anak bisa berdiri dengan 1 kaki selama 11 detik?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="berdiri_1_kaki_11_detik" value="1" class="form-check-input fs-4" {{ (isset($p72->berdiri_1_kaki_11_detik) && $p72->berdiri_1_kaki_11_detik == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="berdiri_1_kaki_11_detik" value="0" class="form-check-input fs-4" {{ (isset($p72->berdiri_1_kaki_11_detik) && $p72->berdiri_1_kaki_11_detik == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">3</td>
+                                    <td class="fw-medium">Anak bisa menggambar dengan 6 bagian, menggambar orang lengkap?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="gambar_6_bagian_orang_lengkap" value="1" class="form-check-input fs-4" {{ (isset($p72->gambar_6_bagian_orang_lengkap) && $p72->gambar_6_bagian_orang_lengkap == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="gambar_6_bagian_orang_lengkap" value="0" class="form-check-input fs-4" {{ (isset($p72->gambar_6_bagian_orang_lengkap) && $p72->gambar_6_bagian_orang_lengkap == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">4</td>
+                                    <td class="fw-medium">Anak bisa menangkap bola kecil dengan kedua tangan?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="tangkap_bola_kecil" value="1" class="form-check-input fs-4" {{ (isset($p72->tangkap_bola_kecil) && $p72->tangkap_bola_kecil == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="tangkap_bola_kecil" value="0" class="form-check-input fs-4" {{ (isset($p72->tangkap_bola_kecil) && $p72->tangkap_bola_kecil == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">5</td>
+                                    <td class="fw-medium">Anak bisa menggambar segi empat?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="gambar_segi_empat" value="1" class="form-check-input fs-4" {{ (isset($p72->gambar_segi_empat) && $p72->gambar_segi_empat == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="gambar_segi_empat" value="0" class="form-check-input fs-4" {{ (isset($p72->gambar_segi_empat) && $p72->gambar_segi_empat == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">6</td>
+                                    <td class="fw-medium">Anak bisa mengerti arti lawan kata?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="mengerti_lawan_kata" value="1" class="form-check-input fs-4" {{ (isset($p72->mengerti_lawan_kata) && $p72->mengerti_lawan_kata == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="mengerti_lawan_kata" value="0" class="form-check-input fs-4" {{ (isset($p72->mengerti_lawan_kata) && $p72->mengerti_lawan_kata == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">7</td>
+                                    <td class="fw-medium">Anak bisa mengerti pembicaraan yang menggunakan 7 kata atau lebih?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="mengerti_pembicaraan_7_kata" value="1" class="form-check-input fs-4" {{ (isset($p72->mengerti_pembicaraan_7_kata) && $p72->mengerti_pembicaraan_7_kata == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="mengerti_pembicaraan_7_kata" value="0" class="form-check-input fs-4" {{ (isset($p72->mengerti_pembicaraan_7_kata) && $p72->mengerti_pembicaraan_7_kata == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">8</td>
+                                    <td class="fw-medium">Anak bisa menjawab pertanyaan tentang benda terbuat dari apa dan kegunaannya?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="jawab_bahan_guna_benda" value="1" class="form-check-input fs-4" {{ (isset($p72->jawab_bahan_guna_benda) && $p72->jawab_bahan_guna_benda == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="jawab_bahan_guna_benda" value="0" class="form-check-input fs-4" {{ (isset($p72->jawab_bahan_guna_benda) && $p72->jawab_bahan_guna_benda == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">9</td>
+                                    <td class="fw-medium">Anak bisa mengenal angka, bisa menghitung angka 5-10?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="kenal_angka_hitung_5_10" value="1" class="form-check-input fs-4" {{ (isset($p72->kenal_angka_hitung_5_10) && $p72->kenal_angka_hitung_5_10 == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="kenal_angka_hitung_5_10" value="0" class="form-check-input fs-4" {{ (isset($p72->kenal_angka_hitung_5_10) && $p72->kenal_angka_hitung_5_10 == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">10</td>
+                                    <td class="fw-medium">Anak bisa mengenal warna-warni?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="kenal_warna_warni" value="1" class="form-check-input fs-4" {{ (isset($p72->kenal_warna_warni) && $p72->kenal_warna_warni == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="kenal_warna_warni" value="0" class="form-check-input fs-4" {{ (isset($p72->kenal_warna_warni) && $p72->kenal_warna_warni == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">11</td>
+                                    <td class="fw-medium">Anak bisa mengungkapkan simpati?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="ungkapkan_simpati" value="1" class="form-check-input fs-4" {{ (isset($p72->ungkapkan_simpati) && $p72->ungkapkan_simpati == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="ungkapkan_simpati" value="0" class="form-check-input fs-4" {{ (isset($p72->ungkapkan_simpati) && $p72->ungkapkan_simpati == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">12</td>
+                                    <td class="fw-medium">Anak bisa mengikuti aturan permainan?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="ikut_aturan_permainan" value="1" class="form-check-input fs-4" {{ (isset($p72->ikut_aturan_permainan) && $p72->ikut_aturan_permainan == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="ikut_aturan_permainan" value="0" class="form-check-input fs-4" {{ (isset($p72->ikut_aturan_permainan) && $p72->ikut_aturan_permainan == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center fw-bold bg-light">13</td>
+                                    <td class="fw-medium">Anak bisa berpakaian sendiri tanpa dibantu?</td>
+                                    <td class="text-center">
+                                        <input type="radio" name="pakaian_sendiri_tanpa_bantu" value="1" class="form-check-input fs-4" {{ (isset($p72->pakaian_sendiri_tanpa_bantu) && $p72->pakaian_sendiri_tanpa_bantu == 1) ? 'checked' : '' }}>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="radio" name="pakaian_sendiri_tanpa_bantu" value="0" class="form-check-input fs-4" {{ (isset($p72->pakaian_sendiri_tanpa_bantu) && $p72->pakaian_sendiri_tanpa_bantu == 0) ? 'checked' : '' }}>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-gradient-primary rounded-pill px-5 py-2 shadow">
+                            <i class="bi bi-save2-fill me-2"></i> Simpan Tumbuh Kembang 5 - 6 Tahun
                         </button>
                     </div>
                 </form>
