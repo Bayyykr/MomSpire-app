@@ -133,11 +133,11 @@ class DataKiaController extends Controller
         $user = auth()->user();
         abort_unless($user, 403);
 
-        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi'])
+        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan'])
             ->findOrFail($id);
 
-        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, persiapanMelahirkan, pemantauanIbuNifas, keluargaBerencana, bayiBaruLahir, pemantauanBayis, warnaTinja, absenKelasBalitas, pemantauanMingguanBayis, dan perkembanganBayi selalu segar
-        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi']);
+        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, persiapanMelahirkan, pemantauanIbuNifas, keluargaBerencana, bayiBaruLahir, pemantauanBayis, warnaTinja, absenKelasBalitas, pemantauanMingguanBayis, perkembanganBayi, pemantauanBulananBayis, dan perkembanganBayi6Bulan selalu segar
+        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan']);
 
         if ($user->role === 'pengguna') {
             abort_unless($dataKia->user_id === $user->id, 403);
@@ -649,6 +649,77 @@ class DataKiaController extends Controller
         );
 
         return back()->with('success', 'Checklist perkembangan bayi berhasil disimpan.')
+            ->with('active_tab', 'perkembangan');
+    }
+
+    public function pemantauanBulananBayiIndex()
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::with(['pemantauanBulananBayis', 'perkembanganBayi6Bulan'])->where('user_id', $userId)->first();
+
+        if (!$dataKia) {
+            return redirect()->route('pengguna.buku_kia')->with('info', 'Silakan lengkapi screening Buku KIA terlebih dahulu.');
+        }
+
+        $bulanan = $dataKia->pemantauanBulananBayis->keyBy('bulan_ke');
+        $perkembangan = $dataKia->perkembanganBayi6Bulan;
+
+        return view('pengguna.kia-bulanan-bayi', compact('dataKia', 'bulanan', 'perkembangan'));
+    }
+
+    public function pemantauanBulananBayiStore(Request $request)
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
+
+        $data = [
+            'sesak_napas'     => $request->has('sesak_napas'),
+            'batuk'           => $request->has('batuk'),
+            'suhu_abnormal'   => $request->has('suhu_abnormal'),
+            'bab_sering'      => $request->has('bab_sering'),
+            'kencing_sedikit' => $request->has('kencing_sedikit'),
+            'kulit_biru'      => $request->has('kulit_biru'),
+            'aktivitas_lemah' => $request->has('aktivitas_lemah'),
+            'hisapan_lemah'   => $request->has('hisapan_lemah'),
+            'tidak_makan'     => $request->has('tidak_makan'),
+        ];
+
+        if ($request->has('paraf_kader_nakes')) {
+            $data['paraf_kader_nakes'] = $request->paraf_kader_nakes;
+        }
+
+        $dataKia->pemantauanBulananBayis()->updateOrCreate(
+            ['data_kia_id' => $dataKia->id, 'bulan_ke' => $request->bulan_ke],
+            $data
+        );
+
+        return back()->with('success', 'Catatan pemantauan bulanan bayi bulan ke-' . $request->bulan_ke . ' berhasil disimpan.')
+            ->with('active_tab', 'bulanan')
+            ->with('active_month', $request->bulan_ke);
+    }
+
+    public function perkembanganBayi6BulanStore(Request $request)
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
+
+        $dataKia->perkembanganBayi6Bulan()->updateOrCreate(
+            ['data_kia_id' => $dataKia->id],
+            [
+                'berbalik'        => $request->has('berbalik') ? ($request->berbalik === '1') : null,
+                'kepala_tegak_90' => $request->has('kepala_tegak_90') ? ($request->kepala_tegak_90 === '1') : null,
+                'kepala_stabil'   => $request->has('kepala_stabil') ? ($request->kepala_stabil === '1') : null,
+                'genggam_mainan'  => $request->has('genggam_mainan') ? ($request->genggam_mainan === '1') : null,
+                'raih_benda'      => $request->has('raih_benda') ? ($request->raih_benda === '1') : null,
+                'amati_tangan'    => $request->has('amati_tangan') ? ($request->amati_tangan === '1') : null,
+                'luas_pandang'    => $request->has('luas_pandang') ? ($request->luas_pandang === '1') : null,
+                'arah_mata'       => $request->has('arah_mata') ? ($request->arah_mata === '1') : null,
+                'suara_gembira'   => $request->has('suara_gembira') ? ($request->suara_gembira === '1') : null,
+                'senyum_mainan'   => $request->has('senyum_mainan') ? ($request->senyum_mainan === '1') : null,
+            ]
+        );
+
+        return back()->with('success', 'Checklist perkembangan bayi umur 3-6 bulan berhasil disimpan.')
             ->with('active_tab', 'perkembangan');
     }
 }

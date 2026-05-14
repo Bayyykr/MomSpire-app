@@ -39,7 +39,7 @@ Route::get('/who-am-i', function () {
 
 // DEBUG: Test PDF export tanpa auth - HAPUS setelah testing
 Route::get('/debug-pdf/{id}', function ($id) {
-    $dataKia = \App\Models\DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi'])->findOrFail($id);
+    $dataKia = \App\Models\DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan'])->findOrFail($id);
 
     $pdfService = new \App\Services\KiaPdfService();
     $pdfContent = $pdfService->generate($dataKia);
@@ -584,6 +584,13 @@ Route::post('/pengguna/mingguan-bayi/save', [\App\Http\Controllers\DataKiaContro
     ->middleware('auth')->name('pengguna.mingguan_bayi.save');
 Route::post('/pengguna/perkembangan-bayi/save', [\App\Http\Controllers\DataKiaController::class, 'perkembanganBayiStore'])
     ->middleware('auth')->name('pengguna.perkembangan_bayi.save');
+
+Route::get('/pengguna/bulanan-bayi', [\App\Http\Controllers\DataKiaController::class, 'pemantauanBulananBayiIndex'])
+    ->middleware('auth')->name('pengguna.bulanan_bayi');
+Route::post('/pengguna/bulanan-bayi/save', [\App\Http\Controllers\DataKiaController::class, 'pemantauanBulananBayiStore'])
+    ->middleware('auth')->name('pengguna.bulanan_bayi.save');
+Route::post('/pengguna/perkembangan-bayi-6-bulan/save', [\App\Http\Controllers\DataKiaController::class, 'perkembanganBayi6BulanStore'])
+    ->middleware('auth')->name('pengguna.perkembangan_bayi_6_bulan.save');
 
 Route::post('/pengguna/kia/wizard/save', [\App\Http\Controllers\DataKiaController::class, 'saveWizard'])
     ->middleware('auth')->name('pengguna.kia.wizard.save');

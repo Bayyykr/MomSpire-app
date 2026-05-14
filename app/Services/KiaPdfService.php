@@ -1071,6 +1071,85 @@ class KiaPdfService
                     }
                 }
             }
+
+            // 18. PEMANTAUAN BULANAN & PERKEMBANGAN BAYI 3-6 BULAN (Halaman 29)
+            if ($pageNo === 29) {
+                // A. Tabel Pemantauan Bulanan (Bulan 3 - 5) -> Rotated 90 degrees
+                $bulanan = $dataKia->pemantauanBulananBayis;
+                if ($bulanan && count($bulanan) > 0) {
+                    $yMapBulanan = [
+                        'sesak_napas'     => 227,
+                        'batuk'           => 207,
+                        'suhu_abnormal'   => 187,
+                        'bab_sering'      => 167,
+                        'kencing_sedikit' => 147,
+                        'kulit_biru'      => 127,
+                        'aktivitas_lemah' => 107,
+                        'hisapan_lemah'   => 87,
+                        'tidak_makan'     => 67,
+                        'paraf'           => 56.5,
+                    ];
+
+                    $xMapBulanan = [
+                        3 => 120, 4 => 142, 5 => 164,
+                    ];
+
+                    $pdf->SetTextColor(0, 0, 0);
+
+                    foreach ($bulanan as $r) {
+                        $month = $r->bulan_ke;
+                        $x = $xMapBulanan[$month] ?? null;
+
+                        if (!$x) {
+                            continue;
+                        }
+
+                        $pdf->SetFont('ZapfDingbats', '', 10);
+                        foreach (['sesak_napas', 'batuk', 'suhu_abnormal', 'bab_sering', 'kencing_sedikit', 'kulit_biru', 'aktivitas_lemah', 'hisapan_lemah', 'tidak_makan'] as $field) {
+                            if ($r->{$field}) {
+                                $pdf->RotatedText($x, $yMapBulanan[$field], chr(51), 90);
+                            }
+                        }
+
+                        if (!empty($r->paraf_kader_nakes)) {
+                            $pdf->SetFont('Arial', '', 4);
+                            $pdf->RotatedText($x, $yMapBulanan['paraf'], $r->paraf_kader_nakes, 90);
+                        }
+                    }
+                }
+
+                // B. Tabel Checklist Perkembangan Bayi 3-6 Bulan (Ya / Tidak) -> Normal Upright Text
+                $perk6 = $dataKia->perkembanganBayi6Bulan;
+                if ($perk6) {
+                    $pdf->SetTextColor(0, 0, 0);
+                    $pdf->SetFont('ZapfDingbats', '', 10);
+
+                    $xYa = 329;
+                    $xTidak = 341;
+
+                    $yPerk6 = [
+                        'berbalik'        => 161,
+                        'kepala_tegak_90' => 170,
+                        'kepala_stabil'   => 180,
+                        'genggam_mainan'  => 190,
+                        'raih_benda'      => 199,
+                        'amati_tangan'    => 209,
+                        'luas_pandang'    => 219,
+                        'arah_mata'       => 228,
+                        'suara_gembira'   => 238,
+                        'senyum_mainan'   => 248,
+                    ];
+
+                    foreach ($yPerk6 as $field => $y) {
+                        $val = $perk6->{$field};
+                        if ($val === true) {
+                            $pdf->Text($xYa, $y, chr(51));
+                        } elseif ($val === false) {
+                            $pdf->Text($xTidak, $y, chr(51));
+                        }
+                    }
+                }
+            }
         }
 
         return $pdf->Output('S');

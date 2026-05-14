@@ -32,4 +32,6 @@ class DataKia extends Model
     public function absenKelasBalitas() { return $this->hasMany(KiaAbsenKelasBalita::class, 'data_kia_id'); }
     public function pemantauanMingguanBayis() { return $this->hasMany(KiaPemantauanMingguanBayi::class, 'data_kia_id'); }
     public function perkembanganBayi() { return $this->hasOne(KiaPerkembanganBayi::class, 'data_kia_id'); }
+    public function pemantauanBulananBayis() { return $this->hasMany(KiaPemantauanBulananBayi::class, 'data_kia_id'); }
+    public function perkembanganBayi6Bulan() { return $this->hasOne(KiaPerkembanganBayi6Bulan::class, 'data_kia_id'); }
 }

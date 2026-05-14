@@ -127,6 +127,10 @@
 					<i class="bi bi-heart-pulse-fill"></i>
 					<span>Bayi 29 Hari - 3 Bulan</span>
 				</a>
+				<a href="{{ route('pengguna.bulanan_bayi') }}" class="nav-link {{ request()->routeIs('pengguna.bulanan_bayi') ? 'active' : '' }}">
+					<i class="bi bi-calendar-heart-fill"></i>
+					<span>Bayi Umur 3 - 6 Bulan</span>
+				</a>
 			</div>
 			<div class="nav-section">
 				<span class="nav-label">SISTEM</span>
