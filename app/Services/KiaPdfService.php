@@ -1498,6 +1498,43 @@ class KiaPdfService
                     }
                 }
             }
+
+            // 26. PERAWATAN ANAK UMUR 3 - 4 TAHUN (Halaman 42 Sisi Kanan)
+            if ($pageNo === 42) {
+                $perk48 = $dataKia->perkembanganAnak48Bulan;
+                if ($perk48) {
+                    $pdf->SetTextColor(0, 0, 0);
+                    $pdf->SetFont('ZapfDingbats', '', 10);
+
+                    $xYa48 = 329;
+                    $xTidak48 = 341;
+
+                    $yPerk48 = [
+                        'berdiri_1_kaki_2_detik'    => 166,
+                        'lompat_kedua_kaki'         => 173,
+                        'kayuh_sepeda_roda_3'       => 180,
+                        'gambar_garis_lurus'        => 187,
+                        'tumpuk_8_kubus'            => 194,
+                        'kenal_2_4_warna'           => 201,
+                        'sebut_nama_umur_tempat'    => 208,
+                        'mengerti_arti_kata_posisi' => 215,
+                        'dengar_cerita'             => 222,
+                        'cuci_tangan_sendiri'       => 228,
+                        'bermain_dengan_teman'      => 235,
+                        'pakai_sepatu_sendiri'      => 242,
+                        'pakai_celana_baju_sendiri' => 249,
+                    ];
+
+                    foreach ($yPerk48 as $field => $y) {
+                        $val = $perk48->{$field};
+                        if ($val === true) {
+                            $pdf->Text($xYa48, $y, chr(51));
+                        } elseif ($val === false) {
+                            $pdf->Text($xTidak48, $y, chr(51));
+                        }
+                    }
+                }
+            }
         }
 
         return $pdf->Output('S');
