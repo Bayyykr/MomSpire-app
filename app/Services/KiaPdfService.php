@@ -1371,6 +1371,100 @@ class KiaPdfService
                     }
                 }
             }
+
+            // 23. PEMANTAUAN BULANAN ANAK 2-6 TAHUN (Halaman 39: Bulan 24-47)
+            if ($pageNo === 39) {
+                $bulanan72 = $dataKia->pemantauanBulananAnak72s;
+                if ($bulanan72 && $bulanan72->count() > 0) {
+                    $pdf->SetTextColor(0, 0, 0);
+
+                    // Peta X untuk bulan 24 s.d. 47
+                    $xMapBulanan72 = [
+                        24 => 116, 25 => 126, 26 => 136.5, 27 => 146.5, 28 => 157, 29 => 167,
+                        30 => 209, 31 => 217, 32 => 225, 33 => 233, 34 => 241, 35 => 249,
+                        36 => 257, 37 => 265, 38 => 273, 39 => 281, 40 => 289, 41 => 297,
+                        42 => 305, 43 => 313, 44 => 321, 45 => 329, 46 => 337, 47 => 345,
+                    ];
+
+                    $yMapBulanan72 = [
+                        'sesak_napas'      => 227,
+                        'batuk'            => 207,
+                        'suhu_abnormal'    => 187,
+                        'bab_sering'       => 167,
+                        'kencing_sedikit'  => 147,
+                        'kulit_pucat_biru' => 127,
+                        'aktivitas_lemah'  => 107,
+                        'telinga_cairan'   => 87,
+                        'tidak_makan'      => 67,
+                        'paraf'            => 56.5,
+                    ];
+
+                    foreach ($bulanan72 as $r) {
+                        $m = $r->bulan_ke;
+                        if (!isset($xMapBulanan72[$m])) continue;
+                        $x = $xMapBulanan72[$m];
+
+                        $pdf->SetFont('ZapfDingbats', '', 10);
+                        foreach (['sesak_napas', 'batuk', 'suhu_abnormal', 'bab_sering', 'kencing_sedikit', 'kulit_pucat_biru', 'aktivitas_lemah', 'telinga_cairan', 'tidak_makan'] as $field) {
+                            if ($r->{$field}) {
+                                $pdf->RotatedText($x, $yMapBulanan72[$field], chr(51), 90);
+                            }
+                        }
+
+                        if (!empty($r->paraf_kader_nakes)) {
+                            $pdf->SetFont('Arial', '', 4);
+                            $pdf->RotatedText($x, $yMapBulanan72['paraf'], $r->paraf_kader_nakes, 90);
+                        }
+                    }
+                }
+            }
+
+            // 24. PEMANTAUAN BULANAN ANAK 2-6 TAHUN (Halaman 40: Bulan 48-71)
+            if ($pageNo === 40) {
+                $bulanan72 = $dataKia->pemantauanBulananAnak72s;
+                if ($bulanan72 && $bulanan72->count() > 0) {
+                    $pdf->SetTextColor(0, 0, 0);
+
+                    // Peta X untuk bulan 48 s.d. 71
+                    $xMapBulanan72 = [
+                        48 => 116,  49 => 126,  50 => 136.5,  51 => 146.5,  52 => 157,  53 => 167,
+                        54 => 209, 55 => 217, 56 => 225, 57 => 233, 58 => 241, 59 => 249,
+                        60 => 257, 61 => 265, 62 => 273, 63 => 281, 64 => 289, 65 => 297,
+                        66 => 305, 67 => 313, 68 => 321, 69 => 329, 70 => 337, 71 => 345,
+                    ];
+
+                    $yMapBulanan72 = [
+                        'sesak_napas'      => 227,
+                        'batuk'            => 207,
+                        'suhu_abnormal'    => 187,
+                        'bab_sering'       => 167,
+                        'kencing_sedikit'  => 147,
+                        'kulit_pucat_biru' => 127,
+                        'aktivitas_lemah'  => 107,
+                        'telinga_cairan'   => 87,
+                        'tidak_makan'      => 67,
+                        'paraf'            => 56.5,
+                    ];
+
+                    foreach ($bulanan72 as $r) {
+                        $m = $r->bulan_ke;
+                        if (!isset($xMapBulanan72[$m])) continue;
+                        $x = $xMapBulanan72[$m];
+
+                        $pdf->SetFont('ZapfDingbats', '', 10);
+                        foreach (['sesak_napas', 'batuk', 'suhu_abnormal', 'bab_sering', 'kencing_sedikit', 'kulit_pucat_biru', 'aktivitas_lemah', 'telinga_cairan', 'tidak_makan'] as $field) {
+                            if ($r->{$field}) {
+                                $pdf->RotatedText($x, $yMapBulanan72[$field], chr(51), 90);
+                            }
+                        }
+
+                        if (!empty($r->paraf_kader_nakes)) {
+                            $pdf->SetFont('Arial', '', 4);
+                            $pdf->RotatedText($x, $yMapBulanan72['paraf'], $r->paraf_kader_nakes, 90);
+                        }
+                    }
+                }
+            }
         }
 
         return $pdf->Output('S');

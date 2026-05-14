@@ -139,6 +139,10 @@
 					<i class="bi bi-calendar2-star-fill"></i>
 					<span>Anak Umur 1 - 2 Tahun</span>
 				</a>
+				<a href="{{ route('pengguna.bulanan_anak_72') }}" class="nav-link {{ request()->routeIs('pengguna.bulanan_anak_72') ? 'active' : '' }}">
+					<i class="bi bi-calendar3-range-fill"></i>
+					<span>Anak Umur 2 - 6 Tahun</span>
+				</a>
 			</div>
 			<div class="nav-section">
 				<span class="nav-label">SISTEM</span>
