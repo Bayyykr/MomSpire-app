@@ -99,13 +99,13 @@
 					<i class="bi bi-journal-check"></i>
 					<span>Persiapan Melahirkan</span>
 				</a>
-				<a href="{{ route('pengguna.proses') }}" class="nav-link {{ request()->routeIs('pengguna.proses') ? 'active' : '' }}">
-					<i class="bi bi-heart-pulse"></i>
-					<span>Proses Melahirkan</span>
-				</a>
 				<a href="{{ route('pengguna.nifas') }}" class="nav-link {{ request()->routeIs('pengguna.nifas') ? 'active' : '' }}">
 					<i class="bi bi-calendar2-heart"></i>
 					<span>Pemantauan Ibu Nifas</span>
+				</a>
+				<a href="{{ route('pengguna.kb') }}" class="nav-link {{ request()->routeIs('pengguna.kb') ? 'active' : '' }}">
+					<i class="bi bi-people"></i>
+					<span>Keluarga Berencana</span>
 				</a>
 			</div>
 			<div class="nav-section">

@@ -334,22 +334,26 @@ class KiaPdfService
                     if ($tracking) {
                         $x = $xMap[$bulan] ?? null;
                         if ($x) {
+                            // 1. Plot Checkmarks (Hari 1-31)
+                            $pdf->SetFont('ZapfDingbats', '', 9);
                             foreach (range(1, 31) as $hari) {
                                 $y = $yMap[$hari] ?? null;
                                 if ($y) {
-                                    $colName = 'hari_' . $hari;
+                                    $colName = 'h' . $hari;
                                     if ($tracking->$colName) {
-                                        $pdf->SetFont('ZapfDingbats', '', 8);
-                                        $pdf->RotatedText($x, $y, chr(51), 90);
+                                        // Cetak tepat di tengah kotak dengan mengimbangi efek rotasi (-4.5)
+                                        $pdf->RotatedText($x, $y - 4.5, chr(51), 90);
                                     }
                                 }
                             }
 
-                            // Gambar Nama & TTD Paraf petugas/kader (Rotated 90 Deg)
-                            if (!empty($tracking->petugas_nama)) {
-                                $pdf->SetFont('Arial', '', 6);
-                                $pdf->RotatedText($x + 2, 42, $tracking->petugas_nama, 90);
-                            }
+                            // 2. Usia Kehamilan (Sesuai koordinat pas Anda - JANGAN DIUBAH)
+                            $pdf->SetFont('Arial', '', 9);
+                            $pdf->RotatedText($x, 218, $tracking->usia_kehamilan ?? '', 90);
+
+                            // 3. Bulan / Tahun (Sesuai koordinat pas Anda - JANGAN DIUBAH)
+                            $pdf->SetFont('Arial', '', 9);
+                            $pdf->RotatedText($x, 236.5, $tracking->bulan_tahun ?? '', 90);
                         }
                     }
                 }
@@ -360,13 +364,13 @@ class KiaPdfService
                 $pemantauans = $dataKia->pemantauanMingguans->keyBy('minggu_ke');
 
                 $xMap = [
-                    'pemeriksaan_kehamilan' => 54,  // Kolom 1
+                    'pemeriksaan_kehamilan' => 55,  // Kolom 1
                     'kelas_ibu_hamil'       => 82,  // Kolom 2
                     'demam_lebih_2_hari'    => 108,  // Kolom 3
                     'pusing_sakit_kepala'   => 133,  // Kolom 4
                     'sulit_tidur_cemas'     => 158, // Kolom 5
                     'risiko_tb'             => 215, // Kolom 6 (Halaman Kanan)
-                    'gerakan_bayi'          => 239, // Kolom 7
+                    'gerakan_bayi'          => 240, // Kolom 7
                     'nyeri_perut_hebat'     => 263, // Kolom 8
                     'keluar_cairan_lahir'   => 286, // Kolom 9
                     'sakit_saat_kencing'    => 310, // Kolom 10
@@ -374,27 +378,27 @@ class KiaPdfService
                 ];
 
                 $yMap = [
-                    4  => 121,
-                    5  => 127.5,
-                    6  => 133.5,
-                    7  => 140,
-                    8  => 146.5,
-                    9  => 153,
-                    10 => 159.5,
-                    11 => 166,
-                    12 => 172.5,
-                    13 => 179,
-                    14 => 185.5,
+                    4  => 123,
+                    5  => 129,
+                    6  => 136,
+                    7  => 142,
+                    8  => 148,
+                    9  => 154,
+                    10 => 160,
+                    11 => 167,
+                    12 => 173,
+                    13 => 180,
+                    14 => 186,
                     15 => 192,
-                    16 => 198.5,
+                    16 => 199,
                     17 => 205,
-                    18 => 211.5,
-                    19 => 218,
-                    20 => 224.5,
-                    21 => 231,
-                    22 => 237.5,
-                    23 => 244,
-                    24 => 250,
+                    18 => 211,
+                    19 => 217,
+                    20 => 224,
+                    21 => 230,
+                    22 => 237,
+                    23 => 243,
+                    24 => 249,
                 ];
 
                 $pdf->SetTextColor(0, 0, 0);
@@ -505,11 +509,11 @@ class KiaPdfService
                     if ($item) {
                         $y = $yMap[$k] ?? null;
                         if ($y) {
-                            if (!empty($item->tanggal_pertemuan)) {
-                                $pdf->Text($xMap['tanggal'], $y, date('d-m-Y', strtotime($item->tanggal_pertemuan)));
+                            if (!empty($item->tanggal)) {
+                                $pdf->Text($xMap['tanggal'], $y, $item->tanggal);
                             }
-                            if (!empty($item->kader_nama)) {
-                                $pdf->Text($xMap['kader_info'], $y, $item->kader_nama);
+                            if (!empty($item->kader_info)) {
+                                $pdf->Text($xMap['kader_info'], $y, $item->kader_info);
                             }
                         }
                     }
@@ -587,29 +591,9 @@ class KiaPdfService
                 }
             }
 
-            // 8. PROSES MELAHIRKAN (Halaman 14)
+            // 8. PROSES MELAHIRKAN (Halaman 14) - Fitur Dihapus
             if ($pageNo === 14) {
-                $p = $dataKia->prosesMelahirkan;
-                if ($p) {
-                    $coords = [
-                        'mulas_teratur'         => ['x' => 32.0, 'y' => 177.7],
-                        'durasi_persalinan'     => ['x' => 32.0, 'y' => 195.7],
-                        'hak_pendamping'        => ['x' => 32.0, 'y' => 223.5],
-                        'hak_posisi'            => ['x' => 32.0, 'y' => 237.5],
-                        'ingin_bab'             => ['x' => 102.0, 'y' => 177.7],
-                        'kurangi_sakit'         => ['x' => 102.0, 'y' => 191.2],
-                        'inisiasi_menyusu_dini' => ['x' => 102.0, 'y' => 209.5],
-                    ];
-
-                    $pdf->SetTextColor(0, 0, 0);
-                    $pdf->SetFont('ZapfDingbats', '', 10);
-
-                    foreach ($coords as $field => $coord) {
-                        if ($p->$field) {
-                            $pdf->Text($coord['x'], $coord['y'], chr(51));
-                        }
-                    }
-                }
+                // Tidak ada isian yang perlu dicetak
             }
 
             // 9. PEMANTAUAN IBU NIFAS SECTION A (Halaman 16)
@@ -760,6 +744,20 @@ class KiaPdfService
                             $pdf->SetFont('Arial', '', 4);
                             $pdf->RotatedText($x, $yMap['paraf'], $r->paraf_kader_nakes, 90);
                         }
+                    }
+                }
+            }
+
+            // 11. KELUARGA BERENCANA (Halaman 18)
+            if ($pageNo === 18) {
+                $p = $dataKia->keluargaBerencana;
+                if ($p) {
+                    $pdf->SetTextColor(0, 0, 0);
+
+                    // Paraf Ibu di kolom tabel (Arial)
+                    if (!empty($p->paraf_ibu)) {
+                        $pdf->SetFont('Arial', '', 9);
+                        $pdf->Text(333, 245.5, $p->paraf_ibu);
                     }
                 }
             }

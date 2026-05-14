@@ -133,11 +133,11 @@ class DataKiaController extends Controller
         $user = auth()->user();
         abort_unless($user, 403);
 
-        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'prosesMelahirkan', 'pemantauanIbuNifas'])
+        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana'])
             ->findOrFail($id);
 
-        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, persiapanMelahirkan, prosesMelahirkan, dan pemantauanIbuNifas selalu segar
-        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'prosesMelahirkan', 'pemantauanIbuNifas']);
+        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, persiapanMelahirkan, pemantauanIbuNifas, dan keluargaBerencana selalu segar
+        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana']);
 
         if ($user->role === 'pengguna') {
             abort_unless($dataKia->user_id === $user->id, 403);
@@ -355,47 +355,6 @@ class DataKiaController extends Controller
         return back()->with('success', 'Persiapan melahirkan berhasil disimpan.');
     }
 
-    public function prosesIndex()
-    {
-        $userId = auth()->id();
-        $dataKia = DataKia::with('prosesMelahirkan')->where('user_id', $userId)->first();
-
-        if (!$dataKia) {
-            return redirect()->route('pengguna.buku_kia')->with('info', 'Silakan lengkapi screening Buku KIA terlebih dahulu.');
-        }
-
-        $proses = $dataKia->prosesMelahirkan;
-
-        return view('pengguna.kia-proses', compact('dataKia', 'proses'));
-    }
-
-    public function prosesStore(Request $request)
-    {
-        $userId = auth()->id();
-        $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
-
-        $fields = [
-            'mulas_teratur',
-            'durasi_persalinan',
-            'hak_pendamping',
-            'hak_posisi',
-            'ingin_bab',
-            'kurangi_sakit',
-            'inisiasi_menyusu_dini',
-        ];
-
-        $data = [];
-        foreach ($fields as $field) {
-            $data[$field] = $request->has($field);
-        }
-
-        $dataKia->prosesMelahirkan()->updateOrCreate(
-            ['data_kia_id' => $dataKia->id],
-            $data
-        );
-
-        return back()->with('success', 'Proses melahirkan berhasil disimpan.');
-    }
 
     public function nifasIndex()
     {
@@ -455,6 +414,33 @@ class DataKiaController extends Controller
         );
 
         return back()->with('success', 'Catatan pemantauan ibu nifas hari ke-' . $request->hari_ke . ' berhasil disimpan.');
+    }
+
+    public function kbIndex()
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::with('keluargaBerencana')->where('user_id', $userId)->first();
+
+        if (!$dataKia) {
+            return redirect()->route('pengguna.buku_kia')->with('info', 'Silakan lengkapi screening Buku KIA terlebih dahulu.');
+        }
+
+        $kb = $dataKia->keluargaBerencana;
+
+        return view('pengguna.kia-kb', compact('dataKia', 'kb'));
+    }
+
+    public function kbStore(Request $request)
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
+
+        $dataKia->keluargaBerencana()->updateOrCreate(
+            ['data_kia_id' => $dataKia->id],
+            ['paraf_ibu' => $request->paraf_ibu]
+        );
+
+        return back()->with('success', 'Catatan rencana Keluarga Berencana (KB) berhasil disimpan.');
     }
 }
 
