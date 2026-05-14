@@ -761,6 +761,28 @@ class KiaPdfService
                     }
                 }
             }
+
+            // 12. BAYI BARU LAHIR (Halaman 22)
+            if ($pageNo === 22) {
+                $p = $dataKia->bayiBaruLahir;
+                if ($p) {
+                    $pdf->SetTextColor(0, 0, 0);
+                    $pdf->SetFont('ZapfDingbats', '', 10);
+
+                    if ($p->jam_0_6) {
+                        $pdf->Text(32, 233.5, chr(51));
+                    }
+                    if ($p->jam_6_48) {
+                        $pdf->Text(67, 233.5, chr(51));
+                    }
+                    if ($p->hari_3_7) {
+                        $pdf->Text(102, 233.5, chr(51));
+                    }
+                    if ($p->hari_8_28) {
+                        $pdf->Text(137, 233.5, chr(51));
+                    }
+                }
+            }
         }
 
         return $pdf->Output('S');

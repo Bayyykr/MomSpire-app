@@ -133,11 +133,11 @@ class DataKiaController extends Controller
         $user = auth()->user();
         abort_unless($user, 403);
 
-        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana'])
+        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir'])
             ->findOrFail($id);
 
-        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, persiapanMelahirkan, pemantauanIbuNifas, dan keluargaBerencana selalu segar
-        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana']);
+        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, persiapanMelahirkan, pemantauanIbuNifas, keluargaBerencana, dan bayiBaruLahir selalu segar
+        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir']);
 
         if ($user->role === 'pengguna') {
             abort_unless($dataKia->user_id === $user->id, 403);
@@ -441,6 +441,38 @@ class DataKiaController extends Controller
         );
 
         return back()->with('success', 'Catatan rencana Keluarga Berencana (KB) berhasil disimpan.');
+    }
+
+    public function bayiIndex()
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::with('bayiBaruLahir')->where('user_id', $userId)->first();
+
+        if (!$dataKia) {
+            return redirect()->route('pengguna.buku_kia')->with('info', 'Silakan lengkapi screening Buku KIA terlebih dahulu.');
+        }
+
+        $bayi = $dataKia->bayiBaruLahir;
+
+        return view('pengguna.kia-bayi', compact('dataKia', 'bayi'));
+    }
+
+    public function bayiStore(Request $request)
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
+
+        $dataKia->bayiBaruLahir()->updateOrCreate(
+            ['data_kia_id' => $dataKia->id],
+            [
+                'jam_0_6' => $request->has('jam_0_6'),
+                'jam_6_48' => $request->has('jam_6_48'),
+                'hari_3_7' => $request->has('hari_3_7'),
+                'hari_8_28' => $request->has('hari_8_28'),
+            ]
+        );
+
+        return back()->with('success', 'Ceklist pemeriksaan bayi baru lahir berhasil disimpan.');
     }
 }
 

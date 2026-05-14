@@ -107,6 +107,10 @@
 					<i class="bi bi-people"></i>
 					<span>Keluarga Berencana</span>
 				</a>
+				<a href="{{ route('pengguna.bayi') }}" class="nav-link {{ request()->routeIs('pengguna.bayi') ? 'active' : '' }}">
+					<i class="bi bi-person-hearts"></i>
+					<span>Bayi Baru Lahir</span>
+				</a>
 			</div>
 			<div class="nav-section">
 				<span class="nav-label">SISTEM</span>

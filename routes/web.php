@@ -39,7 +39,7 @@ Route::get('/who-am-i', function () {
 
 // DEBUG: Test PDF export tanpa auth - HAPUS setelah testing
 Route::get('/debug-pdf/{id}', function ($id) {
-    $dataKia = \App\Models\DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana'])->findOrFail($id);
+    $dataKia = \App\Models\DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir'])->findOrFail($id);
 
     $pdfService = new \App\Services\KiaPdfService();
     $pdfContent = $pdfService->generate($dataKia);
@@ -557,6 +557,11 @@ Route::get('/pengguna/keluarga-berencana', [\App\Http\Controllers\DataKiaControl
     ->middleware('auth')->name('pengguna.kb');
 Route::post('/pengguna/keluarga-berencana/save', [\App\Http\Controllers\DataKiaController::class, 'kbStore'])
     ->middleware('auth')->name('pengguna.kb.save');
+
+Route::get('/pengguna/bayi-baru-lahir', [\App\Http\Controllers\DataKiaController::class, 'bayiIndex'])
+    ->middleware('auth')->name('pengguna.bayi');
+Route::post('/pengguna/bayi-baru-lahir/save', [\App\Http\Controllers\DataKiaController::class, 'bayiStore'])
+    ->middleware('auth')->name('pengguna.bayi.save');
 
 Route::post('/pengguna/kia/wizard/save', [\App\Http\Controllers\DataKiaController::class, 'saveWizard'])
     ->middleware('auth')->name('pengguna.kia.wizard.save');

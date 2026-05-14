@@ -26,4 +26,5 @@ class DataKia extends Model
     public function persiapanMelahirkan() { return $this->hasOne(KiaPersiapanMelahirkan::class, 'data_kia_id'); }
     public function pemantauanIbuNifas() { return $this->hasMany(KiaPemantauanIbuNifas::class, 'data_kia_id'); }
     public function keluargaBerencana() { return $this->hasOne(KiaKeluargaBerencana::class, 'data_kia_id'); }
+    public function bayiBaruLahir() { return $this->hasOne(KiaBayiBaruLahir::class, 'data_kia_id'); }
 }
