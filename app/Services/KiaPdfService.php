@@ -1150,6 +1150,52 @@ class KiaPdfService
                     }
                 }
             }
+
+            // 19. PEMANTAUAN BULANAN BAYI 6 - 12 BULAN (Halaman 32)
+            if ($pageNo === 32) {
+                $bulanan12 = $dataKia->pemantauanBulananBayi12s;
+                if ($bulanan12 && count($bulanan12) > 0) {
+                    $yMapBulanan12 = [
+                        'sesak_napas'     => 227,
+                        'batuk'           => 207,
+                        'suhu_abnormal'   => 187,
+                        'bab_sering'      => 167,
+                        'kencing_sedikit' => 147,
+                        'kulit_biru'      => 127,
+                        'aktivitas_lemah' => 107,
+                        'hisapan_lemah'   => 87,
+                        'tidak_makan'     => 67,
+                        'paraf'           => 56.5,
+                    ];
+
+                    $xMapBulanan12 = [
+                        6 => 292, 7 => 302, 8 => 312, 9 => 322, 10 => 333, 11 => 343,
+                    ];
+
+                    $pdf->SetTextColor(0, 0, 0);
+
+                    foreach ($bulanan12 as $r) {
+                        $month = $r->bulan_ke;
+                        $x = $xMapBulanan12[$month] ?? null;
+
+                        if (!$x) {
+                            continue;
+                        }
+
+                        $pdf->SetFont('ZapfDingbats', '', 10);
+                        foreach (['sesak_napas', 'batuk', 'suhu_abnormal', 'bab_sering', 'kencing_sedikit', 'kulit_biru', 'aktivitas_lemah', 'hisapan_lemah', 'tidak_makan'] as $field) {
+                            if ($r->{$field}) {
+                                $pdf->RotatedText($x, $yMapBulanan12[$field], chr(51), 90);
+                            }
+                        }
+
+                        if (!empty($r->paraf_kader_nakes)) {
+                            $pdf->SetFont('Arial', '', 4);
+                            $pdf->RotatedText($x, $yMapBulanan12['paraf'], $r->paraf_kader_nakes, 90);
+                        }
+                    }
+                }
+            }
         }
 
         return $pdf->Output('S');
