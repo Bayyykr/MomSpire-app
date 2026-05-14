@@ -135,6 +135,10 @@
 					<i class="bi bi-calendar2-check-fill"></i>
 					<span>Bayi Umur 6 - 12 Bulan</span>
 				</a>
+				<a href="{{ route('pengguna.bulanan_anak_24') }}" class="nav-link {{ request()->routeIs('pengguna.bulanan_anak_24') ? 'active' : '' }}">
+					<i class="bi bi-calendar2-star-fill"></i>
+					<span>Anak Umur 1 - 2 Tahun</span>
+				</a>
 			</div>
 			<div class="nav-section">
 				<span class="nav-label">SISTEM</span>

@@ -1263,6 +1263,54 @@ class KiaPdfService
                     }
                 }
             }
+
+            // 21. PEMANTAUAN BULANAN ANAK 1 - 2 TAHUN (Halaman 35)
+            if ($pageNo === 35) {
+                $bulanan24 = $dataKia->pemantauanBulananAnak24s;
+                if ($bulanan24 && count($bulanan24) > 0) {
+                    $yMapBulanan24 = [
+                        'sesak_napas'      => 227,
+                        'batuk'            => 207,
+                        'suhu_abnormal'    => 187,
+                        'bab_sering'       => 167,
+                        'kencing_sedikit'  => 147,
+                        'kulit_pucat_biru' => 127,
+                        'aktivitas_lemah'  => 107,
+                        'telinga_cairan'   => 87,
+                        'tidak_makan'      => 67,
+                        'paraf'            => 56.5,
+                    ];
+
+                    $xMapBulanan24 = [
+                        12 => 121,   13 => 141, 14 => 162,   15 => 213,
+                        16 => 230,   17 => 246, 18 => 263,   19 => 279,
+                        20 => 295,   21 => 311, 22 => 327,   23 => 343,
+                    ];
+
+                    $pdf->SetTextColor(0, 0, 0);
+
+                    foreach ($bulanan24 as $r) {
+                        $month = $r->bulan_ke;
+                        $x = $xMapBulanan24[$month] ?? null;
+
+                        if (!$x) {
+                            continue;
+                        }
+
+                        $pdf->SetFont('ZapfDingbats', '', 10);
+                        foreach (['sesak_napas', 'batuk', 'suhu_abnormal', 'bab_sering', 'kencing_sedikit', 'kulit_pucat_biru', 'aktivitas_lemah', 'telinga_cairan', 'tidak_makan'] as $field) {
+                            if ($r->{$field}) {
+                                $pdf->RotatedText($x, $yMapBulanan24[$field], chr(51), 90);
+                            }
+                        }
+
+                        if (!empty($r->paraf_kader_nakes)) {
+                            $pdf->SetFont('Arial', '', 4);
+                            $pdf->RotatedText($x, $yMapBulanan24['paraf'], $r->paraf_kader_nakes, 90);
+                        }
+                    }
+                }
+            }
         }
 
         return $pdf->Output('S');

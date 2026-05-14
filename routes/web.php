@@ -39,7 +39,7 @@ Route::get('/who-am-i', function () {
 
 // DEBUG: Test PDF export tanpa auth - HAPUS setelah testing
 Route::get('/debug-pdf/{id}', function ($id) {
-    $dataKia = \App\Models\DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan'])->findOrFail($id);
+    $dataKia = \App\Models\DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s'])->findOrFail($id);
 
     $pdfService = new \App\Services\KiaPdfService();
     $pdfContent = $pdfService->generate($dataKia);
@@ -600,6 +600,11 @@ Route::post('/pengguna/perkembangan-bayi-9-bulan/save', [\App\Http\Controllers\D
     ->middleware('auth')->name('pengguna.perkembangan_bayi_9_bulan.save');
 Route::post('/pengguna/perkembangan-bayi-12-bulan/save', [\App\Http\Controllers\DataKiaController::class, 'perkembanganBayi12BulanStore'])
     ->middleware('auth')->name('pengguna.perkembangan_bayi_12_bulan.save');
+
+Route::get('/pengguna/bulanan-anak-24', [\App\Http\Controllers\DataKiaController::class, 'pemantauanBulananAnak24Index'])
+    ->middleware('auth')->name('pengguna.bulanan_anak_24');
+Route::post('/pengguna/bulanan-anak-24/save', [\App\Http\Controllers\DataKiaController::class, 'pemantauanBulananAnak24Store'])
+    ->middleware('auth')->name('pengguna.bulanan_anak_24.save');
 
 Route::post('/pengguna/kia/wizard/save', [\App\Http\Controllers\DataKiaController::class, 'saveWizard'])
     ->middleware('auth')->name('pengguna.kia.wizard.save');
