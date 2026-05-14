@@ -994,6 +994,83 @@ class KiaPdfService
                     }
                 }
             }
+
+            // 17. PEMANTAUAN MINGGUAN & PERKEMBANGAN BAYI (Halaman 28)
+            if ($pageNo === 28) {
+                // A. Tabel Pemantauan Mingguan (Minggu 5 - 9) -> Rotated 90 degrees
+                $mingguan = $dataKia->pemantauanMingguanBayis;
+                if ($mingguan && count($mingguan) > 0) {
+                    $yMapMingguan = [
+                        'sesak_napas'     => 227,
+                        'batuk'           => 207    ,
+                        'suhu_abnormal'   => 187,
+                        'bab_sering'      => 167,
+                        'kencing_sedikit' => 147,
+                        'kulit_biru'      => 127,
+                        'aktivitas_lemah' => 107,
+                        'hisapan_lemah'   => 87,
+                        'tidak_makan'     => 67,
+                        'paraf'           => 57,
+                    ];
+
+                    $xMapMingguan = [
+                        5 => 117, 6 => 130, 7 => 142, 8 => 153.5, 9 => 165.5,
+                    ];
+
+                    $pdf->SetTextColor(0, 0, 0);
+
+                    foreach ($mingguan as $r) {
+                        $week = $r->minggu_ke;
+                        $x = $xMapMingguan[$week] ?? null;
+
+                        if (!$x) {
+                            continue;
+                        }
+
+                        $pdf->SetFont('ZapfDingbats', '', 10);
+                        foreach (['sesak_napas', 'batuk', 'suhu_abnormal', 'bab_sering', 'kencing_sedikit', 'kulit_biru', 'aktivitas_lemah', 'hisapan_lemah', 'tidak_makan'] as $field) {
+                            if ($r->{$field}) {
+                                $pdf->RotatedText($x, $yMapMingguan[$field], chr(51), 90);
+                            }
+                        }
+
+                        if (!empty($r->paraf_kader_nakes)) {
+                            $pdf->SetFont('Arial', '', 5);
+                            $pdf->RotatedText($x, $yMapMingguan['paraf'], $r->paraf_kader_nakes, 90);
+                        }
+                    }
+                }
+
+                // B. Tabel Checklist Perkembangan Bayi (Ya / Tidak) -> Normal Upright Text
+                $perk = $dataKia->perkembanganBayi;
+                if ($perk) {
+                    $pdf->SetTextColor(0, 0, 0);
+                    $pdf->SetFont('ZapfDingbats', '', 10);
+
+                    $xYa = 329;
+                    $xTidak = 341;
+
+                    $yPerk = [
+                        'angkat_kepala_45' => 173,
+                        'gerak_kepala'     => 184,
+                        'tatap_wajah'      => 195,
+                        'ngoceh'           => 205,
+                        'tertawa_keras'    => 216,
+                        'terkejut_suara'   => 226,
+                        'tersenyum'        => 236,
+                        'mengenal_ibu'     => 247,
+                    ];
+
+                    foreach ($yPerk as $field => $y) {
+                        $val = $perk->{$field};
+                        if ($val === true) {
+                            $pdf->Text($xYa, $y, chr(51));
+                        } elseif ($val === false) {
+                            $pdf->Text($xTidak, $y, chr(51));
+                        }
+                    }
+                }
+            }
         }
 
         return $pdf->Output('S');

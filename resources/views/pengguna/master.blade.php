@@ -123,6 +123,10 @@
 					<i class="bi bi-people-fill"></i>
 					<span>Kelas Ibu Balita</span>
 				</a>
+				<a href="{{ route('pengguna.mingguan_bayi') }}" class="nav-link {{ request()->routeIs('pengguna.mingguan_bayi') ? 'active' : '' }}">
+					<i class="bi bi-heart-pulse-fill"></i>
+					<span>Bayi 29 Hari - 3 Bulan</span>
+				</a>
 			</div>
 			<div class="nav-section">
 				<span class="nav-label">SISTEM</span>
