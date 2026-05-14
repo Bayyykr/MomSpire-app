@@ -39,7 +39,7 @@ Route::get('/who-am-i', function () {
 
 // DEBUG: Test PDF export tanpa auth - HAPUS setelah testing
 Route::get('/debug-pdf/{id}', function ($id) {
-    $dataKia = \App\Models\DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis'])->findOrFail($id);
+    $dataKia = \App\Models\DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas'])->findOrFail($id);
 
     $pdfService = new \App\Services\KiaPdfService();
     $pdfContent = $pdfService->generate($dataKia);
@@ -567,6 +567,16 @@ Route::get('/pengguna/pemantauan-bayi', [\App\Http\Controllers\DataKiaController
     ->middleware('auth')->name('pengguna.pemantauan_bayi');
 Route::post('/pengguna/pemantauan-bayi/save', [\App\Http\Controllers\DataKiaController::class, 'pemantauanBayiStore'])
     ->middleware('auth')->name('pengguna.pemantauan_bayi.save');
+
+Route::get('/pengguna/warna-tinja', [\App\Http\Controllers\DataKiaController::class, 'warnaTinjaIndex'])
+    ->middleware('auth')->name('pengguna.warna_tinja');
+Route::post('/pengguna/warna-tinja/save', [\App\Http\Controllers\DataKiaController::class, 'warnaTinjaStore'])
+    ->middleware('auth')->name('pengguna.warna_tinja.save');
+
+Route::get('/pengguna/kelas-balita', [\App\Http\Controllers\DataKiaController::class, 'kelasBalitaIndex'])
+    ->middleware('auth')->name('pengguna.kelas_balita');
+Route::post('/pengguna/kelas-balita/save', [\App\Http\Controllers\DataKiaController::class, 'kelasBalitaStore'])
+    ->middleware('auth')->name('pengguna.kelas_balita.save');
 
 Route::post('/pengguna/kia/wizard/save', [\App\Http\Controllers\DataKiaController::class, 'saveWizard'])
     ->middleware('auth')->name('pengguna.kia.wizard.save');

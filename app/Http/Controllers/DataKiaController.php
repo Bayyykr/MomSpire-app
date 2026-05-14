@@ -133,11 +133,11 @@ class DataKiaController extends Controller
         $user = auth()->user();
         abort_unless($user, 403);
 
-        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis'])
+        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas'])
             ->findOrFail($id);
 
-        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, persiapanMelahirkan, pemantauanIbuNifas, keluargaBerencana, bayiBaruLahir, dan pemantauanBayis selalu segar
-        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis']);
+        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, persiapanMelahirkan, pemantauanIbuNifas, keluargaBerencana, bayiBaruLahir, pemantauanBayis, warnaTinja, dan absenKelasBalitas selalu segar
+        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas']);
 
         if ($user->role === 'pengguna') {
             abort_unless($dataKia->user_id === $user->id, 403);
@@ -519,6 +519,68 @@ class DataKiaController extends Controller
         );
 
         return back()->with('success', 'Catatan pemantauan harian bayi hari ke-' . $request->hari_ke . ' berhasil disimpan.');
+    }
+
+    public function warnaTinjaIndex()
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::with('warnaTinja')->where('user_id', $userId)->first();
+
+        if (!$dataKia) {
+            return redirect()->route('pengguna.buku_kia')->with('info', 'Silakan lengkapi screening Buku KIA terlebih dahulu.');
+        }
+
+        return view('pengguna.kia-warna-tinja', compact('dataKia'));
+    }
+
+    public function warnaTinjaStore(Request $request)
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
+
+        $dataKia->warnaTinja()->updateOrCreate(
+            ['data_kia_id' => $dataKia->id],
+            [
+                'tanggal_2_minggu'  => $request->tanggal_2_minggu,
+                'nomor_2_minggu'    => $request->nomor_2_minggu,
+                'tanggal_1_bulan'   => $request->tanggal_1_bulan,
+                'nomor_1_bulan'     => $request->nomor_1_bulan,
+                'tanggal_2_4_bulan' => $request->tanggal_2_4_bulan,
+                'nomor_2_4_bulan'   => $request->nomor_2_4_bulan,
+            ]
+        );
+
+        return back()->with('success', 'Pemantauan warna tinja bayi berhasil disimpan.');
+    }
+
+    public function kelasBalitaIndex()
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::with('absenKelasBalitas')->where('user_id', $userId)->first();
+
+        if (!$dataKia) {
+            return redirect()->route('pengguna.buku_kia')->with('info', 'Silakan lengkapi screening Buku KIA terlebih dahulu.');
+        }
+
+        $absensi = $dataKia->absenKelasBalitas->keyBy('kehadiran_ke');
+
+        return view('pengguna.kia-kelas-balita', compact('dataKia', 'absensi'));
+    }
+
+    public function kelasBalitaStore(Request $request)
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
+
+        $dataKia->absenKelasBalitas()->updateOrCreate(
+            ['data_kia_id' => $dataKia->id, 'kehadiran_ke' => $request->kehadiran_ke],
+            [
+                'tanggal'    => $request->tanggal,
+                'kader_info' => $request->kader_info,
+            ]
+        );
+
+        return back()->with('success', 'Absensi kehadiran kelas ibu balita sesi ke-' . $request->kehadiran_ke . ' berhasil disimpan.');
     }
 }
 

@@ -905,6 +905,95 @@ class KiaPdfService
                     }
                 }
             }
+
+            // 15. WARNA TINJA BAYI (Halaman 25)
+            if ($pageNo === 25) {
+                $t = $dataKia->warnaTinja;
+                if ($t) {
+                    $pdf->SetTextColor(0, 0, 0);
+                    $pdf->SetFont('Arial', 'B', 10);
+
+                    // 2 Minggu
+                    if (!empty($t->tanggal_2_minggu)) {
+                        $pdf->Text(239, 208, $t->tanggal_2_minggu);
+                    }
+                    if (!empty($t->nomor_2_minggu)) {
+                        $pdf->Text(247, 228, $t->nomor_2_minggu);
+                    }
+
+                    // 1 Bulan
+                    if (!empty($t->tanggal_1_bulan)) {
+                        $pdf->Text(270, 208, $t->tanggal_1_bulan);
+                    }
+                    if (!empty($t->nomor_1_bulan)) {
+                        $pdf->Text(278, 228, $t->nomor_1_bulan);
+                    }
+
+                    // 2 - 4 Bulan
+                    if (!empty($t->tanggal_2_4_bulan)) {
+                        $pdf->Text(300, 208, $t->tanggal_2_4_bulan);
+                    }
+                    if (!empty($t->nomor_2_4_bulan)) {
+                        $pdf->Text(308, 228, $t->nomor_2_4_bulan);
+                    }
+                }
+            }
+
+            // 16. KELAS IBU BALITA (Halaman 27)
+            if ($pageNo === 27) {
+                $absensi = $dataKia->absenKelasBalitas->keyBy('kehadiran_ke');
+
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->SetFont('Arial', '', 6);
+
+                $yMapRows = [
+                    1  => 117,   2  => 122, 3  => 126, 4  => 130.5, 5  => 135,
+                    6  => 139.5,   7  => 143.5, 8  => 148, 9  => 153, 10 => 158,
+                    11 => 162.5,   12 => 167.5, 13 => 172, 14 => 176.5, 15 => 181,
+                    16 => 185,   17 => 189.5, 18 => 194, 19 => 198.8, 20 => 203.3,
+                    21 => 207.8,   22 => 212.5, 23 => 217, 24 => 221.5, 25 => 226,
+                    26 => 231,   27 => 236, 28 => 240.5, 29 => 245, 30 => 250,
+                ];
+
+                // Tabel Kiri (Sesi 1 - 30)
+                $xTanggalKiri = 40;
+                $xKaderKiri = 75;
+
+                foreach (range(1, 30) as $k) {
+                    $item = $absensi->get($k);
+                    if ($item) {
+                        $y = $yMapRows[$k] ?? null;
+                        if ($y) {
+                            if (!empty($item->tanggal)) {
+                                $pdf->Text($xTanggalKiri, $y, $item->tanggal);
+                            }
+                            if (!empty($item->kader_info)) {
+                                $pdf->Text($xKaderKiri, $y, $item->kader_info);
+                            }
+                        }
+                    }
+                }
+
+                // Tabel Kanan (Sesi 31 - 60)
+                $xTanggalKanan = 114;
+                $xKaderKanan = 149;
+
+                foreach (range(31, 60) as $k) {
+                    $item = $absensi->get($k);
+                    if ($item) {
+                        $rowIdx = $k - 30;
+                        $y = $yMapRows[$rowIdx] ?? null;
+                        if ($y) {
+                            if (!empty($item->tanggal)) {
+                                $pdf->Text($xTanggalKanan, $y, $item->tanggal);
+                            }
+                            if (!empty($item->kader_info)) {
+                                $pdf->Text($xKaderKanan, $y, $item->kader_info);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         return $pdf->Output('S');

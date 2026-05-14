@@ -115,6 +115,14 @@
 					<i class="bi bi-calendar2-check"></i>
 					<span>Pemantauan Bayi 0-28 Hari</span>
 				</a>
+				<a href="{{ route('pengguna.warna_tinja') }}" class="nav-link {{ request()->routeIs('pengguna.warna_tinja') ? 'active' : '' }}">
+					<i class="bi bi-palette-fill"></i>
+					<span>Warna Tinja Bayi</span>
+				</a>
+				<a href="{{ route('pengguna.kelas_balita') }}" class="nav-link {{ request()->routeIs('pengguna.kelas_balita') ? 'active' : '' }}">
+					<i class="bi bi-people-fill"></i>
+					<span>Kelas Ibu Balita</span>
+				</a>
 			</div>
 			<div class="nav-section">
 				<span class="nav-label">SISTEM</span>
