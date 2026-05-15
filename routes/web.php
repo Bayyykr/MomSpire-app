@@ -403,6 +403,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/bidan/kia/{id}/save-evaluasi', [\App\Http\Controllers\DataKiaController::class, 'saveEvaluasi'])->name('bidan.kia.save_evaluasi');
     Route::get('/bidan/kia/{id}/edit-trimester1', [\App\Http\Controllers\DataKiaController::class, 'editTrimester1'])->name('bidan.kia.edit_trimester1');
     Route::post('/bidan/kia/{id}/save-trimester1', [\App\Http\Controllers\DataKiaController::class, 'saveTrimester1'])->name('bidan.kia.save_trimester1');
+    Route::get('/bidan/kia/{id}/edit-trimester2', [\App\Http\Controllers\DataKiaController::class, 'editTrimester2'])->name('bidan.kia.edit_trimester2');
+    Route::post('/bidan/kia/{id}/save-trimester2', [\App\Http\Controllers\DataKiaController::class, 'saveTrimester2'])->name('bidan.kia.save_trimester2');
 
     Route::get('/dokter/dashboard', function () use ($ensureRole) {
         $ensureRole('dokter');
@@ -425,6 +427,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/dokter/kia/{id}/save-evaluasi', [\App\Http\Controllers\DataKiaController::class, 'saveEvaluasi'])->name('dokter.kia.save_evaluasi');
     Route::get('/dokter/kia/{id}/edit-trimester1', [\App\Http\Controllers\DataKiaController::class, 'editTrimester1'])->name('dokter.kia.edit_trimester1');
     Route::post('/dokter/kia/{id}/save-trimester1', [\App\Http\Controllers\DataKiaController::class, 'saveTrimester1'])->name('dokter.kia.save_trimester1');
+    Route::get('/dokter/kia/{id}/edit-trimester2', [\App\Http\Controllers\DataKiaController::class, 'editTrimester2'])->name('dokter.kia.edit_trimester2');
+    Route::post('/dokter/kia/{id}/save-trimester2', [\App\Http\Controllers\DataKiaController::class, 'saveTrimester2'])->name('dokter.kia.save_trimester2');
 
     Route::get('/bidan/settings', function () use ($ensureRole) {
         $ensureRole('bidan');

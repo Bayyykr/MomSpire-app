@@ -138,7 +138,7 @@ class DataKiaController extends Controller
             ->findOrFail($id);
 
         // Pastikan relasi ...
-        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s', 'perkembanganBayi18Bulan', 'perkembanganBayi24Bulan', 'pemantauanBulananAnak72s', 'kesehatanLingkungan', 'pelayananKesehatanIbu', 'evaluasiKesehatanIbu', 'pemeriksaanUsgs']);
+        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s', 'perkembanganBayi18Bulan', 'perkembanganBayi24Bulan', 'pemantauanBulananAnak72s', 'kesehatanLingkungan', 'pelayananKesehatanIbu', 'evaluasiKesehatanIbu', 'pemeriksaanUsgs', 'pemeriksaanTrimester2', 'catatanPelayananTrimester2']);
 
         if ($user->role === 'pengguna') {
             abort_unless($dataKia->user_id === $user->id, 403);
@@ -459,6 +459,77 @@ class DataKiaController extends Controller
 
         return redirect()->route($user->role . '.kia')->with('success', 'Data Trimester 1 (Halaman 52-53) berhasil disimpan!');
     }
+    public function editTrimester2($id)
+    {
+        $user = auth()->user();
+        abort_unless(in_array($user->role, ['bidan', 'dokter']), 403);
+
+        $dataKia = DataKia::with(['pemeriksaanTrimester2', 'catatanPelayananTrimester2', 'ibu'])->findOrFail($id);
+        $pemeriksaan = $dataKia->pemeriksaanTrimester2 ?? new \App\Models\KiaPemeriksaanTrimester2();
+        $catatan = $dataKia->catatanPelayananTrimester2;
+
+        return view('nakes.kia-edit-trimester2', [
+            'dataKia' => $dataKia,
+            'pemeriksaan' => $pemeriksaan,
+            'catatan' => $catatan,
+            'role' => $user->role,
+        ]);
+    }
+
+    public function saveTrimester2(Request $request, $id)
+    {
+        $user = auth()->user();
+        abort_unless(in_array($user->role, ['bidan', 'dokter']), 403);
+
+        $dataKia = DataKia::findOrFail($id);
+
+        $request->validate([
+            'skrining_preeklampsia' => 'nullable|array',
+            'kesimpulan_preeklampsia' => 'nullable|string',
+            'lab_gula_darah_puasa' => 'nullable|string',
+            'tindak_lanjut_puasa' => 'nullable|string',
+            'lab_gula_darah_2jam' => 'nullable|string',
+            'tindak_lanjut_2jam' => 'nullable|string',
+            'tgl_periksa_diabetes' => 'nullable|date',
+            'nama_dokter_diabetes' => 'nullable|string',
+            'catatan.*.id' => 'nullable|integer',
+            'catatan.*.tanggal_periksa' => 'nullable|date',
+            'catatan.*.catatan' => 'nullable|string',
+            'catatan.*.tanggal_kembali' => 'nullable|date',
+            'deleted_catatan' => 'nullable|string'
+        ]);
+
+        $pemeriksaanModel = $dataKia->pemeriksaanTrimester2 ?? new \App\Models\KiaPemeriksaanTrimester2();
+        $pemeriksaanModel->data_kia_id = $dataKia->id;
+        $pemeriksaanModel->skrining_preeklampsia = $request->skrining_preeklampsia;
+        $pemeriksaanModel->kesimpulan_preeklampsia = $request->kesimpulan_preeklampsia;
+        $pemeriksaanModel->lab_gula_darah_puasa = $request->lab_gula_darah_puasa;
+        $pemeriksaanModel->tindak_lanjut_puasa = $request->tindak_lanjut_puasa;
+        $pemeriksaanModel->lab_gula_darah_2jam = $request->lab_gula_darah_2jam;
+        $pemeriksaanModel->tindak_lanjut_2jam = $request->tindak_lanjut_2jam;
+        $pemeriksaanModel->tgl_periksa_diabetes = $request->tgl_periksa_diabetes;
+        $pemeriksaanModel->nama_dokter_diabetes = $request->nama_dokter_diabetes;
+        $pemeriksaanModel->save();
+
+        if ($request->filled('deleted_catatan')) {
+            $deletedIds = explode(',', $request->deleted_catatan);
+            \App\Models\KiaCatatanPelayananTrimester2::whereIn('id', $deletedIds)->where('data_kia_id', $dataKia->id)->delete();
+        }
+
+        if ($request->has('catatan')) {
+            foreach ($request->catatan as $cat) {
+                $catatanModel = isset($cat['id']) ? \App\Models\KiaCatatanPelayananTrimester2::find($cat['id']) : new \App\Models\KiaCatatanPelayananTrimester2();
+                $catatanModel->data_kia_id = $dataKia->id;
+                $catatanModel->tanggal_periksa = $cat['tanggal_periksa'] ?? null;
+                $catatanModel->catatan = $cat['catatan'] ?? null;
+                $catatanModel->tanggal_kembali = $cat['tanggal_kembali'] ?? null;
+                $catatanModel->save();
+            }
+        }
+
+        return redirect()->route($user->role . '.kia')->with('success', 'Data Trimester 2 (Halaman 53) berhasil disimpan!');
+    }
+
     public function ttdIndex()
     {
         abort_unless(auth()->check() && auth()->user()->role === 'pengguna', 403);

@@ -47,6 +47,8 @@ class DataKia extends Model
     public function perkembanganAnak72Bulan() { return $this->hasOne(KiaPerkembanganAnak72Bulan::class, 'data_kia_id'); }
     public function pemeriksaanTrimester1() { return $this->hasOne(KiaPemeriksaanTrimester1::class, 'data_kia_id'); }
     public function catatanPelayananTrimester1() { return $this->hasMany(KiaCatatanPelayananTrimester1::class, 'data_kia_id'); }
+    public function pemeriksaanTrimester2() { return $this->hasOne(KiaPemeriksaanTrimester2::class, 'data_kia_id'); }
+    public function catatanPelayananTrimester2() { return $this->hasMany(KiaCatatanPelayananTrimester2::class, 'data_kia_id'); }
     public function kesehatanLingkungan() { return $this->hasOne(KiaKesehatanLingkungan::class, 'data_kia_id'); }
     public function pelayananKesehatanIbu() { return $this->hasMany(KiaPelayananKesehatanIbu::class, 'data_kia_id'); }
     public function evaluasiKesehatanIbu() { return $this->hasOne(KiaEvaluasiKesehatanIbu::class, 'data_kia_id'); }

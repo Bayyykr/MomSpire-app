@@ -43,7 +43,10 @@
                                     <i class="bi bi-clipboard2-pulse me-1"></i> Evaluasi
                                 </a>
                                 <a href="{{ route($role . '.kia.edit_trimester1', $kia->id) }}" class="btn btn-sm btn-outline-secondary mb-1">
-                                    <i class="bi bi-images me-1"></i> Hal. 52-53
+                                    <i class="bi bi-images me-1"></i> T1 (Hal. 52)
+                                </a>
+                                <a href="{{ route($role . '.kia.edit_trimester2', $kia->id) }}" class="btn btn-sm btn-outline-secondary mb-1">
+                                    <i class="bi bi-clipboard-check me-1"></i> T2 (Hal. 53)
                                 </a>
                                 <a href="{{ route('admin.kia.export_pdf', $kia->id) }}" target="_blank" class="btn btn-sm btn-outline-success mb-1">
                                     <i class="bi bi-file-earmark-pdf me-1"></i> PDF

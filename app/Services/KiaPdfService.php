@@ -2710,6 +2710,111 @@ class KiaPdfService
                     }
                 }
             }
+
+            // 32. HASIL PEMERIKSAAN DOKTER PADA TRIMESTER 2 / SKRINING (Halaman 53 PDF)
+            if ($pageNo === 53) {
+                $pdf->SetTextColor(0, 0, 0);
+                
+                // --- SISI KIRI (Skrining) ---
+                $pemeriksaan2 = $dataKia->pemeriksaanTrimester2;
+                if ($pemeriksaan2) {
+                    $pdf->SetFont('Arial', '', 9);
+                    $skrining = $pemeriksaan2->skrining_preeklampsia ?? [];
+                    
+                    // Koordinat Checklist Preeklampsia (ZapfDingbats chr(51))
+                    $pdf->SetFont('ZapfDingbats', '', 10);
+                    $check = chr(51);
+
+                    // Row mapping untuk kriteria (Estimasi Y berdasarkan gambar)
+                    $criteriaY = [
+                        'multipara_pasangan_baru' => 91,
+                        'teknologi_reproduksi' => 97,
+                        'umur_35' => 104,
+                        'nullipara' => 109,
+                        'jarak_10' => 114,
+                        'riwayat_ibu_saudara' => 119,
+                        'obesitas' => 125,
+                        'riwayat_preeklampsia_sebelumnya' => 130,
+                        'kehamilan_multipel' => 135,
+                        'diabetes' => 140,
+                        'hipertensi' => 145,
+                        'ginjal' => 150,
+                        'autoimun' => 155,
+                        'aps' => 160,
+                        'map_90' => 171,
+                        'proteinuria' => 177,
+                    ];
+
+                    $countRisikoSedang = 0;
+                    $hasRisikoTinggi = false;
+
+                    foreach ($skrining as $key => $val) {
+                        if ($val === 'Risiko Sedang' && isset($criteriaY[$key])) {
+                            // Risiko Sedang (Kolom Orange) tampil di baris masing-masing
+                            $pdf->Text(123, $criteriaY[$key], $check);
+                            $countRisikoSedang++;
+                        } elseif ($val === 'Risiko Tinggi' && isset($criteriaY[$key])) {
+                            // Risiko Tinggi (Kolom Merah) tampil di baris masing-masing (tidak di grup)
+                            $pdf->Text(155, $criteriaY[$key], $check);
+                            $hasRisikoTinggi = true;
+                        }
+                    }
+
+                    $pdf->SetFont('Arial', '', 9);
+                    if ($pemeriksaan2->kesimpulan_preeklampsia) {
+                        $pdf->Text(48, 205.5, $pemeriksaan2->kesimpulan_preeklampsia); // Samakan dengan p52
+                    }
+
+                    // Skrining Diabetes
+                    if ($pemeriksaan2->lab_gula_darah_puasa) {
+                        $pdf->Text(74, 225, $pemeriksaan2->lab_gula_darah_puasa);
+                    }
+                    if ($pemeriksaan2->lab_gula_darah_2jam) {
+                        $pdf->Text(74, 230.5, $pemeriksaan2->lab_gula_darah_2jam);
+                    }
+                    if ($pemeriksaan2->tindak_lanjut_puasa) {
+                        $pdf->Text(106, 225, $pemeriksaan2->tindak_lanjut_puasa);
+                    }
+                    if ($pemeriksaan2->tindak_lanjut_2jam) {
+                        $pdf->Text(106, 230.5, $pemeriksaan2->tindak_lanjut_2jam);
+                    }
+                    if ($pemeriksaan2->tgl_periksa_diabetes) {
+                        $pdf->Text(54, 237, date('d/m/Y', strtotime($pemeriksaan2->tgl_periksa_diabetes)));
+                    }
+                    if ($pemeriksaan2->nama_dokter_diabetes) {
+                        $pdf->Text(152, 250, $pemeriksaan2->nama_dokter_diabetes);
+                    }
+                }
+
+                // --- SISI KANAN (Catatan Pelayanan Trimester 2) ---
+                $catatanList2 = $dataKia->catatanPelayananTrimester2;
+                if ($catatanList2 && $catatanList2->count() > 0) {
+                    $pdf->SetFont('Arial', '', 9);
+                    $currentY = 61; // Samakan koordinat dengan Trimester 1 di p52
+                    $maxY = 249;
+
+                    foreach ($catatanList2 as $cat) {
+                        if ($currentY > $maxY - 20) break;
+
+                        $startY = $currentY;
+                        $pdf->SetXY(206, $currentY);
+                        $tglPeriksa = $cat->tanggal_periksa ? date('d/m/Y', strtotime($cat->tanggal_periksa)) : '';
+                        $pdf->MultiCell(25, 5, $tglPeriksa, 0, 'C');
+
+                        $pdf->SetXY(236, $currentY);
+                        $pdf->MultiCell(72, 5, $cat->catatan, 0, 'L');
+                        $endYCatatan = $pdf->GetY();
+
+                        $pdf->SetXY(315, $currentY);
+                        $tglKembali = $cat->tanggal_kembali ? date('d/m/Y', strtotime($cat->tanggal_kembali)) : '';
+                        $pdf->MultiCell(25, 5, $tglKembali, 0, 'C');
+                        $endYKembali = $pdf->GetY();
+
+                        $currentY = max($startY + 5, $endYCatatan, $endYKembali) + 5;
+                        $pdf->Line(204, $currentY - 2, 348, $currentY - 2);
+                    }
+                }
+            }
         }
 
         return $pdf->Output('S');
