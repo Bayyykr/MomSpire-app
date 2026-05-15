@@ -44,6 +44,59 @@ if (!class_exists('App\Services\MyFpdi')) {
             }
             parent::_endpage();
         }
+
+        function Ellipse($x, $y, $rx, $ry, $style = 'D')
+        {
+            if ($style == 'F')
+                $op = 'f';
+            elseif ($style == 'FD' || $style == 'DF')
+                $op = 'B';
+            else
+                $op = 'S';
+            $lx = 4 / 3 * (M_SQRT2 - 1) * $rx;
+            $ly = 4 / 3 * (M_SQRT2 - 1) * $ry;
+            $k = $this->k;
+            $h = $this->h;
+            $this->_out(sprintf(
+                '%.2F %.2F m %.2F %.2F %.2F %.2F %.2F %.2F c',
+                ($x + $rx) * $k,
+                ($h - $y) * $k,
+                ($x + $rx) * $k,
+                ($h - ($y - $ly)) * $k,
+                ($x + $lx) * $k,
+                ($h - ($y - $ry)) * $k,
+                $x * $k,
+                ($h - ($y - $ry)) * $k
+            ));
+            $this->_out(sprintf(
+                '%.2F %.2F %.2F %.2F %.2F %.2F c',
+                ($x - $lx) * $k,
+                ($h - ($y - $ry)) * $k,
+                ($x - $rx) * $k,
+                ($h - ($y - $ly)) * $k,
+                ($x - $rx) * $k,
+                ($h - $y) * $k
+            ));
+            $this->_out(sprintf(
+                '%.2F %.2F %.2F %.2F %.2F %.2F c',
+                ($x - $rx) * $k,
+                ($h - ($y + $ly)) * $k,
+                ($x - $lx) * $k,
+                ($h - ($y + $ry)) * $k,
+                $x * $k,
+                ($h - ($y + $ry)) * $k
+            ));
+            $this->_out(sprintf(
+                '%.2F %.2F %.2F %.2F %.2F %.2F c %s',
+                ($x + $lx) * $k,
+                ($h - ($y + $ry)) * $k,
+                ($x + $rx) * $k,
+                ($h - ($y + $ly)) * $k,
+                ($x + $rx) * $k,
+                ($h - $y) * $k,
+                $op
+            ));
+        }
     }
 }
 
@@ -236,18 +289,24 @@ class KiaPdfService
                 // Baris 21: No. Reg. Kohort Ibu
                 $pdf->SetXY(240, 166);
                 $pdf->Write(0, $layanan->no_reg_kohort_ibu ?? '-');
-                $pdf->SetXY(276, 166); $pdf->Write(0, '-');
-                $pdf->SetXY(312, 166); $pdf->Write(0, '-');
+                $pdf->SetXY(276, 166);
+                $pdf->Write(0, '-');
+                $pdf->SetXY(312, 166);
+                $pdf->Write(0, '-');
 
                 // Baris 22: No. Reg. Kohort Bayi
-                $pdf->SetXY(240, 176); $pdf->Write(0, '-');
-                $pdf->SetXY(276, 176); $pdf->Write(0, '-');
+                $pdf->SetXY(240, 176);
+                $pdf->Write(0, '-');
+                $pdf->SetXY(276, 176);
+                $pdf->Write(0, '-');
                 $pdf->SetXY(312, 176);
                 $pdf->Write(0, $layanan->no_reg_kohort_bayi ?? '-');
 
                 // Baris 23: No. Reg. Kohort Balita
-                $pdf->SetXY(240, 186); $pdf->Write(0, '-');
-                $pdf->SetXY(276, 186); $pdf->Write(0, '-');
+                $pdf->SetXY(240, 186);
+                $pdf->Write(0, '-');
+                $pdf->SetXY(276, 186);
+                $pdf->Write(0, '-');
                 $pdf->SetXY(312, 186);
                 $pdf->Write(0, $layanan->no_reg_kohort_balita ?? '-');
 
@@ -262,47 +321,57 @@ class KiaPdfService
                 // --- SEKSI RIWAYAT KESEHATAN IBU (Halaman 2 Bawah) ---
                 $riwayat = $dataKia->riwayat;
                 if ($riwayat) {
-                    $pdf->SetXY(240, 220); $pdf->Write(0, ($riwayat->usia_ibu ?? '-') . ' Tahun');
-                    $pdf->SetXY(240, 225); $pdf->Write(0, $riwayat->kehamilan_ke ?? '-');
-                    $pdf->SetXY(240, 231); $pdf->Write(0, $riwayat->jumlah_anak_hidup ?? '-');
-                    $pdf->SetXY(240, 237); $pdf->Write(0, $riwayat->riwayat_keguguran ?? '-');
-                    $pdf->SetXY(240, 241); $pdf->MultiCell(100, 4, $riwayat->riwayat_penyakit_ibu ?? '-', 0, 'L');
+                    $pdf->SetXY(240, 220);
+                    $pdf->Write(0, ($riwayat->usia_ibu ?? '-') . ' Tahun');
+                    $pdf->SetXY(240, 225);
+                    $pdf->Write(0, $riwayat->kehamilan_ke ?? '-');
+                    $pdf->SetXY(240, 231);
+                    $pdf->Write(0, $riwayat->jumlah_anak_hidup ?? '-');
+                    $pdf->SetXY(240, 237);
+                    $pdf->Write(0, $riwayat->riwayat_keguguran ?? '-');
+                    $pdf->SetXY(240, 241);
+                    $pdf->MultiCell(100, 4, $riwayat->riwayat_penyakit_ibu ?? '-', 0, 'L');
                 } else {
-                    $pdf->SetXY(240, 220); $pdf->Write(0, '-');
-                    $pdf->SetXY(240, 225); $pdf->Write(0, '-');
-                    $pdf->SetXY(240, 227); $pdf->Write(0, '-');
-                    $pdf->SetXY(240, 229); $pdf->Write(0, '-');
-                    $pdf->SetXY(240, 246); $pdf->Write(0, '-');
+                    $pdf->SetXY(240, 220);
+                    $pdf->Write(0, '-');
+                    $pdf->SetXY(240, 225);
+                    $pdf->Write(0, '-');
+                    $pdf->SetXY(240, 227);
+                    $pdf->Write(0, '-');
+                    $pdf->SetXY(240, 229);
+                    $pdf->Write(0, '-');
+                    $pdf->SetXY(240, 246);
+                    $pdf->Write(0, '-');
                 }
             }
 
             // 3. TTD TRACKING MAPPING (Halaman 5)
             if ($pageNo === 5) {
                 $trackings = $dataKia->ttdTrackings->keyBy('bulan_ke');
-                
+
                 $xMap = [
-                    1  => 257.5,  // Bulan 1
-                    2  => 266.35, // Bulan 2
-                    3  => 276.2,  // Bulan 3
-                    4  => 286.05, // Bulan 4
-                    5  => 295.9,  // Bulan 5
-                    6  => 305.75, // Bulan 6
-                    7  => 315.6,  // Bulan 7
-                    8  => 325.45, // Bulan 8
-                    9  => 335.3,  // Bulan 9
+                    1 => 257.5,  // Bulan 1
+                    2 => 266.35, // Bulan 2
+                    3 => 276.2,  // Bulan 3
+                    4 => 286.05, // Bulan 4
+                    5 => 295.9,  // Bulan 5
+                    6 => 305.75, // Bulan 6
+                    7 => 315.6,  // Bulan 7
+                    8 => 325.45, // Bulan 8
+                    9 => 335.3,  // Bulan 9
                     10 => 345.15, // Bulan 10
                 ];
 
                 $yMap = [
-                    1  => 211, // Hari 1
-                    2  => 206, // Hari 2
-                    3  => 200, // Hari 3
-                    4  => 195, // Hari 4
-                    5  => 189.5, // Hari 5
-                    6  => 184, // Hari 6
-                    7  => 178.5, // Hari 7
-                    8  => 173.5, // Hari 8
-                    9  => 168, // Hari 9
+                    1 => 211, // Hari 1
+                    2 => 206, // Hari 2
+                    3 => 200, // Hari 3
+                    4 => 195, // Hari 4
+                    5 => 189.5, // Hari 5
+                    6 => 184, // Hari 6
+                    7 => 178.5, // Hari 7
+                    8 => 173.5, // Hari 8
+                    9 => 168, // Hari 9
                     10 => 163, // Hari 10
                     11 => 157, // Hari 11
                     12 => 152, // Hari 12
@@ -365,25 +434,25 @@ class KiaPdfService
 
                 $xMap = [
                     'pemeriksaan_kehamilan' => 55,  // Kolom 1
-                    'kelas_ibu_hamil'       => 82,  // Kolom 2
-                    'demam_lebih_2_hari'    => 108,  // Kolom 3
-                    'pusing_sakit_kepala'   => 133,  // Kolom 4
-                    'sulit_tidur_cemas'     => 158, // Kolom 5
-                    'risiko_tb'             => 215, // Kolom 6 (Halaman Kanan)
-                    'gerakan_bayi'          => 240, // Kolom 7
-                    'nyeri_perut_hebat'     => 263, // Kolom 8
-                    'keluar_cairan_lahir'   => 286, // Kolom 9
-                    'sakit_saat_kencing'    => 310, // Kolom 10
-                    'diare_berulang'        => 335, // Kolom 11
+                    'kelas_ibu_hamil' => 82,  // Kolom 2
+                    'demam_lebih_2_hari' => 108,  // Kolom 3
+                    'pusing_sakit_kepala' => 133,  // Kolom 4
+                    'sulit_tidur_cemas' => 158, // Kolom 5
+                    'risiko_tb' => 215, // Kolom 6 (Halaman Kanan)
+                    'gerakan_bayi' => 240, // Kolom 7
+                    'nyeri_perut_hebat' => 263, // Kolom 8
+                    'keluar_cairan_lahir' => 286, // Kolom 9
+                    'sakit_saat_kencing' => 310, // Kolom 10
+                    'diare_berulang' => 335, // Kolom 11
                 ];
 
                 $yMap = [
-                    4  => 123,
-                    5  => 129,
-                    6  => 136,
-                    7  => 142,
-                    8  => 148,
-                    9  => 154,
+                    4 => 123,
+                    5 => 129,
+                    6 => 136,
+                    7 => 142,
+                    8 => 148,
+                    9 => 154,
                     10 => 160,
                     11 => 167,
                     12 => 173,
@@ -429,37 +498,37 @@ class KiaPdfService
 
                 $xMap = [
                     'pemeriksaan_kehamilan' => 55,  // Kolom 1
-                    'kelas_ibu_hamil'       => 82,  // Kolom 2
-                    'demam_lebih_2_hari'    => 108,  // Kolom 3
-                    'pusing_sakit_kepala'   => 133,  // Kolom 4
-                    'sulit_tidur_cemas'     => 158, // Kolom 5
-                    'risiko_tb'             => 215, // Kolom 6 (Halaman Kanan)
-                    'gerakan_bayi'          => 239, // Kolom 7
-                    'nyeri_perut_hebat'     => 263, // Kolom 8
-                    'keluar_cairan_lahir'   => 286, // Kolom 9
-                    'sakit_saat_kencing'    => 310, // Kolom 10
-                    'diare_berulang'        => 335, // Kolom 11
+                    'kelas_ibu_hamil' => 82,  // Kolom 2
+                    'demam_lebih_2_hari' => 108,  // Kolom 3
+                    'pusing_sakit_kepala' => 133,  // Kolom 4
+                    'sulit_tidur_cemas' => 158, // Kolom 5
+                    'risiko_tb' => 215, // Kolom 6 (Halaman Kanan)
+                    'gerakan_bayi' => 239, // Kolom 7
+                    'nyeri_perut_hebat' => 263, // Kolom 8
+                    'keluar_cairan_lahir' => 286, // Kolom 9
+                    'sakit_saat_kencing' => 310, // Kolom 10
+                    'diare_berulang' => 335, // Kolom 11
                 ];
 
                 $yMap = [
-                    25  => 123,
-                    26  => 131,
-                    27  => 139,
-                    28  => 146,
-                    29  => 153,
-                    30  => 161,
-                    31  => 168,
-                    32  => 176,
-                    33  => 183,
-                    34  => 190,
-                    35  => 198,
-                    36  => 205,
-                    37  => 212,
-                    38  => 220,
-                    39  => 227,
-                    40  => 234,
-                    41  => 242,
-                    42  => 249,
+                    25 => 123,
+                    26 => 131,
+                    27 => 139,
+                    28 => 146,
+                    29 => 153,
+                    30 => 161,
+                    31 => 168,
+                    32 => 176,
+                    33 => 183,
+                    34 => 190,
+                    35 => 198,
+                    36 => 205,
+                    37 => 212,
+                    38 => 220,
+                    39 => 227,
+                    40 => 234,
+                    41 => 242,
+                    42 => 249,
                 ];
 
                 $pdf->SetTextColor(0, 0, 0);
@@ -485,7 +554,7 @@ class KiaPdfService
                 $absensi = $dataKia->absenKelasIbuHamils->keyBy('kehadiran_ke');
 
                 $xMap = [
-                    'tanggal'    => 222,
+                    'tanggal' => 222,
                     'kader_info' => 303,
                 ];
 
@@ -601,28 +670,61 @@ class KiaPdfService
                 $records = $dataKia->pemantauanIbuNifas;
                 if ($records && count($records) > 0) {
                     $yMap = [
-                        'pemeriksaan_nifas'  => 227,
+                        'pemeriksaan_nifas' => 227,
                         'konsumsi_vitamin_a' => 207,
-                        'konsumsi_ttd'       => 187,
-                        'pemenuhan_gizi'     => 167,
-                        'masalah_jiwa'       => 147,
-                        'demam'              => 127,
-                        'sakit_kepala'       => 107,
-                        'pandangan_kabur'    => 87,
-                        'nyeri_ulu_hati'     => 67,
-                        'paraf'              => 56.5,
+                        'konsumsi_ttd' => 187,
+                        'pemenuhan_gizi' => 167,
+                        'masalah_jiwa' => 147,
+                        'demam' => 127,
+                        'sakit_kepala' => 107,
+                        'pandangan_kabur' => 87,
+                        'nyeri_ulu_hati' => 67,
+                        'paraf' => 56.5,
                     ];
 
                     $xMap = [
-                        1  => 96.5,  2  => 102, 3  => 108, 4  => 113.5, 5  => 119.5,
-                        6  => 125, 7  => 130.5, 8  => 136, 9  => 142, 10 => 148,
-                        11 => 153, 12 => 159, 13 => 164.5, 14 => 170, 15 => 207.5,
-                        16 => 212.5, 17 => 218, 18 => 223, 19 => 228, 20 => 233,
-                        21 => 238, 22 => 243, 23 => 248.5, 24 => 254, 25 => 259,
-                        26 => 264.5, 27 => 269.5, 28 => 274.5, 29 => 279.5, 30 => 285,
-                        31 => 290, 32 => 295, 33 => 300, 34 => 305, 35 => 310,
-                        36 => 315, 37 => 320.5, 38 => 325.5, 39 => 331, 40 => 336,
-                        41 => 341, 42 => 346,
+                        1 => 96.5,
+                        2 => 102,
+                        3 => 108,
+                        4 => 113.5,
+                        5 => 119.5,
+                        6 => 125,
+                        7 => 130.5,
+                        8 => 136,
+                        9 => 142,
+                        10 => 148,
+                        11 => 153,
+                        12 => 159,
+                        13 => 164.5,
+                        14 => 170,
+                        15 => 207.5,
+                        16 => 212.5,
+                        17 => 218,
+                        18 => 223,
+                        19 => 228,
+                        20 => 233,
+                        21 => 238,
+                        22 => 243,
+                        23 => 248.5,
+                        24 => 254,
+                        25 => 259,
+                        26 => 264.5,
+                        27 => 269.5,
+                        28 => 274.5,
+                        29 => 279.5,
+                        30 => 285,
+                        31 => 290,
+                        32 => 295,
+                        33 => 300,
+                        34 => 305,
+                        35 => 310,
+                        36 => 315,
+                        37 => 320.5,
+                        38 => 325.5,
+                        39 => 331,
+                        40 => 336,
+                        41 => 341,
+                        42 => 346,
                     ];
 
                     $pdf->SetTextColor(0, 0, 0);
@@ -677,28 +779,61 @@ class KiaPdfService
                 $records = $dataKia->pemantauanIbuNifas;
                 if ($records && count($records) > 0) {
                     $yMap = [
-                        'jantung_berdebar'     => 227,
-                        'keluar_cairan_lahir'  => 207,
-                        'napas_pendek'         => 187,
-                        'payudara_bengkak'     => 167,
-                        'gangguan_bak'         => 147,
-                        'kelamin_bengkak'      => 127,
-                        'darah_nifas_berbau'   => 107,
-                        'pendarahan_hebat'     => 87,
-                        'keputihan'            => 67,
-                        'paraf'                => 56.5,
+                        'jantung_berdebar' => 227,
+                        'keluar_cairan_lahir' => 207,
+                        'napas_pendek' => 187,
+                        'payudara_bengkak' => 167,
+                        'gangguan_bak' => 147,
+                        'kelamin_bengkak' => 127,
+                        'darah_nifas_berbau' => 107,
+                        'pendarahan_hebat' => 87,
+                        'keputihan' => 67,
+                        'paraf' => 56.5,
                     ];
 
                     $xMap = [
-                        1  => 96.5,  2  => 102, 3  => 108, 4  => 113.5, 5  => 119.5,
-                        6  => 125, 7  => 130.5, 8  => 136, 9  => 142, 10 => 148,
-                        11 => 153, 12 => 159, 13 => 164.5, 14 => 170, 15 => 207.5,
-                        16 => 212.5, 17 => 218, 18 => 223, 19 => 228, 20 => 233,
-                        21 => 238, 22 => 243, 23 => 248.5, 24 => 254, 25 => 259,
-                        26 => 264.5, 27 => 269.5, 28 => 274.5, 29 => 279.5, 30 => 285,
-                        31 => 290, 32 => 295, 33 => 300, 34 => 305, 35 => 310,
-                        36 => 315, 37 => 320.5, 38 => 325.5, 39 => 331, 40 => 336,
-                        41 => 341, 42 => 346,
+                        1 => 96.5,
+                        2 => 102,
+                        3 => 108,
+                        4 => 113.5,
+                        5 => 119.5,
+                        6 => 125,
+                        7 => 130.5,
+                        8 => 136,
+                        9 => 142,
+                        10 => 148,
+                        11 => 153,
+                        12 => 159,
+                        13 => 164.5,
+                        14 => 170,
+                        15 => 207.5,
+                        16 => 212.5,
+                        17 => 218,
+                        18 => 223,
+                        19 => 228,
+                        20 => 233,
+                        21 => 238,
+                        22 => 243,
+                        23 => 248.5,
+                        24 => 254,
+                        25 => 259,
+                        26 => 264.5,
+                        27 => 269.5,
+                        28 => 274.5,
+                        29 => 279.5,
+                        30 => 285,
+                        31 => 290,
+                        32 => 295,
+                        33 => 300,
+                        34 => 305,
+                        35 => 310,
+                        36 => 315,
+                        37 => 320.5,
+                        38 => 325.5,
+                        39 => 331,
+                        40 => 336,
+                        41 => 341,
+                        42 => 346,
                     ];
 
                     $pdf->SetTextColor(0, 0, 0);
@@ -789,22 +924,44 @@ class KiaPdfService
                 $records = $dataKia->pemantauanBayis;
                 if ($records && count($records) > 0) {
                     $yMap = [
-                        'sesak_napas'      => 222,
-                        'aktivitas_lemah'  => 192,
+                        'sesak_napas' => 222,
+                        'aktivitas_lemah' => 192,
                         'warna_kulit_biru' => 162,
-                        'hisapan_lemah'    => 132,
-                        'kejang'           => 102,
-                        'suhu_abnormal'    => 72,
-                        'paraf'            => 56.5,
+                        'hisapan_lemah' => 132,
+                        'kejang' => 102,
+                        'suhu_abnormal' => 72,
+                        'paraf' => 56.5,
                     ];
 
                     $xMap = [
-                        1  => 97.5,  2  => 107, 3  => 116, 4  => 125, 5  => 134,
-                        6  => 143, 7  => 151, 8  => 160, 9  => 169, 10 => 209,
-                        11 => 216.5, 12 => 224.5, 13 => 232, 14 => 240, 15 => 247,
-                        16 => 255, 17 => 262, 18 => 270, 19 => 278, 20 => 285,
-                        21 => 292, 22 => 300, 23 => 308, 24 => 315, 25 => 323,
-                        26 => 331, 27 => 338, 28 => 346,
+                        1 => 97.5,
+                        2 => 107,
+                        3 => 116,
+                        4 => 125,
+                        5 => 134,
+                        6 => 143,
+                        7 => 151,
+                        8 => 160,
+                        9 => 169,
+                        10 => 209,
+                        11 => 216.5,
+                        12 => 224.5,
+                        13 => 232,
+                        14 => 240,
+                        15 => 247,
+                        16 => 255,
+                        17 => 262,
+                        18 => 270,
+                        19 => 278,
+                        20 => 285,
+                        21 => 292,
+                        22 => 300,
+                        23 => 308,
+                        24 => 315,
+                        25 => 323,
+                        26 => 331,
+                        27 => 338,
+                        28 => 346,
                     ];
 
                     $pdf->SetTextColor(0, 0, 0);
@@ -850,22 +1007,44 @@ class KiaPdfService
                 $records = $dataKia->pemantauanBayis;
                 if ($records && count($records) > 0) {
                     $yMap = [
-                        'bab_abnormal'     => 222,
-                        'kencing_sedikit'  => 192,
+                        'bab_abnormal' => 222,
+                        'kencing_sedikit' => 192,
                         'tali_pusat_merah' => 162,
-                        'mata_merah'       => 132,
-                        'kulit_bintil'     => 102,
-                        'belum_imunisasi'  => 72,
-                        'paraf'            => 56.5,
+                        'mata_merah' => 132,
+                        'kulit_bintil' => 102,
+                        'belum_imunisasi' => 72,
+                        'paraf' => 56.5,
                     ];
 
                     $xMap = [
-                        1  => 97.5,  2  => 107, 3  => 116, 4  => 125, 5  => 134,
-                        6  => 143, 7  => 151, 8  => 160, 9  => 169, 10 => 209,
-                        11 => 216.5, 12 => 224.5, 13 => 232, 14 => 240, 15 => 247,
-                        16 => 255, 17 => 262, 18 => 270, 19 => 278, 20 => 285,
-                        21 => 292, 22 => 300, 23 => 308, 24 => 315, 25 => 323,
-                        26 => 331, 27 => 338, 28 => 346,
+                        1 => 97.5,
+                        2 => 107,
+                        3 => 116,
+                        4 => 125,
+                        5 => 134,
+                        6 => 143,
+                        7 => 151,
+                        8 => 160,
+                        9 => 169,
+                        10 => 209,
+                        11 => 216.5,
+                        12 => 224.5,
+                        13 => 232,
+                        14 => 240,
+                        15 => 247,
+                        16 => 255,
+                        17 => 262,
+                        18 => 270,
+                        19 => 278,
+                        20 => 285,
+                        21 => 292,
+                        22 => 300,
+                        23 => 308,
+                        24 => 315,
+                        25 => 323,
+                        26 => 331,
+                        27 => 338,
+                        28 => 346,
                     ];
 
                     $pdf->SetTextColor(0, 0, 0);
@@ -947,12 +1126,36 @@ class KiaPdfService
                 $pdf->SetFont('Arial', '', 6);
 
                 $yMapRows = [
-                    1  => 117,   2  => 122, 3  => 126, 4  => 130.5, 5  => 135,
-                    6  => 139.5,   7  => 143.5, 8  => 148, 9  => 153, 10 => 158,
-                    11 => 162.5,   12 => 167.5, 13 => 172, 14 => 176.5, 15 => 181,
-                    16 => 185,   17 => 189.5, 18 => 194, 19 => 198.8, 20 => 203.3,
-                    21 => 207.8,   22 => 212.5, 23 => 217, 24 => 221.5, 25 => 226,
-                    26 => 231,   27 => 236, 28 => 240.5, 29 => 245, 30 => 250,
+                    1 => 117,
+                    2 => 122,
+                    3 => 126,
+                    4 => 130.5,
+                    5 => 135,
+                    6 => 139.5,
+                    7 => 143.5,
+                    8 => 148,
+                    9 => 153,
+                    10 => 158,
+                    11 => 162.5,
+                    12 => 167.5,
+                    13 => 172,
+                    14 => 176.5,
+                    15 => 181,
+                    16 => 185,
+                    17 => 189.5,
+                    18 => 194,
+                    19 => 198.8,
+                    20 => 203.3,
+                    21 => 207.8,
+                    22 => 212.5,
+                    23 => 217,
+                    24 => 221.5,
+                    25 => 226,
+                    26 => 231,
+                    27 => 236,
+                    28 => 240.5,
+                    29 => 245,
+                    30 => 250,
                 ];
 
                 // Tabel Kiri (Sesi 1 - 30)
@@ -1001,20 +1204,24 @@ class KiaPdfService
                 $mingguan = $dataKia->pemantauanMingguanBayis;
                 if ($mingguan && count($mingguan) > 0) {
                     $yMapMingguan = [
-                        'sesak_napas'     => 227,
-                        'batuk'           => 207    ,
-                        'suhu_abnormal'   => 187,
-                        'bab_sering'      => 167,
+                        'sesak_napas' => 227,
+                        'batuk' => 207,
+                        'suhu_abnormal' => 187,
+                        'bab_sering' => 167,
                         'kencing_sedikit' => 147,
-                        'kulit_biru'      => 127,
+                        'kulit_biru' => 127,
                         'aktivitas_lemah' => 107,
-                        'hisapan_lemah'   => 87,
-                        'tidak_makan'     => 67,
-                        'paraf'           => 57,
+                        'hisapan_lemah' => 87,
+                        'tidak_makan' => 67,
+                        'paraf' => 57,
                     ];
 
                     $xMapMingguan = [
-                        5 => 117, 6 => 130, 7 => 142, 8 => 153.5, 9 => 165.5,
+                        5 => 117,
+                        6 => 130,
+                        7 => 142,
+                        8 => 153.5,
+                        9 => 165.5,
                     ];
 
                     $pdf->SetTextColor(0, 0, 0);
@@ -1052,13 +1259,13 @@ class KiaPdfService
 
                     $yPerk = [
                         'angkat_kepala_45' => 173,
-                        'gerak_kepala'     => 184,
-                        'tatap_wajah'      => 195,
-                        'ngoceh'           => 205,
-                        'tertawa_keras'    => 216,
-                        'terkejut_suara'   => 226,
-                        'tersenyum'        => 236,
-                        'mengenal_ibu'     => 247,
+                        'gerak_kepala' => 184,
+                        'tatap_wajah' => 195,
+                        'ngoceh' => 205,
+                        'tertawa_keras' => 216,
+                        'terkejut_suara' => 226,
+                        'tersenyum' => 236,
+                        'mengenal_ibu' => 247,
                     ];
 
                     foreach ($yPerk as $field => $y) {
@@ -1078,20 +1285,22 @@ class KiaPdfService
                 $bulanan = $dataKia->pemantauanBulananBayis;
                 if ($bulanan && count($bulanan) > 0) {
                     $yMapBulanan = [
-                        'sesak_napas'     => 227,
-                        'batuk'           => 207,
-                        'suhu_abnormal'   => 187,
-                        'bab_sering'      => 167,
+                        'sesak_napas' => 227,
+                        'batuk' => 207,
+                        'suhu_abnormal' => 187,
+                        'bab_sering' => 167,
                         'kencing_sedikit' => 147,
-                        'kulit_biru'      => 127,
+                        'kulit_biru' => 127,
                         'aktivitas_lemah' => 107,
-                        'hisapan_lemah'   => 87,
-                        'tidak_makan'     => 67,
-                        'paraf'           => 56.5,
+                        'hisapan_lemah' => 87,
+                        'tidak_makan' => 67,
+                        'paraf' => 56.5,
                     ];
 
                     $xMapBulanan = [
-                        3 => 120, 4 => 142, 5 => 164,
+                        3 => 120,
+                        4 => 142,
+                        5 => 164,
                     ];
 
                     $pdf->SetTextColor(0, 0, 0);
@@ -1128,16 +1337,16 @@ class KiaPdfService
                     $xTidak = 341;
 
                     $yPerk6 = [
-                        'berbalik'        => 161,
+                        'berbalik' => 161,
                         'kepala_tegak_90' => 170,
-                        'kepala_stabil'   => 180,
-                        'genggam_mainan'  => 190,
-                        'raih_benda'      => 199,
-                        'amati_tangan'    => 209,
-                        'luas_pandang'    => 219,
-                        'arah_mata'       => 228,
-                        'suara_gembira'   => 238,
-                        'senyum_mainan'   => 248,
+                        'kepala_stabil' => 180,
+                        'genggam_mainan' => 190,
+                        'raih_benda' => 199,
+                        'amati_tangan' => 209,
+                        'luas_pandang' => 219,
+                        'arah_mata' => 228,
+                        'suara_gembira' => 238,
+                        'senyum_mainan' => 248,
                     ];
 
                     foreach ($yPerk6 as $field => $y) {
@@ -1156,20 +1365,25 @@ class KiaPdfService
                 $bulanan12 = $dataKia->pemantauanBulananBayi12s;
                 if ($bulanan12 && count($bulanan12) > 0) {
                     $yMapBulanan12 = [
-                        'sesak_napas'     => 227,
-                        'batuk'           => 207,
-                        'suhu_abnormal'   => 187,
-                        'bab_sering'      => 167,
+                        'sesak_napas' => 227,
+                        'batuk' => 207,
+                        'suhu_abnormal' => 187,
+                        'bab_sering' => 167,
                         'kencing_sedikit' => 147,
-                        'kulit_biru'      => 127,
+                        'kulit_biru' => 127,
                         'aktivitas_lemah' => 107,
-                        'hisapan_lemah'   => 87,
-                        'tidak_makan'     => 67,
-                        'paraf'           => 56.5,
+                        'hisapan_lemah' => 87,
+                        'tidak_makan' => 67,
+                        'paraf' => 56.5,
                     ];
 
                     $xMapBulanan12 = [
-                        6 => 292, 7 => 302, 8 => 312, 9 => 322, 10 => 333, 11 => 343,
+                        6 => 292,
+                        7 => 302,
+                        8 => 312,
+                        9 => 322,
+                        10 => 333,
+                        11 => 343,
                     ];
 
                     $pdf->SetTextColor(0, 0, 0);
@@ -1209,17 +1423,17 @@ class KiaPdfService
                     $xTidak9 = 165.5;
 
                     $yPerk9 = [
-                        'duduk_mandiri'       => 188,
-                        'tengkurap_dada'      => 194,
-                        'merangkak'           => 200,
-                        'pindah_benda'        => 206,
-                        'pungut_2_benda'      => 212,
-                        'pungut_kacang'       => 218,
+                        'duduk_mandiri' => 188,
+                        'tengkurap_dada' => 194,
+                        'merangkak' => 200,
+                        'pindah_benda' => 206,
+                        'pungut_2_benda' => 212,
+                        'pungut_kacang' => 218,
                         'bersuara_tanpa_arti' => 224,
-                        'cari_mainan'         => 231,
-                        'tepuk_tangan'        => 237,
-                        'lempar_benda'        => 243,
-                        'makan_kue'           => 249,
+                        'cari_mainan' => 231,
+                        'tepuk_tangan' => 237,
+                        'lempar_benda' => 243,
+                        'makan_kue' => 249,
                     ];
 
                     foreach ($yPerk9 as $field => $y) {
@@ -1240,17 +1454,17 @@ class KiaPdfService
 
                     $yPerk12 = [
                         'angkat_badan_berdiri' => 178,
-                        'belajar_berdiri'      => 184,
-                        'jalan_dituntun'       => 191,
-                        'ulur_tangan_raih'     => 197,
-                        'genggam_pensil'       => 204,
-                        'masuk_benda_mulut'    => 210,
-                        'tiru_bunyi'           => 217,
-                        'sebut_2_suku_kata'    => 223,
-                        'eksplorasi_sekitar'   => 229,
-                        'reaksi_panggilan'     => 235,
-                        'bermain_cilukba'      => 242,
-                        'kenal_keluarga'       => 248,
+                        'belajar_berdiri' => 184,
+                        'jalan_dituntun' => 191,
+                        'ulur_tangan_raih' => 197,
+                        'genggam_pensil' => 204,
+                        'masuk_benda_mulut' => 210,
+                        'tiru_bunyi' => 217,
+                        'sebut_2_suku_kata' => 223,
+                        'eksplorasi_sekitar' => 229,
+                        'reaksi_panggilan' => 235,
+                        'bermain_cilukba' => 242,
+                        'kenal_keluarga' => 248,
                     ];
 
                     foreach ($yPerk12 as $field => $y) {
@@ -1269,22 +1483,31 @@ class KiaPdfService
                 $bulanan24 = $dataKia->pemantauanBulananAnak24s;
                 if ($bulanan24 && count($bulanan24) > 0) {
                     $yMapBulanan24 = [
-                        'sesak_napas'      => 227,
-                        'batuk'            => 207,
-                        'suhu_abnormal'    => 187,
-                        'bab_sering'       => 167,
-                        'kencing_sedikit'  => 147,
+                        'sesak_napas' => 227,
+                        'batuk' => 207,
+                        'suhu_abnormal' => 187,
+                        'bab_sering' => 167,
+                        'kencing_sedikit' => 147,
                         'kulit_pucat_biru' => 127,
-                        'aktivitas_lemah'  => 107,
-                        'telinga_cairan'   => 87,
-                        'tidak_makan'      => 67,
-                        'paraf'            => 56.5,
+                        'aktivitas_lemah' => 107,
+                        'telinga_cairan' => 87,
+                        'tidak_makan' => 67,
+                        'paraf' => 56.5,
                     ];
 
                     $xMapBulanan24 = [
-                        12 => 121,   13 => 141, 14 => 162,   15 => 213,
-                        16 => 230,   17 => 246, 18 => 263,   19 => 279,
-                        20 => 295,   21 => 311, 22 => 327,   23 => 343,
+                        12 => 121,
+                        13 => 141,
+                        14 => 162,
+                        15 => 213,
+                        16 => 230,
+                        17 => 246,
+                        18 => 263,
+                        19 => 279,
+                        20 => 295,
+                        21 => 311,
+                        22 => 327,
+                        23 => 343,
                     ];
 
                     $pdf->SetTextColor(0, 0, 0);
@@ -1325,13 +1548,13 @@ class KiaPdfService
 
                     $yPerk18 = [
                         'berdiri_tanpa_pegangan' => 195,
-                        'bungkuk_pungut_mainan'  => 203,
+                        'bungkuk_pungut_mainan' => 203,
                         'jalan_mundur_5_langkah' => 210.5,
-                        'panggil_papa_mama'      => 217.5,
-                        'tumpuk_2_kubus'         => 224.5,
-                        'masuk_kubus_kotak'      => 232,
-                        'tunjuk_tanpa_nangis'    => 239.5,
-                        'rasa_cemburu'           => 248,
+                        'panggil_papa_mama' => 217.5,
+                        'tumpuk_2_kubus' => 224.5,
+                        'masuk_kubus_kotak' => 232,
+                        'tunjuk_tanpa_nangis' => 239.5,
+                        'rasa_cemburu' => 248,
                     ];
 
                     foreach ($yPerk18 as $field => $y) {
@@ -1351,13 +1574,13 @@ class KiaPdfService
                     $xTidak24 = 341;
 
                     $yPerk24 = [
-                        'berdiri_30_detik'       => 184,
-                        'jalan_tanpa_huyung'     => 193,
-                        'tumpuk_4_kubus'         => 202,
-                        'pungut_benda_kecil'     => 211,
-                        'gelinding_bola'         => 220,
-                        'sebut_3_6_kata'         => 229,
-                        'bantu_pekerjaan_rumah'  => 238,
+                        'berdiri_30_detik' => 184,
+                        'jalan_tanpa_huyung' => 193,
+                        'tumpuk_4_kubus' => 202,
+                        'pungut_benda_kecil' => 211,
+                        'gelinding_bola' => 220,
+                        'sebut_3_6_kata' => 229,
+                        'bantu_pekerjaan_rumah' => 238,
                         'pegang_cangkir_sendiri' => 247,
                     ];
 
@@ -1380,28 +1603,49 @@ class KiaPdfService
 
                     // Peta X untuk bulan 24 s.d. 47
                     $xMapBulanan72 = [
-                        24 => 116, 25 => 126, 26 => 136.5, 27 => 146.5, 28 => 157, 29 => 167,
-                        30 => 209, 31 => 217, 32 => 225, 33 => 233, 34 => 241, 35 => 249,
-                        36 => 257, 37 => 265, 38 => 273, 39 => 281, 40 => 289, 41 => 297,
-                        42 => 305, 43 => 313, 44 => 321, 45 => 329, 46 => 337, 47 => 345,
+                        24 => 116,
+                        25 => 126,
+                        26 => 136.5,
+                        27 => 146.5,
+                        28 => 157,
+                        29 => 167,
+                        30 => 209,
+                        31 => 217,
+                        32 => 225,
+                        33 => 233,
+                        34 => 241,
+                        35 => 249,
+                        36 => 257,
+                        37 => 265,
+                        38 => 273,
+                        39 => 281,
+                        40 => 289,
+                        41 => 297,
+                        42 => 305,
+                        43 => 313,
+                        44 => 321,
+                        45 => 329,
+                        46 => 337,
+                        47 => 345,
                     ];
 
                     $yMapBulanan72 = [
-                        'sesak_napas'      => 227,
-                        'batuk'            => 207,
-                        'suhu_abnormal'    => 187,
-                        'bab_sering'       => 167,
-                        'kencing_sedikit'  => 147,
+                        'sesak_napas' => 227,
+                        'batuk' => 207,
+                        'suhu_abnormal' => 187,
+                        'bab_sering' => 167,
+                        'kencing_sedikit' => 147,
                         'kulit_pucat_biru' => 127,
-                        'aktivitas_lemah'  => 107,
-                        'telinga_cairan'   => 87,
-                        'tidak_makan'      => 67,
-                        'paraf'            => 56.5,
+                        'aktivitas_lemah' => 107,
+                        'telinga_cairan' => 87,
+                        'tidak_makan' => 67,
+                        'paraf' => 56.5,
                     ];
 
                     foreach ($bulanan72 as $r) {
                         $m = $r->bulan_ke;
-                        if (!isset($xMapBulanan72[$m])) continue;
+                        if (!isset($xMapBulanan72[$m]))
+                            continue;
                         $x = $xMapBulanan72[$m];
 
                         $pdf->SetFont('ZapfDingbats', '', 10);
@@ -1427,28 +1671,49 @@ class KiaPdfService
 
                     // Peta X untuk bulan 48 s.d. 71
                     $xMapBulanan72 = [
-                        48 => 116,  49 => 126,  50 => 136.5,  51 => 146.5,  52 => 157,  53 => 167,
-                        54 => 209, 55 => 217, 56 => 225, 57 => 233, 58 => 241, 59 => 249,
-                        60 => 257, 61 => 265, 62 => 273, 63 => 281, 64 => 289, 65 => 297,
-                        66 => 305, 67 => 313, 68 => 321, 69 => 329, 70 => 337, 71 => 345,
+                        48 => 116,
+                        49 => 126,
+                        50 => 136.5,
+                        51 => 146.5,
+                        52 => 157,
+                        53 => 167,
+                        54 => 209,
+                        55 => 217,
+                        56 => 225,
+                        57 => 233,
+                        58 => 241,
+                        59 => 249,
+                        60 => 257,
+                        61 => 265,
+                        62 => 273,
+                        63 => 281,
+                        64 => 289,
+                        65 => 297,
+                        66 => 305,
+                        67 => 313,
+                        68 => 321,
+                        69 => 329,
+                        70 => 337,
+                        71 => 345,
                     ];
 
                     $yMapBulanan72 = [
-                        'sesak_napas'      => 227,
-                        'batuk'            => 207,
-                        'suhu_abnormal'    => 187,
-                        'bab_sering'       => 167,
-                        'kencing_sedikit'  => 147,
+                        'sesak_napas' => 227,
+                        'batuk' => 207,
+                        'suhu_abnormal' => 187,
+                        'bab_sering' => 167,
+                        'kencing_sedikit' => 147,
                         'kulit_pucat_biru' => 127,
-                        'aktivitas_lemah'  => 107,
-                        'telinga_cairan'   => 87,
-                        'tidak_makan'      => 67,
-                        'paraf'            => 56.5,
+                        'aktivitas_lemah' => 107,
+                        'telinga_cairan' => 87,
+                        'tidak_makan' => 67,
+                        'paraf' => 56.5,
                     ];
 
                     foreach ($bulanan72 as $r) {
                         $m = $r->bulan_ke;
-                        if (!isset($xMapBulanan72[$m])) continue;
+                        if (!isset($xMapBulanan72[$m]))
+                            continue;
                         $x = $xMapBulanan72[$m];
 
                         $pdf->SetFont('ZapfDingbats', '', 10);
@@ -1477,15 +1742,15 @@ class KiaPdfService
                     $xTidak36 = 341;
 
                     $yPerk36 = [
-                        'naik_tangga'         => 175,
-                        'tendang_bola'        => 184,
-                        'coret_kertas'        => 193,
-                        'bicara_2_kata'       => 201,
+                        'naik_tangga' => 175,
+                        'tendang_bola' => 184,
+                        'coret_kertas' => 193,
+                        'bicara_2_kata' => 201,
                         'tunjuk_bagian_tubuh' => 211,
-                        'sebut_nama_benda'    => 220,
-                        'pungut_mainan'       => 229,
-                        'makan_nasi_sendiri'  => 238,
-                        'lepas_pakaian'       => 247,
+                        'sebut_nama_benda' => 220,
+                        'pungut_mainan' => 229,
+                        'makan_nasi_sendiri' => 238,
+                        'lepas_pakaian' => 247,
                     ];
 
                     foreach ($yPerk36 as $field => $y) {
@@ -1510,18 +1775,18 @@ class KiaPdfService
                     $xTidak48 = 341;
 
                     $yPerk48 = [
-                        'berdiri_1_kaki_2_detik'    => 166,
-                        'lompat_kedua_kaki'         => 173,
-                        'kayuh_sepeda_roda_3'       => 180,
-                        'gambar_garis_lurus'        => 187,
-                        'tumpuk_8_kubus'            => 194,
-                        'kenal_2_4_warna'           => 201,
-                        'sebut_nama_umur_tempat'    => 208,
+                        'berdiri_1_kaki_2_detik' => 166,
+                        'lompat_kedua_kaki' => 173,
+                        'kayuh_sepeda_roda_3' => 180,
+                        'gambar_garis_lurus' => 187,
+                        'tumpuk_8_kubus' => 194,
+                        'kenal_2_4_warna' => 201,
+                        'sebut_nama_umur_tempat' => 208,
                         'mengerti_arti_kata_posisi' => 215,
-                        'dengar_cerita'             => 222,
-                        'cuci_tangan_sendiri'       => 228,
-                        'bermain_dengan_teman'      => 235,
-                        'pakai_sepatu_sendiri'      => 242,
+                        'dengar_cerita' => 222,
+                        'cuci_tangan_sendiri' => 228,
+                        'bermain_dengan_teman' => 235,
+                        'pakai_sepatu_sendiri' => 242,
                         'pakai_celana_baju_sendiri' => 249,
                     ];
 
@@ -1548,20 +1813,20 @@ class KiaPdfService
                     $xTidak60 = 166;
 
                     $yPerk60 = [
-                        'berdiri_1_kaki_6_detik'      => 163,
-                        'lompat_1_kaki'               => 169,
-                        'menari'                      => 176,
-                        'gambar_tanda_silang'         => 182,
-                        'gambar_lingkaran'            => 189,
-                        'gambar_orang_3_bagian'       => 196,
-                        'kancing_baju_boneka'         => 202,
-                        'sebut_nama_lengkap'          => 209,
-                        'senang_sebut_kata_baru'      => 215,
-                        'senang_bertanya'             => 222,
+                        'berdiri_1_kaki_6_detik' => 163,
+                        'lompat_1_kaki' => 169,
+                        'menari' => 176,
+                        'gambar_tanda_silang' => 182,
+                        'gambar_lingkaran' => 189,
+                        'gambar_orang_3_bagian' => 196,
+                        'kancing_baju_boneka' => 202,
+                        'sebut_nama_lengkap' => 209,
+                        'senang_sebut_kata_baru' => 215,
+                        'senang_bertanya' => 222,
                         'jawab_pertanyaan_kata_benar' => 229,
-                        'bicara_mudah_dimengerti'     => 235,
-                        'banding_ukuran_bentuk'       => 242,
-                        'sebut_angka_hitung_jari'     => 249,
+                        'bicara_mudah_dimengerti' => 235,
+                        'banding_ukuran_bentuk' => 242,
+                        'sebut_angka_hitung_jari' => 249,
                     ];
 
                     foreach ($yPerk60 as $field => $y) {
@@ -1584,19 +1849,19 @@ class KiaPdfService
                     $xTidak72 = 341;
 
                     $yPerk72 = [
-                        'berjalan_lurus'                => 184,
-                        'berdiri_1_kaki_11_detik'       => 189,
+                        'berjalan_lurus' => 184,
+                        'berdiri_1_kaki_11_detik' => 189,
                         'gambar_6_bagian_orang_lengkap' => 195,
-                        'tangkap_bola_kecil'            => 200,
-                        'gambar_segi_empat'             => 206,
-                        'mengerti_lawan_kata'           => 211,
-                        'mengerti_pembicaraan_7_kata'   => 216,
-                        'jawab_bahan_guna_benda'        => 222,
-                        'kenal_angka_hitung_5_10'       => 227,
-                        'kenal_warna_warni'             => 233,
-                        'ungkapkan_simpati'             => 238,
-                        'ikut_aturan_permainan'         => 244,
-                        'pakaian_sendiri_tanpa_bantu'   => 249,
+                        'tangkap_bola_kecil' => 200,
+                        'gambar_segi_empat' => 206,
+                        'mengerti_lawan_kata' => 211,
+                        'mengerti_pembicaraan_7_kata' => 216,
+                        'jawab_bahan_guna_benda' => 222,
+                        'kenal_angka_hitung_5_10' => 227,
+                        'kenal_warna_warni' => 233,
+                        'ungkapkan_simpati' => 238,
+                        'ikut_aturan_permainan' => 244,
+                        'pakaian_sendiri_tanpa_bantu' => 249,
                     ];
 
                     foreach ($yPerk72 as $field => $y) {
@@ -1618,52 +1883,126 @@ class KiaPdfService
                     $pdf->SetFont('ZapfDingbats', '', 10);
 
                     // Kolom Kiri (X = 30)
-                    if ($lingk->bab_sembarangan) { $pdf->Text(214, 67, chr(51)); }
-                    if ($lingk->bab_jamban_sendiri) { $pdf->Text(214, 71, chr(51)); }
-                    if ($lingk->penampung_tangki_septik) { $pdf->Text(214, 84, chr(51)); }
-                    if ($lingk->penampung_cubluk) { $pdf->Text(214, 97, chr(51)); }
-                    if ($lingk->penampung_drainase) { $pdf->Text(214, 101, chr(51)); }
-                    if ($lingk->kloset_leher_angsa) { $pdf->Text(214, 118, chr(51)); }
+                    if ($lingk->bab_sembarangan) {
+                        $pdf->Text(214, 67, chr(51));
+                    }
+                    if ($lingk->bab_jamban_sendiri) {
+                        $pdf->Text(214, 71, chr(51));
+                    }
+                    if ($lingk->penampung_tangki_septik) {
+                        $pdf->Text(214, 84, chr(51));
+                    }
+                    if ($lingk->penampung_cubluk) {
+                        $pdf->Text(214, 97, chr(51));
+                    }
+                    if ($lingk->penampung_drainase) {
+                        $pdf->Text(214, 101, chr(51));
+                    }
+                    if ($lingk->kloset_leher_angsa) {
+                        $pdf->Text(214, 118, chr(51));
+                    }
 
-                    if ($lingk->ctps_sarana) { $pdf->Text(214, 142, chr(51)); }
-                    if ($lingk->ctps_air_mengalir) { $pdf->Text(214, 146.5, chr(51)); }
-                    if ($lingk->ctps_sabun) { $pdf->Text(214, 151, chr(51)); }
+                    if ($lingk->ctps_sarana) {
+                        $pdf->Text(214, 142, chr(51));
+                    }
+                    if ($lingk->ctps_air_mengalir) {
+                        $pdf->Text(214, 146.5, chr(51));
+                    }
+                    if ($lingk->ctps_sabun) {
+                        $pdf->Text(214, 151, chr(51));
+                    }
 
-                    if ($lingk->ctps_waktu_sebelum_makan) { $pdf->Text(214, 173, chr(51)); }
-                    if ($lingk->ctps_waktu_sebelum_mengolah) { $pdf->Text(214, 177.5, chr(51)); }
-                    if ($lingk->ctps_waktu_sebelum_menyusui) { $pdf->Text(214, 186, chr(51)); }
-                    if ($lingk->ctps_waktu_setelah_bab) { $pdf->Text(214, 194.5, chr(51)); }
+                    if ($lingk->ctps_waktu_sebelum_makan) {
+                        $pdf->Text(214, 173, chr(51));
+                    }
+                    if ($lingk->ctps_waktu_sebelum_mengolah) {
+                        $pdf->Text(214, 177.5, chr(51));
+                    }
+                    if ($lingk->ctps_waktu_sebelum_menyusui) {
+                        $pdf->Text(214, 186, chr(51));
+                    }
+                    if ($lingk->ctps_waktu_setelah_bab) {
+                        $pdf->Text(214, 194.5, chr(51));
+                    }
 
-                    if ($lingk->sumber_air_pipa) { $pdf->Text(214, 209.5, chr(51)); }
-                    if ($lingk->sumber_air_kran) { $pdf->Text(214, 214, chr(51)); }
-                    if ($lingk->sumber_air_sumur_terlindungi) { $pdf->Text(214, 218, chr(51)); }
-                    if ($lingk->sumber_air_mata_air_terlindungi) { $pdf->Text(214, 226.5, chr(51)); }
-                    if ($lingk->sumber_air_sungai) { $pdf->Text(214, 230.5, chr(51)); }
-                    if ($lingk->sumber_air_danau) { $pdf->Text(214, 235, chr(51)); }
-                    if ($lingk->sumber_air_hujan) { $pdf->Text(214, 239.5, chr(51)); }
-                    if ($lingk->sumber_air_waduk) { $pdf->Text(214, 243.5, chr(51)); }
+                    if ($lingk->sumber_air_pipa) {
+                        $pdf->Text(214, 209.5, chr(51));
+                    }
+                    if ($lingk->sumber_air_kran) {
+                        $pdf->Text(214, 214, chr(51));
+                    }
+                    if ($lingk->sumber_air_sumur_terlindungi) {
+                        $pdf->Text(214, 218, chr(51));
+                    }
+                    if ($lingk->sumber_air_mata_air_terlindungi) {
+                        $pdf->Text(214, 226.5, chr(51));
+                    }
+                    if ($lingk->sumber_air_sungai) {
+                        $pdf->Text(214, 230.5, chr(51));
+                    }
+                    if ($lingk->sumber_air_danau) {
+                        $pdf->Text(214, 235, chr(51));
+                    }
+                    if ($lingk->sumber_air_hujan) {
+                        $pdf->Text(214, 239.5, chr(51));
+                    }
+                    if ($lingk->sumber_air_waduk) {
+                        $pdf->Text(214, 243.5, chr(51));
+                    }
 
                     // Kolom Kanan (X = 113)
-                    if ($lingk->sumber_air_kolam) { $pdf->Text(284, 57.5, chr(51)); }
-                    if ($lingk->sumber_air_irigasi) { $pdf->Text(284, 61.5, chr(51)); }
+                    if ($lingk->sumber_air_kolam) {
+                        $pdf->Text(284, 57.5, chr(51));
+                    }
+                    if ($lingk->sumber_air_irigasi) {
+                        $pdf->Text(284, 61.5, chr(51));
+                    }
 
-                    if ($lingk->kelola_air_rebus) { $pdf->Text(284, 75, chr(51)); }
-                    if ($lingk->kelola_air_endap_saring) { $pdf->Text(284, 79, chr(51)); }
-                    if ($lingk->kelola_air_wadah_tertutup) { $pdf->Text(284, 87.5, chr(51)); }
+                    if ($lingk->kelola_air_rebus) {
+                        $pdf->Text(284, 75, chr(51));
+                    }
+                    if ($lingk->kelola_air_endap_saring) {
+                        $pdf->Text(284, 79, chr(51));
+                    }
+                    if ($lingk->kelola_air_wadah_tertutup) {
+                        $pdf->Text(284, 87.5, chr(51));
+                    }
 
-                    if ($lingk->kelola_makanan_tertutup) { $pdf->Text(284, 109.5, chr(51)); }
-                    if ($lingk->kelola_makanan_jauh_bahan_berbahaya) { $pdf->Text(284, 118, chr(51)); }
-                    if ($lingk->kelola_makanan_baik_benar) { $pdf->Text(284, 130.5, chr(51)); }
+                    if ($lingk->kelola_makanan_tertutup) {
+                        $pdf->Text(284, 109.5, chr(51));
+                    }
+                    if ($lingk->kelola_makanan_jauh_bahan_berbahaya) {
+                        $pdf->Text(284, 118, chr(51));
+                    }
+                    if ($lingk->kelola_makanan_baik_benar) {
+                        $pdf->Text(284, 130.5, chr(51));
+                    }
 
-                    if ($lingk->sampah_tidak_berserakan) { $pdf->Text(284, 167, chr(51)); }
-                    if ($lingk->sampah_tempat_tertutup) { $pdf->Text(284, 175.5, chr(51)); }
-                    if ($lingk->sampah_dipilah) { $pdf->Text(284, 184, chr(51)); }
-                    if ($lingk->sampah_tidak_dibakar) { $pdf->Text(284, 188, chr(51)); }
-                    if ($lingk->sampah_tidak_dibuang_sembarangan) { $pdf->Text(284, 192, chr(51)); }
+                    if ($lingk->sampah_tidak_berserakan) {
+                        $pdf->Text(284, 167, chr(51));
+                    }
+                    if ($lingk->sampah_tempat_tertutup) {
+                        $pdf->Text(284, 175.5, chr(51));
+                    }
+                    if ($lingk->sampah_dipilah) {
+                        $pdf->Text(284, 184, chr(51));
+                    }
+                    if ($lingk->sampah_tidak_dibakar) {
+                        $pdf->Text(284, 188, chr(51));
+                    }
+                    if ($lingk->sampah_tidak_dibuang_sembarangan) {
+                        $pdf->Text(284, 192, chr(51));
+                    }
 
-                    if ($lingk->limbah_tidak_menggenang) { $pdf->Text(284, 221, chr(51)); }
-                    if ($lingk->limbah_saluran_tertutup) { $pdf->Text(284, 225, chr(51)); }
-                    if ($lingk->limbah_terhubung_resapan) { $pdf->Text(284, 233.5, chr(51)); }
+                    if ($lingk->limbah_tidak_menggenang) {
+                        $pdf->Text(284, 221, chr(51));
+                    }
+                    if ($lingk->limbah_saluran_tertutup) {
+                        $pdf->Text(284, 225, chr(51));
+                    }
+                    if ($lingk->limbah_terhubung_resapan) {
+                        $pdf->Text(284, 233.5, chr(51));
+                    }
                 }
             }
 
@@ -1708,64 +2047,653 @@ class KiaPdfService
 
                     foreach ($pelayanan as $p) {
                         $x = $xMap[$p->kunjungan_ke] ?? null;
-                        if (!$x) continue;
+                        if (!$x)
+                            continue;
 
-                        if ($p->tanggal_periksa) { $pdf->Text($x, $yMap['tanggal_periksa'], date('d/m/Y', strtotime($p->tanggal_periksa))); }
-                        if ($p->tempat_periksa) { 
+                        if ($p->tanggal_periksa) {
+                            $pdf->Text($x, $yMap['tanggal_periksa'], date('d/m/Y', strtotime($p->tanggal_periksa)));
+                        }
+                        if ($p->tempat_periksa) {
                             $pdf->SetXY($x, $yMap['tempat_periksa'] - 2);
-                            $pdf->MultiCell(18, 3, $p->tempat_periksa, 0, 'L'); 
+                            $pdf->MultiCell(18, 3, $p->tempat_periksa, 0, 'L');
                         }
-                        if ($p->berat_badan) { $pdf->Text($x, $yMap['berat_badan'], $p->berat_badan); }
-                        
-                        if ($p->tinggi_badan && in_array($p->kunjungan_ke, [1])) { 
-                            $pdf->Text($x, $yMap['tinggi_badan'], $p->tinggi_badan); 
+                        if ($p->berat_badan) {
+                            $pdf->Text($x, $yMap['berat_badan'], $p->berat_badan);
                         }
-                        
-                        if ($p->lingkar_lengan_atas) { $pdf->Text($x, $yMap['lingkar_lengan_atas'], $p->lingkar_lengan_atas); }
-                        if ($p->tekanan_darah) { $pdf->Text($x, $yMap['tekanan_darah'], $p->tekanan_darah); }
-                        if ($p->tinggi_rahim) { $pdf->Text($x, $yMap['tinggi_rahim'], $p->tinggi_rahim); }
-                        
-                        $letakDenyut = trim(($p->letak_janin ?? '') . ' / ' . ($p->denyut_jantung_bayi ?? ''), ' /');
-                        if ($letakDenyut) { $pdf->Text($x, $yMap['letak_denyut_jantung'], substr($letakDenyut, 0, 15)); }
 
-                        if ($p->status_imunisasi_tt) { $pdf->Text($x, $yMap['status_imunisasi_tt'], substr($p->status_imunisasi_tt, 0, 15)); }
-                        if ($p->konseling) { $pdf->Text($x, $yMap['konseling'], substr($p->konseling, 0, 15)); }
-                        if ($p->skrining_dokter) { $pdf->Text($x, $yMap['skrining_dokter'], substr($p->skrining_dokter, 0, 15)); }
-                        if ($p->tablet_tambah_darah) { $pdf->Text($x, $yMap['tablet_tambah_darah'], $p->tablet_tambah_darah); }
-                        
-                        if ($p->tes_lab_hb && in_array($p->kunjungan_ke, [1, 4, 5])) { 
-                            $pdf->Text($x, $yMap['tes_lab_hb'], $p->tes_lab_hb); 
+                        if ($p->tinggi_badan && in_array($p->kunjungan_ke, [1])) {
+                            $pdf->Text($x, $yMap['tinggi_badan'], $p->tinggi_badan);
                         }
-                        
-                        if ($p->tes_golongan_darah && in_array($p->kunjungan_ke, [1])) { 
-                            $pdf->Text($x, $yMap['tes_golongan_darah'], $p->tes_golongan_darah); 
+
+                        if ($p->lingkar_lengan_atas) {
+                            $pdf->Text($x, $yMap['lingkar_lengan_atas'], $p->lingkar_lengan_atas);
                         }
-                        
-                        if ($p->tes_lab_protein_urine && in_array($p->kunjungan_ke, [2, 3, 4, 5, 6])) { 
-                            $pdf->Text($x, $yMap['tes_lab_protein_urine'], $p->tes_lab_protein_urine); 
+                        if ($p->tekanan_darah) {
+                            $pdf->Text($x, $yMap['tekanan_darah'], $p->tekanan_darah);
                         }
-                        
-                        if ($p->tes_lab_gula_darah && in_array($p->kunjungan_ke, [4, 5, 6])) { 
-                            $pdf->Text($x, $yMap['tes_lab_gula_darah'], $p->tes_lab_gula_darah); 
+                        if ($p->tinggi_rahim) {
+                            $pdf->Text($x, $yMap['tinggi_rahim'], $p->tinggi_rahim);
                         }
-                        
-                        if ($p->usg && in_array($p->kunjungan_ke, [1, 5])) { 
-                            $pdf->Text($x, $yMap['usg'], substr($p->usg, 0, 10)); 
+
+                        $letakDenyut = trim(($p->letak_janin ?? '') . ' / ' . ($p->denyut_jantung_bayi ?? ''), ' /');
+                        if ($letakDenyut) {
+                            $pdf->Text($x, $yMap['letak_denyut_jantung'], substr($letakDenyut, 0, 15));
                         }
-                        
-                        if ($p->tripel_eliminasi) { 
+
+                        if ($p->status_imunisasi_tt) {
+                            $pdf->Text($x, $yMap['status_imunisasi_tt'], substr($p->status_imunisasi_tt, 0, 15));
+                        }
+                        if ($p->konseling) {
+                            $pdf->Text($x, $yMap['konseling'], substr($p->konseling, 0, 15));
+                        }
+                        if ($p->skrining_dokter) {
+                            $pdf->Text($x, $yMap['skrining_dokter'], substr($p->skrining_dokter, 0, 15));
+                        }
+                        if ($p->tablet_tambah_darah) {
+                            $pdf->Text($x, $yMap['tablet_tambah_darah'], $p->tablet_tambah_darah);
+                        }
+
+                        if ($p->tes_lab_hb && in_array($p->kunjungan_ke, [1, 4, 5])) {
+                            $pdf->Text($x, $yMap['tes_lab_hb'], $p->tes_lab_hb);
+                        }
+
+                        if ($p->tes_golongan_darah && in_array($p->kunjungan_ke, [1])) {
+                            $pdf->Text($x, $yMap['tes_golongan_darah'], $p->tes_golongan_darah);
+                        }
+
+                        if ($p->tes_lab_protein_urine && in_array($p->kunjungan_ke, [2, 3, 4, 5, 6])) {
+                            $pdf->Text($x, $yMap['tes_lab_protein_urine'], $p->tes_lab_protein_urine);
+                        }
+
+                        if ($p->tes_lab_gula_darah && in_array($p->kunjungan_ke, [4, 5, 6])) {
+                            $pdf->Text($x, $yMap['tes_lab_gula_darah'], $p->tes_lab_gula_darah);
+                        }
+
+                        if ($p->usg && in_array($p->kunjungan_ke, [1, 5])) {
+                            $pdf->Text($x, $yMap['usg'], substr($p->usg, 0, 10));
+                        }
+
+                        if ($p->tripel_eliminasi) {
                             // Split value by comma, space, or slash
                             $tripelArr = preg_split('/[,\s\/]+/', $p->tripel_eliminasi);
                             $h = $tripelArr[0] ?? '';
                             $s = $tripelArr[1] ?? '';
                             $hepB = $tripelArr[2] ?? '';
-                            
+
                             $pdf->Text($x, $yMap['tripel_eliminasi'], substr($h, 0, 3));
                             $pdf->Text($x + 6, $yMap['tripel_eliminasi'], substr($s, 0, 3));
                             $pdf->Text($x + 12, $yMap['tripel_eliminasi'], substr($hepB, 0, 3));
                         }
-                        
-                        if ($p->tata_laksana_kasus) { $pdf->Text($x, $yMap['tata_laksana_kasus'], substr($p->tata_laksana_kasus, 0, 15)); }
+
+                        if ($p->tata_laksana_kasus) {
+                            $pdf->Text($x, $yMap['tata_laksana_kasus'], substr($p->tata_laksana_kasus, 0, 15));
+                        }
+                    }
+                }
+            }
+            // 30. EVALUASI KESEHATAN IBU HAMIL (Halaman 51)
+            if ($pageNo === 51) {
+                $eval = $dataKia->evaluasiKesehatanIbu;
+                if ($eval) {
+                    $pdf->SetTextColor(0, 0, 0);
+
+                    // Gunakan font ZapfDingbats untuk checkmark
+                    $checkFont = 'ZapfDingbats';
+                    $checkChar = chr(51);
+
+                    // --- Informasi Dasar ---
+                    $pdf->SetFont('Arial', '', 9);
+                    if ($eval->nama_dokter) {
+                        $pdf->Text(50, 46, substr($eval->nama_dokter, 0, 30));
+                    }
+                    if ($eval->tanggal_periksa) {
+                        $pdf->Text(129, 46, date('d/m/Y', strtotime($eval->tanggal_periksa)));
+                    }
+                    if ($eval->fasilitas_kesehatan) {
+                        $pdf->Text(59, 53, substr($eval->fasilitas_kesehatan, 0, 30));
+                    }
+
+                    // --- Kondisi Kesehatan Ibu (Sesuai Gambar User) ---
+                    $pdf->SetFont('Arial', '', 8);
+                    if ($eval->tb) { $pdf->Text(38.5, 71.3, $eval->tb); }
+                    if ($eval->bb) { $pdf->Text(38.5, 77.5, $eval->bb); }
+                    if ($eval->lila) { $pdf->Text(38.5, 83.5, $eval->lila); }
+
+                    // Baris LiLa 4 Kolom (Di bawah Kurus, Normal, Gemuk, Obesitas)
+                    if ($eval->lila_kurus) { $pdf->Text(51, 83, $eval->lila_kurus); }
+                    if ($eval->lila_normal) { $pdf->Text(64, 83, $eval->lila_normal); }
+                    if ($eval->lila_gemuk) { $pdf->Text(75, 83, $eval->lila_gemuk); }
+                    if ($eval->lila_obesitas) { $pdf->Text(89, 83, $eval->lila_obesitas); }
+
+                    // --- Status Imunisasi TD ---
+                    $pdf->SetFont('ZapfDingbats', '', 10);
+                    $checkChar = chr(51); // Karakter checklist
+
+                    if ($eval->imunisasi_tt_1) {
+                        $pdf->Text(92, 105, $checkChar);
+                    }
+                    if ($eval->imunisasi_tt_2) {
+                        $pdf->Text(92, 111, $checkChar);
+                    }
+                    if ($eval->imunisasi_tt_3) {
+                        $pdf->Text(92, 117, $checkChar);
+                    }
+                    if ($eval->imunisasi_tt_4) {
+                        $pdf->Text(92, 123, $checkChar);
+                    }
+                    if ($eval->imunisasi_tt_5) {
+                        $pdf->Text(92, 129, $checkChar);
+                    }
+
+                    $pdf->SetFont('Arial', '', 8);
+
+                    // --- Riwayat Kesehatan Ibu Sekarang ---
+                    $rkes = $eval->riwayat_kesehatan_ibu ?? [];
+                    if (in_array('Alergi', $rkes)) {
+                        $pdf->Ellipse(107.5, 70.5, 5, 3);
+                    }
+                    if (in_array('Autoimun', $rkes)) {
+                        $pdf->Ellipse(110, 76.5, 7.8, 2.5);
+                    }
+                    if (in_array('Hepatitis B', $rkes)) {
+                        $pdf->Ellipse(110.5, 82.5, 8, 2.5);
+                    }
+                    if (in_array('Jantung', $rkes)) {
+                        $pdf->Ellipse(109.1, 89, 5.7, 2.5);
+                    }
+                    if (in_array('Sifilis', $rkes)) {
+                        $pdf->Ellipse(107.5, 95, 5, 2.5);
+                    }
+                    if (in_array('Asma', $rkes)) {
+                        $pdf->Ellipse(143, 70.5, 5.5, 2.5);
+                    }
+                    if (in_array('Diabetes', $rkes)) {
+                        $pdf->Ellipse(144, 76.5, 6.8, 2.5);
+                    }
+                    if (in_array('Hipertensi', $rkes)) {
+                        $pdf->Ellipse(145, 82.5, 8, 2.5);
+                    }
+                    if (in_array('Jiwa', $rkes)) {
+                        $pdf->Ellipse(142, 88.5, 4, 3);
+                    }
+                    if (in_array('TB', $rkes)) {
+                        $pdf->Ellipse(140.5, 95, 3, 3);
+                    }
+                    if ($eval->riwayat_kesehatan_ibu_lainnya) {
+                        $pdf->Text(116, 102, substr($eval->riwayat_kesehatan_ibu_lainnya, 0, 20));
+                    }
+
+                    // --- Riwayat Perilaku Berisiko ---
+                    $rper = $eval->riwayat_perilaku ?? [];
+                    if (in_array('Aktivitas fisik kurang', $rper)) {
+                        $pdf->Ellipse(116.5, 123, 14, 3);
+                    }
+                    if (in_array('Kosmetik berbahaya', $rper)) {
+                        $pdf->Ellipse(114, 132.5, 12, 6.6);
+                    }
+                    if (in_array('Obat Teratogenik', $rper)) {
+                        $pdf->Ellipse(115.5, 142, 13, 3);
+                    }
+                    if (in_array('Alkohol', $rper)) {
+                        $pdf->Ellipse(143.5, 123, 6, 2.5);
+                    }
+                    if (in_array('Merokok', $rper)) {
+                        $pdf->Ellipse(144, 133, 6.5, 2.7);
+                    }
+                    if (in_array('Pola makan berisiko', $rper)) {
+                        $pdf->Ellipse(152, 142.5, 14, 3);
+                    }
+                    if ($eval->riwayat_perilaku_lainnya) {
+                        $pdf->Text(115, 149.5, substr($eval->riwayat_perilaku_lainnya, 0, 20));
+                    }
+
+                    // --- Riwayat Penyakit Keluarga ---
+                    $rkel = $eval->riwayat_penyakit_keluarga ?? [];
+                    if (in_array('Alergi', $rkel)) {
+                        $pdf->Ellipse(107.5, 166, 5, 3);
+                    }
+                    if (in_array('Autoimun', $rkel)) {
+                        $pdf->Ellipse(110, 172, 7.8, 2.5);
+                    }
+                    if (in_array('Hepatitis B', $rkel)) {
+                        $pdf->Ellipse(110.5, 178, 8, 2.5);
+                    }
+                    if (in_array('Jantung', $rkel)) {
+                        $pdf->Ellipse(109.1, 184.5, 5.7, 2.5);
+                    }
+                    if (in_array('Sifilis', $rkel)) {
+                        $pdf->Ellipse(107.5, 190.5, 5, 2.5);
+                    }
+                    if (in_array('Asma', $rkel)) {
+                        $pdf->Ellipse(143, 166, 5.5, 2.5);
+                    }
+                    if (in_array('Diabetes', $rkel)) {
+                        $pdf->Ellipse(144, 172, 6.8, 2.5);
+                    }
+                    if (in_array('Hipertensi', $rkel)) {
+                        $pdf->Ellipse(145, 178, 8, 2.5);
+                    }
+                    if (in_array('Jiwa', $rkel)) {
+                        $pdf->Ellipse(142, 184, 4, 3);
+                    }
+                    if (in_array('TB', $rkel)) {
+                        $pdf->Ellipse(140.5, 190.5, 3, 3);
+                    }
+                    if ($eval->riwayat_penyakit_keluarga_lainnya) {
+                        $pdf->Text(115, 197.5, substr($eval->riwayat_penyakit_keluarga_lainnya, 0, 20));
+                    }
+
+                    // --- Pemeriksaan Khusus ---
+                    // Logika: DILINGKARI (Ellipse) opsi yang DIPILIH
+
+                    if ($eval->inspeksi_porsio) {
+                        if ($eval->inspeksi_porsio === 'Normal') {
+                            $pdf->Ellipse(67, 149.5, 8, 3);
+                        } // Lingkar 'Normal'
+                        else {
+                            $pdf->Ellipse(86.5, 149.5, 9, 3);
+                        } // Lingkar 'Tidak normal'
+                    }
+                    if ($eval->inspeksi_uretra) {
+                        if ($eval->inspeksi_uretra === 'Normal') {
+                            $pdf->Ellipse(67, 155.5, 8, 3);
+                        } else {
+                            $pdf->Ellipse(86.5, 156, 9, 3);
+                        }
+                    }
+                    if ($eval->inspeksi_vagina) {
+                        if ($eval->inspeksi_vagina === 'Normal') {
+                            $pdf->Ellipse(67, 161.8, 8, 3);
+                        } else {
+                            $pdf->Ellipse(86.5, 162, 9, 3);
+                        }
+                    }
+                    if ($eval->inspeksi_vulva) {
+                        if ($eval->inspeksi_vulva === 'Normal') {
+                            $pdf->Ellipse(67, 168, 8, 3);
+                        } else {
+                            $pdf->Ellipse(86.5, 168, 9, 3);
+                        }
+                    }
+
+                    if ($eval->inspeksi_fluksus) {
+                        if ($eval->inspeksi_fluksus === '+') {
+                            $pdf->Ellipse(64.5, 174, 2, 2);
+                        } // Lingkar '+'
+                        else {
+                            $pdf->Ellipse(88.5, 174, 2, 2);
+                        } // Lingkar '-'
+                    }
+                    if ($eval->inspeksi_fluor) {
+                        if ($eval->inspeksi_fluor === '+') {
+                            $pdf->Ellipse(64.5, 180, 2, 2);
+                        } else {
+                            $pdf->Ellipse(88.5, 180, 2, 2);
+                        }
+                    }
+
+                    // --- Riwayat Kehamilan ---
+                    $rk = $eval->riwayat_kehamilan ?? [];
+                    $rkY = 233; // Estimasi posisi Y tabel bawah
+                    foreach ($rk as $i => $k) {
+                        if (empty($k['tahun']) && empty($k['bb']))
+                            continue;
+                        $y = $rkY + ($i * 7.5);
+                        if (!empty($k['tahun'])) {
+                            $pdf->Text(40, $y, $k['tahun']);
+                        }
+                        if (!empty($k['bb'])) {
+                            $pdf->Text(55, $y, $k['bb']);
+                        }
+                        if (!empty($k['proses'])) {
+                            $pdf->Text(64, $y, $k['proses']);
+                        }
+                        if (!empty($k['penolong'])) {
+                            $pdf->Text(101, $y, $k['penolong']);
+                        }
+                        if (!empty($k['masalah'])) {
+                            $pdf->Text(137, $y, $k['masalah']);
+                        }
+                    }
+                }
+
+                // --- SISI KANAN: PEMERIKSAAN DOKTER TRIMESTER 1 ---
+                $pemeriksaan = $dataKia->pemeriksaanTrimester1;
+                if ($pemeriksaan) {
+                    $pdf->SetFont('Arial', '', 8);
+                    if ($eval->nama_dokter) {
+                        $pdf->Text(225, 51, substr($eval->nama_dokter, 0, 30));
+                    }
+                    if ($eval->tanggal_periksa) {
+                        $pdf->Text(304, 51, date('d/m/Y', strtotime($eval->tanggal_periksa)));
+                    }
+
+                    // Keadaan Umum
+                    if ($pemeriksaan->konjungtiva) {
+                        if ($pemeriksaan->konjungtiva === 'Anemia') {
+                            $pdf->Ellipse(247, 79.8, 7, 2.8);
+                        } else {
+                            $pdf->Ellipse(271, 79.7, 10, 3);
+                        }
+                    }
+                    if ($pemeriksaan->keterangan_konjungtiva) {
+                        $pdf->Text(285, 80.5, substr($pemeriksaan->keterangan_konjungtiva, 0, 20));
+                    }
+
+                    if ($pemeriksaan->sklera) {
+                        if ($pemeriksaan->sklera === 'Ikterik') {
+                            $pdf->Ellipse(247, 85.6, 6, 2.5);
+                        } else {
+                            $pdf->Ellipse(271, 85.5, 10, 3);
+                        }
+                    }
+                    if ($pemeriksaan->keterangan_sklera) {
+                        $pdf->Text(285, 86.3, substr($pemeriksaan->keterangan_sklera, 0, 20));
+                    }
+
+                    if ($pemeriksaan->kulit) {
+                        if ($pemeriksaan->kulit === 'Normal') {
+                            $pdf->Ellipse(247, 90.5, 7, 2.8);
+                        } else {
+                            $pdf->Ellipse(271, 91, 10, 3);
+                        }
+                    }
+                    if ($pemeriksaan->keterangan_kulit) {
+                        $pdf->Text(285, 91.5, substr($pemeriksaan->keterangan_kulit, 0, 20));
+                    }
+                    if ($pemeriksaan->leher) {
+                        if ($pemeriksaan->leher === 'Normal') {
+                            $pdf->Ellipse(247, 96, 7, 2.5);
+                        } else {
+                            $pdf->Ellipse(271, 96.5, 10, 3);
+                        }
+                    }
+                    if ($pemeriksaan->keterangan_leher) {
+                        $pdf->Text(285, 96.5, substr($pemeriksaan->keterangan_leher, 0, 20));
+                    }
+
+                    if ($pemeriksaan->gigi_mulut) {
+                        if ($pemeriksaan->gigi_mulut === 'Normal') {
+                            $pdf->Ellipse(247, 101, 7, 2.5);
+                        } else {
+                            $pdf->Ellipse(271, 101.5, 10, 3);
+                        }
+                    }
+                    if ($pemeriksaan->keterangan_gigi_mulut) {
+                        $pdf->Text(285, 101.5, substr($pemeriksaan->keterangan_gigi_mulut, 0, 20));
+                    }
+
+                    if ($pemeriksaan->tht) {
+                        if ($pemeriksaan->tht === 'Normal') {
+                            $pdf->Ellipse(247, 107, 7, 2.5);
+                        } else {
+                            $pdf->Ellipse(271, 107, 10, 3);
+                        }
+                    }
+                    if ($pemeriksaan->keterangan_tht) {
+                        $pdf->Text(285, 107.5, substr($pemeriksaan->keterangan_tht, 0, 20));
+                    }
+
+                    if ($pemeriksaan->dada_jantung) {
+                        if ($pemeriksaan->dada_jantung === 'Normal') {
+                            $pdf->Ellipse(247, 112.7, 7, 2.5);
+                        } else {
+                            $pdf->Ellipse(271, 113, 10, 3);
+                        }
+                    }
+                    if ($pemeriksaan->keterangan_dada_jantung) {
+                        $pdf->Text(285, 113.5, substr($pemeriksaan->keterangan_dada_jantung, 0, 20));
+                    }
+
+                    if ($pemeriksaan->dada_paru) {
+                        if ($pemeriksaan->dada_paru === 'Normal') {
+                            $pdf->Ellipse(247, 118.8, 7, 2.5);
+                        } else {
+                            $pdf->Ellipse(271, 119, 10, 3);
+                        }
+                    }
+                    if ($pemeriksaan->keterangan_dada_paru) {
+                        $pdf->Text(285, 119, substr($pemeriksaan->keterangan_dada_paru, 0, 20));
+                    }
+
+                    if ($pemeriksaan->perut) {
+                        if ($pemeriksaan->perut === 'Normal') {
+                            $pdf->Ellipse(247, 124.9, 7, 2.5);
+                        } else {
+                            $pdf->Ellipse(271, 124.5, 10, 3);
+                        }
+                    }
+                    if ($pemeriksaan->keterangan_perut) {
+                        $pdf->Text(285, 125, substr($pemeriksaan->keterangan_perut, 0, 20));
+                    }
+
+                    if ($pemeriksaan->tungkai) {
+                        if ($pemeriksaan->tungkai === 'Normal') {
+                            $pdf->Ellipse(247, 131, 7, 2.5);
+                        } else {
+                            $pdf->Ellipse(271, 130.5, 10, 3);
+                        }
+                    }
+                    if ($pemeriksaan->keterangan_tungkai) {
+                        $pdf->Text(285, 131.5, substr($pemeriksaan->keterangan_tungkai, 0, 20));
+                    }
+
+                    // USG Trimester 1
+                    if ($pemeriksaan->hpht) {
+                        $pdf->Text(215, 146, date('d/m/Y', strtotime($pemeriksaan->hpht)));
+                    }
+                    if ($pemeriksaan->keteraturan_haid) {
+                        if ($pemeriksaan->keteraturan_haid === 'Teratur') {
+                            $pdf->Ellipse(237, 153, 6, 2.5);
+                        } else {
+                            $pdf->Ellipse(253, 152, 10, 3.5);
+                        }
+                    }
+                    if ($pemeriksaan->usia_kehamilan_hpht) {
+                        $pdf->Text(288, 158.5, $pemeriksaan->usia_kehamilan_hpht);
+                    }
+                    if ($pemeriksaan->hpl_hpht) {
+                        $pdf->Text(277, 165, date('d/m/Y', strtotime($pemeriksaan->hpl_hpht)));
+                    }
+                    if ($pemeriksaan->usia_kehamilan_usg) {
+                        $pdf->Text(254, 171.5, $pemeriksaan->usia_kehamilan_usg);
+                    }
+                    if ($pemeriksaan->hpl_usg) {
+                        $pdf->Text(238, 178, date('d/m/Y', strtotime($pemeriksaan->hpl_usg)));
+                    }
+
+                    // Table USG
+                    if ($pemeriksaan->jumlah_gs) {
+                        if ($pemeriksaan->jumlah_gs === 'Tunggal') {
+                            $pdf->Ellipse(242.5, 185, 6, 2.5);
+                        } else {
+                            $pdf->Ellipse(254, 185, 6, 2.5);
+                        }
+                    }
+                    if ($pemeriksaan->diameter_gs_cm) {
+                        $pdf->Text(240, 191.5, $pemeriksaan->diameter_gs_cm);
+                    }
+                    if ($pemeriksaan->diameter_gs_minggu) {
+                        $pdf->Text(297, 191.5, $pemeriksaan->diameter_gs_minggu);
+                    }
+                    if ($pemeriksaan->diameter_gs_hari) {
+                        $pdf->Text(319, 191.5, $pemeriksaan->diameter_gs_hari);
+                    }
+
+                    if ($pemeriksaan->jumlah_bayi) {
+                        if ($pemeriksaan->jumlah_bayi === 'Tunggal') {
+                            $pdf->Ellipse(242.5, 197.5, 6, 2.5);
+                        } else {
+                            $pdf->Ellipse(254, 198, 6, 2.5);
+                        }
+                    }
+                    if ($pemeriksaan->crl_cm) {
+                        $pdf->Text(240, 203.5, $pemeriksaan->crl_cm);
+                    }
+                    if ($pemeriksaan->crl_minggu) {
+                        $pdf->Text(297, 203.5, $pemeriksaan->crl_minggu);
+                    }
+                    if ($pemeriksaan->crl_hari) {
+                        $pdf->Text(319, 203.5, $pemeriksaan->crl_hari);
+                    }
+
+                    if ($pemeriksaan->letak_produk_kehamilan) {
+                        if ($pemeriksaan->letak_produk_kehamilan === 'Intrauterin') {
+                            $pdf->Ellipse(242, 211, 8, 3);
+                        } elseif ($pemeriksaan->letak_produk_kehamilan === 'Ekstrauterin') {
+                            $pdf->Ellipse(258, 211.5, 8, 3);
+                        } else {
+                            $pdf->Ellipse(280, 211.5, 15, 3);
+                        }
+                    }
+
+                    if ($pemeriksaan->pulsasi_jantung) {
+                        if ($pemeriksaan->pulsasi_jantung === 'Tampak') {
+                            $pdf->Ellipse(242, 219, 6, 2.5);
+                        } else {
+                            $pdf->Ellipse(257, 219, 9, 3);
+                        }
+                    }
+
+                    if ($pemeriksaan->kecurigaan_temuan_abnormal) {
+                        if ($pemeriksaan->kecurigaan_temuan_abnormal === 'Ya') {
+                            $pdf->Ellipse(239, 227, 3, 3);
+                        } else {
+                            $pdf->Ellipse(245, 227, 4, 2.5);
+                        }
+                    }
+                    if ($pemeriksaan->kecurigaan_temuan_abnormal_sebutkan) {
+                        $pdf->Text(264, 226.5, substr($pemeriksaan->kecurigaan_temuan_abnormal_sebutkan, 0, 20));
+                    }
+                }
+            }
+
+            // 31. HASIL PEMERIKSAAN DOKTER PADA TRIMESTER 1 / USG (Halaman 52-53 PDF)
+            if ($pageNo === 52) {
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->SetFont('Arial', '', 9);
+
+                // --- SISI KIRI (Pemeriksaan Trimester 1) ---
+                $pemeriksaan = $dataKia->pemeriksaanTrimester1;
+                if ($pemeriksaan) {
+                    // Gambar USG
+                    if ($pemeriksaan->gambar_usg) {
+                        $imagePath = public_path($pemeriksaan->gambar_usg);
+                        if (file_exists($imagePath)) {
+                            // X=25, Y=25, Lebar=110, Tinggi=90
+                            $pdf->Image($imagePath, 25, 25, 110, 90);
+                        }
+                    }
+
+                    // Pemeriksaan Laboratorium
+                    if ($pemeriksaan->tgl_periksa_lab) {
+                        $pdf->Text(100, 142.5, date('d   /   m   /   Y', strtotime($pemeriksaan->tgl_periksa_lab)));
+                    }
+                    if ($pemeriksaan->lab_hemoglobin) {
+                        $pdf->Text(75, 153.5, $pemeriksaan->lab_hemoglobin);
+                    }
+                    if ($pemeriksaan->lab_gol_darah) {
+                        $pdf->Text(75, 161.5, $pemeriksaan->lab_gol_darah);
+                    }
+                    if ($pemeriksaan->lab_gula_darah) {
+                        $pdf->Text(75, 169.5, $pemeriksaan->lab_gula_darah);
+                    }
+
+                    $pdf->SetDrawColor(0, 0, 0);
+                    $pdf->SetLineWidth(0.5);
+
+                    // Tripel Eliminasi (coret yang TIDAK dipilih)
+                    if ($pemeriksaan->lab_tripel_h) {
+                        if ($pemeriksaan->lab_tripel_h === 'Reaktif') {
+                            $pdf->Line(103, 185.5, 128, 185.5);
+                        } // Coret Non reaktif
+                        else {
+                            $pdf->Line(75, 185.5, 95, 185.5);
+                        } // Coret Reaktif
+                    }
+                    if ($pemeriksaan->lab_tripel_s) {
+                        if ($pemeriksaan->lab_tripel_s === 'Reaktif') {
+                            $pdf->Line(103, 193.5, 128, 193.5);
+                        } else {
+                            $pdf->Line(75, 193.5, 95, 193.5);
+                        }
+                    }
+                    if ($pemeriksaan->lab_tripel_hep_b) {
+                        if ($pemeriksaan->lab_tripel_hep_b === 'Reaktif') {
+                            $pdf->Line(103, 201.5, 128, 201.5);
+                        } else {
+                            $pdf->Line(75, 201.5, 95, 201.5);
+                        }
+                    }
+
+                    // Skrining Kesehatan Jiwa
+                    if ($pemeriksaan->tgl_skrining_jiwa) {
+                        $pdf->Text(100, 216, date('d   /   m   /   Y', strtotime($pemeriksaan->tgl_skrining_jiwa)));
+                    }
+                    if ($pemeriksaan->skrining_jiwa) {
+                        if ($pemeriksaan->skrining_jiwa === 'Ya') {
+                            $pdf->Line(108, 227.5, 120, 227.5);
+                        } // Coret Tidak
+                        else {
+                            $pdf->Line(82, 227.5, 90, 227.5);
+                        } // Coret Ya
+                    }
+                    if ($pemeriksaan->tindak_lanjut_jiwa) {
+                        if ($pemeriksaan->tindak_lanjut_jiwa === 'Edukasi') {
+                            $pdf->Line(108, 235.5, 125, 235.5);
+                        } // Coret Konseling
+                        else {
+                            $pdf->Line(82, 235.5, 98, 235.5);
+                        } // Coret Edukasi
+                    }
+                    if ($pemeriksaan->rujukan_jiwa) {
+                        if ($pemeriksaan->rujukan_jiwa === 'Ya') {
+                            $pdf->Line(108, 243.5, 120, 243.5);
+                        } // Coret Tidak
+                        else {
+                            $pdf->Line(82, 243.5, 90, 243.5);
+                        } // Coret Ya
+                    }
+
+                    if ($pemeriksaan->kesimpulan) {
+                        $pdf->Text(45, 258, $pemeriksaan->kesimpulan);
+                    }
+                    if ($pemeriksaan->rekomendasi) {
+                        $pdf->Text(45, 266, $pemeriksaan->rekomendasi);
+                    }
+                }
+
+                // --- SISI KANAN (Catatan Pelayanan) ---
+                $catatanList = $dataKia->catatanPelayananTrimester1;
+                if ($catatanList && $catatanList->count() > 0) {
+                    $pdf->SetFont('Arial', '', 9);
+                    $currentY = 40; // Y awal untuk tabel catatan
+                    $maxY = 280; // Batas bawah
+
+                    foreach ($catatanList as $cat) {
+                        if ($currentY > $maxY - 20) {
+                            break; // Jika melebihi batas bawah, berhenti (karena keterbatasan 1 halaman PDF)
+                        }
+
+                        $pdf->SetXY(155, $currentY);
+                        $tglPeriksa = $cat->tanggal_periksa ? date('d/m/Y', strtotime($cat->tanggal_periksa)) : '';
+                        $pdf->MultiCell(25, 5, $tglPeriksa, 0, 'C');
+
+                        $startY = $pdf->GetY();
+                        $pdf->SetXY(182, $currentY);
+                        $pdf->MultiCell(72, 5, $cat->catatan, 0, 'L');
+                        $endYCatatan = $pdf->GetY();
+
+                        $pdf->SetXY(256, $currentY);
+                        $tglKembali = $cat->tanggal_kembali ? date('d/m/Y', strtotime($cat->tanggal_kembali)) : '';
+                        $pdf->MultiCell(25, 5, $tglKembali, 0, 'C');
+                        $endYKembali = $pdf->GetY();
+
+                        // Ambil Y terbesar sebagai awal row berikutnya
+                        $currentY = max($startY, $endYCatatan, $endYKembali) + 5;
+
+                        // Garis pemisah antar baris
+                        $pdf->Line(152, $currentY - 2, 282, $currentY - 2);
                     }
                 }
             }

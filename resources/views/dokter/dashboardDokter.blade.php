@@ -90,7 +90,7 @@
 									<div class="fw-semibold" style="font-size: 0.95rem;">{{ $doctor->name }}</div>
 									<div class="text-muted small">{{ $doctor->email }}</div>
 								</div>
-								<span class="badge text-bg-light text-nowrap">{{ $doctor->created_at?->diffForHumans() }}</span>
+								<span class="badge text-bg-light text-nowrap">{{ $doctor->created_at ? \Illuminate\Support\Carbon::parse($doctor->created_at)->diffForHumans() : '-' }}</span>
 							</div>
 						@empty
 							<div class="text-muted">Belum ada dokter baru.</div>

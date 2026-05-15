@@ -39,6 +39,12 @@
                                 <a href="{{ route($role . '.kia.edit_pelayanan', $kia->id) }}" class="btn btn-sm btn-outline-info mb-1">
                                     <i class="bi bi-journal-medical me-1"></i> Pelayanan
                                 </a>
+                                <a href="{{ route($role . '.kia.edit_evaluasi', $kia->id) }}" class="btn btn-sm btn-outline-warning mb-1">
+                                    <i class="bi bi-clipboard2-pulse me-1"></i> Evaluasi
+                                </a>
+                                <a href="{{ route($role . '.kia.edit_trimester1', $kia->id) }}" class="btn btn-sm btn-outline-secondary mb-1">
+                                    <i class="bi bi-images me-1"></i> Hal. 52-53
+                                </a>
                                 <a href="{{ route('admin.kia.export_pdf', $kia->id) }}" target="_blank" class="btn btn-sm btn-outline-success mb-1">
                                     <i class="bi bi-file-earmark-pdf me-1"></i> PDF
                                 </a>

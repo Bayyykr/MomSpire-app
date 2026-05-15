@@ -25,7 +25,8 @@ class DataKiaController extends Controller
 
         // Helper to convert empty strings to null
         $clean = function ($val) {
-            return $val === '' ? null : $val; };
+            return $val === '' ? null : $val;
+        };
 
         // 1. Core Data
         $dataKia->update([
@@ -133,11 +134,11 @@ class DataKiaController extends Controller
         $user = auth()->user();
         abort_unless($user, 403);
 
-        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s', 'perkembanganBayi18Bulan', 'perkembanganBayi24Bulan', 'pemantauanBulananAnak72s', 'kesehatanLingkungan', 'pelayananKesehatanIbu'])
+        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s', 'perkembanganBayi18Bulan', 'perkembanganBayi24Bulan', 'pemantauanBulananAnak72s', 'kesehatanLingkungan', 'pelayananKesehatanIbu', 'evaluasiKesehatanIbu', 'pemeriksaanUsgs'])
             ->findOrFail($id);
 
-        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, persiapanMelahirkan, pemantauanIbuNifas, keluargaBerencana, bayiBaruLahir, pemantauanBayis, warnaTinja, absenKelasBalitas, pemantauanMingguanBayis, perkembanganBayi, pemantauanBulananBayis, perkembanganBayi6Bulan, pemantauanBulananBayi12s, perkembanganBayi9Bulan, perkembanganBayi12Bulan, pemantauanBulananAnak24s, perkembanganBayi18Bulan, perkembanganBayi24Bulan, pemantauanBulananAnak72s, kesehatanLingkungan, dan pelayananKesehatanIbu selalu segar
-        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s', 'perkembanganBayi18Bulan', 'perkembanganBayi24Bulan', 'pemantauanBulananAnak72s', 'kesehatanLingkungan', 'pelayananKesehatanIbu']);
+        // Pastikan relasi ...
+        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s', 'perkembanganBayi18Bulan', 'perkembanganBayi24Bulan', 'pemantauanBulananAnak72s', 'kesehatanLingkungan', 'pelayananKesehatanIbu', 'evaluasiKesehatanIbu', 'pemeriksaanUsgs']);
 
         if ($user->role === 'pengguna') {
             abort_unless($dataKia->user_id === $user->id, 403);
@@ -210,7 +211,8 @@ class DataKiaController extends Controller
         $tripelCombined = null;
         if ($request->has('tripel_eliminasi_h') || $request->has('tripel_eliminasi_s') || $request->has('tripel_eliminasi_hep_b')) {
             $tripelCombined = ($request->tripel_eliminasi_h ?? '') . ',' . ($request->tripel_eliminasi_s ?? '') . ',' . ($request->tripel_eliminasi_hep_b ?? '');
-            if ($tripelCombined === ',,') $tripelCombined = null;
+            if ($tripelCombined === ',,')
+                $tripelCombined = null;
         }
 
         $dataKia->pelayananKesehatanIbu()->updateOrCreate(
@@ -243,6 +245,215 @@ class DataKiaController extends Controller
         );
 
         return back()->with('success', 'Pelayanan Kesehatan Ibu kunjungan ke-' . $kunjunganKe . ' berhasil disimpan.')->with('active_tab', 'kunjungan' . $kunjunganKe);
+    }
+
+    public function editEvaluasi($id)
+    {
+        $user = auth()->user();
+        abort_unless(in_array($user->role, ['bidan', 'dokter']), 403);
+
+        $dataKia = DataKia::with(['evaluasiKesehatanIbu', 'ibu', 'pemeriksaanTrimester1'])->findOrFail($id);
+        $evaluasi = $dataKia->evaluasiKesehatanIbu;
+        $pemeriksaan = $dataKia->pemeriksaanTrimester1 ?? new \App\Models\KiaPemeriksaanTrimester1();
+
+        return view('nakes.kia-edit-evaluasi', [
+            'dataKia' => $dataKia,
+            'evaluasi' => $evaluasi,
+            'pemeriksaan' => $pemeriksaan,
+            'role' => $user->role,
+        ]);
+    }
+
+    public function saveEvaluasi(Request $request, $id)
+    {
+        $user = auth()->user();
+        abort_unless(in_array($user->role, ['bidan', 'dokter']), 403);
+
+        $dataKia = DataKia::findOrFail($id);
+
+        $dataKia->evaluasiKesehatanIbu()->updateOrCreate(
+            ['data_kia_id' => $dataKia->id],
+            [
+                'nama_dokter' => $request->nama_dokter,
+                'tanggal_periksa' => $request->tanggal_periksa,
+                'fasilitas_kesehatan' => $request->fasilitas_kesehatan,
+                'tb' => $request->tb,
+                'bb' => $request->bb,
+                'imt' => $request->imt,
+                'lila' => $request->lila,
+                'lila_kurus' => $request->lila_kurus,
+                'lila_normal' => $request->lila_normal,
+                'lila_gemuk' => $request->lila_gemuk,
+                'lila_obesitas' => $request->lila_obesitas,
+                'imunisasi_tt_1' => $request->has('imunisasi_tt_1'),
+                'imunisasi_tt_2' => $request->has('imunisasi_tt_2'),
+                'imunisasi_tt_3' => $request->has('imunisasi_tt_3'),
+                'imunisasi_tt_4' => $request->has('imunisasi_tt_4'),
+                'imunisasi_tt_5' => $request->has('imunisasi_tt_5'),
+                'riwayat_kesehatan_ibu' => $request->riwayat_kesehatan_ibu ?? [],
+                'riwayat_kesehatan_ibu_lainnya' => $request->riwayat_kesehatan_ibu_lainnya,
+                'riwayat_perilaku' => $request->riwayat_perilaku ?? [],
+                'riwayat_perilaku_lainnya' => $request->riwayat_perilaku_lainnya,
+                'riwayat_penyakit_keluarga' => $request->riwayat_penyakit_keluarga ?? [],
+                'riwayat_penyakit_keluarga_lainnya' => $request->riwayat_penyakit_keluarga_lainnya,
+                'inspeksi_porsio' => $request->inspeksi_porsio,
+                'inspeksi_uretra' => $request->inspeksi_uretra,
+                'inspeksi_vagina' => $request->inspeksi_vagina,
+                'inspeksi_vulva' => $request->inspeksi_vulva,
+                'inspeksi_fluksus' => $request->inspeksi_fluksus,
+                'inspeksi_fluor' => $request->inspeksi_fluor,
+                'riwayat_kehamilan' => $request->riwayat_kehamilan ?? [],
+            ]
+        );
+
+        $pemeriksaanData = $request->only([
+            'konjungtiva',
+            'sklera',
+            'kulit',
+            'leher',
+            'gigi_mulut',
+            'tht',
+            'dada_jantung',
+            'dada_paru',
+            'perut',
+            'tungkai',
+            'keterangan_konjungtiva',
+            'keterangan_sklera',
+            'keterangan_kulit',
+            'keterangan_leher',
+            'keterangan_gigi_mulut',
+            'keterangan_tht',
+            'keterangan_dada_jantung',
+            'keterangan_dada_paru',
+            'keterangan_perut',
+            'keterangan_tungkai',
+            'hpht',
+            'keteraturan_haid',
+            'usia_kehamilan_hpht',
+            'hpl_hpht',
+            'usia_kehamilan_usg',
+            'hpl_usg',
+            'jumlah_gs',
+            'diameter_gs_cm',
+            'diameter_gs_minggu',
+            'diameter_gs_hari',
+            'jumlah_bayi',
+            'crl_cm',
+            'crl_minggu',
+            'crl_hari',
+            'letak_produk_kehamilan',
+            'pulsasi_jantung',
+            'kecurigaan_temuan_abnormal',
+            'kecurigaan_temuan_abnormal_sebutkan'
+        ]);
+
+        if (array_filter($pemeriksaanData)) {
+            $pemeriksaanModel = $dataKia->pemeriksaanTrimester1 ?? new \App\Models\KiaPemeriksaanTrimester1();
+            $pemeriksaanModel->data_kia_id = $dataKia->id;
+            $pemeriksaanModel->fill($pemeriksaanData);
+            $pemeriksaanModel->save();
+        }
+
+        return redirect()->route($user->role . '.kia')->with('success', 'Data Evaluasi Halaman 51 berhasil disimpan!');
+    }
+
+    public function editTrimester1($id)
+    {
+        $user = auth()->user();
+        abort_unless(in_array($user->role, ['bidan', 'dokter']), 403);
+
+        $dataKia = DataKia::with(['pemeriksaanTrimester1', 'catatanPelayananTrimester1', 'ibu'])->findOrFail($id);
+        $pemeriksaan = $dataKia->pemeriksaanTrimester1 ?? new \App\Models\KiaPemeriksaanTrimester1();
+        $catatan = $dataKia->catatanPelayananTrimester1;
+
+        return view('nakes.kia-edit-trimester1', [
+            'dataKia' => $dataKia,
+            'pemeriksaan' => $pemeriksaan,
+            'catatan' => $catatan,
+            'role' => $user->role,
+        ]);
+    }
+
+    public function saveTrimester1(Request $request, $id)
+    {
+        $user = auth()->user();
+        abort_unless(in_array($user->role, ['bidan', 'dokter']), 403);
+
+        $dataKia = DataKia::findOrFail($id);
+
+        $request->validate([
+            // Validasi pemeriksaan
+            'gambar_usg' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'tgl_periksa_lab' => 'nullable|date',
+            'lab_hemoglobin' => 'nullable|string',
+            'lab_gol_darah' => 'nullable|string',
+            'lab_gula_darah' => 'nullable|string',
+            'lab_tripel_h' => 'nullable|in:Reaktif,Non reaktif',
+            'lab_tripel_s' => 'nullable|in:Reaktif,Non reaktif',
+            'lab_tripel_hep_b' => 'nullable|in:Reaktif,Non reaktif',
+            'tgl_skrining_jiwa' => 'nullable|date',
+            'skrining_jiwa' => 'nullable|in:Ya,Tidak',
+            'tindak_lanjut_jiwa' => 'nullable|in:Edukasi,Konseling',
+            'rujukan_jiwa' => 'nullable|in:Ya,Tidak',
+            'kesimpulan' => 'nullable|string',
+            'rekomendasi' => 'nullable|string',
+
+            // Validasi catatan
+            'catatan.*.id' => 'nullable|integer',
+            'catatan.*.tanggal_periksa' => 'nullable|date',
+            'catatan.*.catatan' => 'nullable|string',
+            'catatan.*.tanggal_kembali' => 'nullable|date',
+            'deleted_catatan' => 'nullable|string'
+        ]);
+
+        // Simpan pemeriksaan trimester 1
+        $pemeriksaanData = $request->only([
+            'tgl_periksa_lab',
+            'lab_hemoglobin',
+            'lab_gol_darah',
+            'lab_gula_darah',
+            'lab_tripel_h',
+            'lab_tripel_s',
+            'lab_tripel_hep_b',
+            'tgl_skrining_jiwa',
+            'skrining_jiwa',
+            'tindak_lanjut_jiwa',
+            'rujukan_jiwa',
+            'kesimpulan',
+            'rekomendasi',
+        ]);
+
+        $pemeriksaanModel = $dataKia->pemeriksaanTrimester1 ?? new \App\Models\KiaPemeriksaanTrimester1();
+        $pemeriksaanModel->data_kia_id = $dataKia->id;
+        $pemeriksaanModel->fill($pemeriksaanData);
+
+        if ($request->hasFile('gambar_usg')) {
+            $file = $request->file('gambar_usg');
+            $path = $file->store('public/usg_images');
+            $pemeriksaanModel->gambar_usg = str_replace('public/', 'storage/', $path);
+        }
+
+        $pemeriksaanModel->save();
+
+        // Delete removed catatan records
+        if ($request->filled('deleted_catatan')) {
+            $deletedIds = explode(',', $request->deleted_catatan);
+            \App\Models\KiaCatatanPelayananTrimester1::whereIn('id', $deletedIds)->where('data_kia_id', $dataKia->id)->delete();
+        }
+
+        // Add or Update catatan records
+        if ($request->has('catatan')) {
+            foreach ($request->catatan as $cat) {
+                $catatanModel = isset($cat['id']) ? \App\Models\KiaCatatanPelayananTrimester1::find($cat['id']) : new \App\Models\KiaCatatanPelayananTrimester1();
+                $catatanModel->data_kia_id = $dataKia->id;
+                $catatanModel->tanggal_periksa = $cat['tanggal_periksa'] ?? null;
+                $catatanModel->catatan = $cat['catatan'] ?? null;
+                $catatanModel->tanggal_kembali = $cat['tanggal_kembali'] ?? null;
+                $catatanModel->save();
+            }
+        }
+
+        return redirect()->route($user->role . '.kia')->with('success', 'Data Trimester 1 (Halaman 52-53) berhasil disimpan!');
     }
     public function ttdIndex()
     {
@@ -339,8 +550,8 @@ class DataKiaController extends Controller
     {
         $request->validate([
             'kehadiran_ke' => 'required|integer|between:1,9',
-            'tanggal'      => 'nullable|string|max:100',
-            'kader_info'   => 'nullable|string|max:255',
+            'tanggal' => 'nullable|string|max:100',
+            'kader_info' => 'nullable|string|max:255',
         ]);
 
         $userId = auth()->id();
@@ -349,7 +560,7 @@ class DataKiaController extends Controller
         $dataKia->absenKelasIbuHamils()->updateOrCreate(
             ['kehadiran_ke' => $request->kehadiran_ke],
             [
-                'tanggal'    => $request->tanggal,
+                'tanggal' => $request->tanggal,
                 'kader_info' => $request->kader_info,
             ]
         );
@@ -395,9 +606,9 @@ class DataKiaController extends Controller
         }
 
         $data['hpl_tanggal'] = $request->hpl_tanggal;
-        $data['hpl_bulan']   = $request->hpl_bulan;
-        $data['hpl_tahun']   = $request->hpl_tahun;
-        $data['metode_kb']   = $request->metode_kb;
+        $data['hpl_bulan'] = $request->hpl_bulan;
+        $data['hpl_tahun'] = $request->hpl_tahun;
+        $data['metode_kb'] = $request->metode_kb;
 
         $dataKia->persiapanMelahirkan()->updateOrCreate(
             ['data_kia_id' => $dataKia->id],
@@ -457,7 +668,7 @@ class DataKiaController extends Controller
         foreach ($fields as $field) {
             $data[$field] = $request->has($field);
         }
-        
+
         $data['paraf_kader_nakes'] = $request->paraf_kader_nakes;
 
         $dataKia->pemantauanIbuNifas()->updateOrCreate(
@@ -547,18 +758,18 @@ class DataKiaController extends Controller
         $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
 
         $data = [
-            'sesak_napas'      => $request->has('sesak_napas'),
-            'aktivitas_lemah'  => $request->has('aktivitas_lemah'),
+            'sesak_napas' => $request->has('sesak_napas'),
+            'aktivitas_lemah' => $request->has('aktivitas_lemah'),
             'warna_kulit_biru' => $request->has('warna_kulit_biru'),
-            'hisapan_lemah'    => $request->has('hisapan_lemah'),
-            'kejang'           => $request->has('kejang'),
-            'suhu_abnormal'    => $request->has('suhu_abnormal'),
-            'bab_abnormal'     => $request->has('bab_abnormal'),
-            'kencing_sedikit'  => $request->has('kencing_sedikit'),
+            'hisapan_lemah' => $request->has('hisapan_lemah'),
+            'kejang' => $request->has('kejang'),
+            'suhu_abnormal' => $request->has('suhu_abnormal'),
+            'bab_abnormal' => $request->has('bab_abnormal'),
+            'kencing_sedikit' => $request->has('kencing_sedikit'),
             'tali_pusat_merah' => $request->has('tali_pusat_merah'),
-            'mata_merah'       => $request->has('mata_merah'),
-            'kulit_bintil'     => $request->has('kulit_bintil'),
-            'belum_imunisasi'  => $request->has('belum_imunisasi'),
+            'mata_merah' => $request->has('mata_merah'),
+            'kulit_bintil' => $request->has('kulit_bintil'),
+            'belum_imunisasi' => $request->has('belum_imunisasi'),
         ];
 
         if ($request->has('paraf_kader_nakes')) {
@@ -593,12 +804,12 @@ class DataKiaController extends Controller
         $dataKia->warnaTinja()->updateOrCreate(
             ['data_kia_id' => $dataKia->id],
             [
-                'tanggal_2_minggu'  => $request->tanggal_2_minggu,
-                'nomor_2_minggu'    => $request->nomor_2_minggu,
-                'tanggal_1_bulan'   => $request->tanggal_1_bulan,
-                'nomor_1_bulan'     => $request->nomor_1_bulan,
+                'tanggal_2_minggu' => $request->tanggal_2_minggu,
+                'nomor_2_minggu' => $request->nomor_2_minggu,
+                'tanggal_1_bulan' => $request->tanggal_1_bulan,
+                'nomor_1_bulan' => $request->nomor_1_bulan,
                 'tanggal_2_4_bulan' => $request->tanggal_2_4_bulan,
-                'nomor_2_4_bulan'   => $request->nomor_2_4_bulan,
+                'nomor_2_4_bulan' => $request->nomor_2_4_bulan,
             ]
         );
 
@@ -627,7 +838,7 @@ class DataKiaController extends Controller
         $dataKia->absenKelasBalitas()->updateOrCreate(
             ['data_kia_id' => $dataKia->id, 'kehadiran_ke' => $request->kehadiran_ke],
             [
-                'tanggal'    => $request->tanggal,
+                'tanggal' => $request->tanggal,
                 'kader_info' => $request->kader_info,
             ]
         );
@@ -656,15 +867,15 @@ class DataKiaController extends Controller
         $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
 
         $data = [
-            'sesak_napas'     => $request->has('sesak_napas'),
-            'batuk'           => $request->has('batuk'),
-            'suhu_abnormal'   => $request->has('suhu_abnormal'),
-            'bab_sering'      => $request->has('bab_sering'),
+            'sesak_napas' => $request->has('sesak_napas'),
+            'batuk' => $request->has('batuk'),
+            'suhu_abnormal' => $request->has('suhu_abnormal'),
+            'bab_sering' => $request->has('bab_sering'),
             'kencing_sedikit' => $request->has('kencing_sedikit'),
-            'kulit_biru'      => $request->has('kulit_biru'),
+            'kulit_biru' => $request->has('kulit_biru'),
             'aktivitas_lemah' => $request->has('aktivitas_lemah'),
-            'hisapan_lemah'   => $request->has('hisapan_lemah'),
-            'tidak_makan'     => $request->has('tidak_makan'),
+            'hisapan_lemah' => $request->has('hisapan_lemah'),
+            'tidak_makan' => $request->has('tidak_makan'),
         ];
 
         if ($request->has('paraf_kader_nakes')) {
@@ -690,13 +901,13 @@ class DataKiaController extends Controller
             ['data_kia_id' => $dataKia->id],
             [
                 'angkat_kepala_45' => $request->has('angkat_kepala_45') ? ($request->angkat_kepala_45 === '1') : null,
-                'gerak_kepala'     => $request->has('gerak_kepala') ? ($request->gerak_kepala === '1') : null,
-                'tatap_wajah'      => $request->has('tatap_wajah') ? ($request->tatap_wajah === '1') : null,
-                'ngoceh'           => $request->has('ngoceh') ? ($request->ngoceh === '1') : null,
-                'tertawa_keras'    => $request->has('tertawa_keras') ? ($request->tertawa_keras === '1') : null,
-                'terkejut_suara'   => $request->has('terkejut_suara') ? ($request->terkejut_suara === '1') : null,
-                'tersenyum'        => $request->has('tersenyum') ? ($request->tersenyum === '1') : null,
-                'mengenal_ibu'     => $request->has('mengenal_ibu') ? ($request->mengenal_ibu === '1') : null,
+                'gerak_kepala' => $request->has('gerak_kepala') ? ($request->gerak_kepala === '1') : null,
+                'tatap_wajah' => $request->has('tatap_wajah') ? ($request->tatap_wajah === '1') : null,
+                'ngoceh' => $request->has('ngoceh') ? ($request->ngoceh === '1') : null,
+                'tertawa_keras' => $request->has('tertawa_keras') ? ($request->tertawa_keras === '1') : null,
+                'terkejut_suara' => $request->has('terkejut_suara') ? ($request->terkejut_suara === '1') : null,
+                'tersenyum' => $request->has('tersenyum') ? ($request->tersenyum === '1') : null,
+                'mengenal_ibu' => $request->has('mengenal_ibu') ? ($request->mengenal_ibu === '1') : null,
             ]
         );
 
@@ -725,15 +936,15 @@ class DataKiaController extends Controller
         $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
 
         $data = [
-            'sesak_napas'     => $request->has('sesak_napas'),
-            'batuk'           => $request->has('batuk'),
-            'suhu_abnormal'   => $request->has('suhu_abnormal'),
-            'bab_sering'      => $request->has('bab_sering'),
+            'sesak_napas' => $request->has('sesak_napas'),
+            'batuk' => $request->has('batuk'),
+            'suhu_abnormal' => $request->has('suhu_abnormal'),
+            'bab_sering' => $request->has('bab_sering'),
             'kencing_sedikit' => $request->has('kencing_sedikit'),
-            'kulit_biru'      => $request->has('kulit_biru'),
+            'kulit_biru' => $request->has('kulit_biru'),
             'aktivitas_lemah' => $request->has('aktivitas_lemah'),
-            'hisapan_lemah'   => $request->has('hisapan_lemah'),
-            'tidak_makan'     => $request->has('tidak_makan'),
+            'hisapan_lemah' => $request->has('hisapan_lemah'),
+            'tidak_makan' => $request->has('tidak_makan'),
         ];
 
         if ($request->has('paraf_kader_nakes')) {
@@ -758,16 +969,16 @@ class DataKiaController extends Controller
         $dataKia->perkembanganBayi6Bulan()->updateOrCreate(
             ['data_kia_id' => $dataKia->id],
             [
-                'berbalik'        => $request->has('berbalik') ? ($request->berbalik === '1') : null,
+                'berbalik' => $request->has('berbalik') ? ($request->berbalik === '1') : null,
                 'kepala_tegak_90' => $request->has('kepala_tegak_90') ? ($request->kepala_tegak_90 === '1') : null,
-                'kepala_stabil'   => $request->has('kepala_stabil') ? ($request->kepala_stabil === '1') : null,
-                'genggam_mainan'  => $request->has('genggam_mainan') ? ($request->genggam_mainan === '1') : null,
-                'raih_benda'      => $request->has('raih_benda') ? ($request->raih_benda === '1') : null,
-                'amati_tangan'    => $request->has('amati_tangan') ? ($request->amati_tangan === '1') : null,
-                'luas_pandang'    => $request->has('luas_pandang') ? ($request->luas_pandang === '1') : null,
-                'arah_mata'       => $request->has('arah_mata') ? ($request->arah_mata === '1') : null,
-                'suara_gembira'   => $request->has('suara_gembira') ? ($request->suara_gembira === '1') : null,
-                'senyum_mainan'   => $request->has('senyum_mainan') ? ($request->senyum_mainan === '1') : null,
+                'kepala_stabil' => $request->has('kepala_stabil') ? ($request->kepala_stabil === '1') : null,
+                'genggam_mainan' => $request->has('genggam_mainan') ? ($request->genggam_mainan === '1') : null,
+                'raih_benda' => $request->has('raih_benda') ? ($request->raih_benda === '1') : null,
+                'amati_tangan' => $request->has('amati_tangan') ? ($request->amati_tangan === '1') : null,
+                'luas_pandang' => $request->has('luas_pandang') ? ($request->luas_pandang === '1') : null,
+                'arah_mata' => $request->has('arah_mata') ? ($request->arah_mata === '1') : null,
+                'suara_gembira' => $request->has('suara_gembira') ? ($request->suara_gembira === '1') : null,
+                'senyum_mainan' => $request->has('senyum_mainan') ? ($request->senyum_mainan === '1') : null,
             ]
         );
 
@@ -797,15 +1008,15 @@ class DataKiaController extends Controller
         $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
 
         $data = [
-            'sesak_napas'     => $request->has('sesak_napas'),
-            'batuk'           => $request->has('batuk'),
-            'suhu_abnormal'   => $request->has('suhu_abnormal'),
-            'bab_sering'      => $request->has('bab_sering'),
+            'sesak_napas' => $request->has('sesak_napas'),
+            'batuk' => $request->has('batuk'),
+            'suhu_abnormal' => $request->has('suhu_abnormal'),
+            'bab_sering' => $request->has('bab_sering'),
             'kencing_sedikit' => $request->has('kencing_sedikit'),
-            'kulit_biru'      => $request->has('kulit_biru'),
+            'kulit_biru' => $request->has('kulit_biru'),
             'aktivitas_lemah' => $request->has('aktivitas_lemah'),
-            'hisapan_lemah'   => $request->has('hisapan_lemah'),
-            'tidak_makan'     => $request->has('tidak_makan'),
+            'hisapan_lemah' => $request->has('hisapan_lemah'),
+            'tidak_makan' => $request->has('tidak_makan'),
         ];
 
         if ($request->has('paraf_kader_nakes')) {
@@ -830,17 +1041,17 @@ class DataKiaController extends Controller
         $dataKia->perkembanganBayi9Bulan()->updateOrCreate(
             ['data_kia_id' => $dataKia->id],
             [
-                'duduk_mandiri'       => $request->has('duduk_mandiri') ? ($request->duduk_mandiri === '1') : null,
-                'tengkurap_dada'      => $request->has('tengkurap_dada') ? ($request->tengkurap_dada === '1') : null,
-                'merangkak'           => $request->has('merangkak') ? ($request->merangkak === '1') : null,
-                'pindah_benda'        => $request->has('pindah_benda') ? ($request->pindah_benda === '1') : null,
-                'pungut_2_benda'      => $request->has('pungut_2_benda') ? ($request->pungut_2_benda === '1') : null,
-                'pungut_kacang'       => $request->has('pungut_kacang') ? ($request->pungut_kacang === '1') : null,
+                'duduk_mandiri' => $request->has('duduk_mandiri') ? ($request->duduk_mandiri === '1') : null,
+                'tengkurap_dada' => $request->has('tengkurap_dada') ? ($request->tengkurap_dada === '1') : null,
+                'merangkak' => $request->has('merangkak') ? ($request->merangkak === '1') : null,
+                'pindah_benda' => $request->has('pindah_benda') ? ($request->pindah_benda === '1') : null,
+                'pungut_2_benda' => $request->has('pungut_2_benda') ? ($request->pungut_2_benda === '1') : null,
+                'pungut_kacang' => $request->has('pungut_kacang') ? ($request->pungut_kacang === '1') : null,
                 'bersuara_tanpa_arti' => $request->has('bersuara_tanpa_arti') ? ($request->bersuara_tanpa_arti === '1') : null,
-                'cari_mainan'         => $request->has('cari_mainan') ? ($request->cari_mainan === '1') : null,
-                'tepuk_tangan'        => $request->has('tepuk_tangan') ? ($request->tepuk_tangan === '1') : null,
-                'lempar_benda'        => $request->has('lempar_benda') ? ($request->lempar_benda === '1') : null,
-                'makan_kue'           => $request->has('makan_kue') ? ($request->makan_kue === '1') : null,
+                'cari_mainan' => $request->has('cari_mainan') ? ($request->cari_mainan === '1') : null,
+                'tepuk_tangan' => $request->has('tepuk_tangan') ? ($request->tepuk_tangan === '1') : null,
+                'lempar_benda' => $request->has('lempar_benda') ? ($request->lempar_benda === '1') : null,
+                'makan_kue' => $request->has('makan_kue') ? ($request->makan_kue === '1') : null,
             ]
         );
 
@@ -857,17 +1068,17 @@ class DataKiaController extends Controller
             ['data_kia_id' => $dataKia->id],
             [
                 'angkat_badan_berdiri' => $request->has('angkat_badan_berdiri') ? ($request->angkat_badan_berdiri === '1') : null,
-                'belajar_berdiri'      => $request->has('belajar_berdiri') ? ($request->belajar_berdiri === '1') : null,
-                'jalan_dituntun'       => $request->has('jalan_dituntun') ? ($request->jalan_dituntun === '1') : null,
-                'ulur_tangan_raih'     => $request->has('ulur_tangan_raih') ? ($request->ulur_tangan_raih === '1') : null,
-                'genggam_pensil'       => $request->has('genggam_pensil') ? ($request->genggam_pensil === '1') : null,
-                'masuk_benda_mulut'    => $request->has('masuk_benda_mulut') ? ($request->masuk_benda_mulut === '1') : null,
-                'tiru_bunyi'           => $request->has('tiru_bunyi') ? ($request->tiru_bunyi === '1') : null,
-                'sebut_2_suku_kata'    => $request->has('sebut_2_suku_kata') ? ($request->sebut_2_suku_kata === '1') : null,
-                'eksplorasi_sekitar'   => $request->has('eksplorasi_sekitar') ? ($request->eksplorasi_sekitar === '1') : null,
-                'reaksi_panggilan'     => $request->has('reaksi_panggilan') ? ($request->reaksi_panggilan === '1') : null,
-                'bermain_cilukba'      => $request->has('bermain_cilukba') ? ($request->bermain_cilukba === '1') : null,
-                'kenal_keluarga'       => $request->has('kenal_keluarga') ? ($request->kenal_keluarga === '1') : null,
+                'belajar_berdiri' => $request->has('belajar_berdiri') ? ($request->belajar_berdiri === '1') : null,
+                'jalan_dituntun' => $request->has('jalan_dituntun') ? ($request->jalan_dituntun === '1') : null,
+                'ulur_tangan_raih' => $request->has('ulur_tangan_raih') ? ($request->ulur_tangan_raih === '1') : null,
+                'genggam_pensil' => $request->has('genggam_pensil') ? ($request->genggam_pensil === '1') : null,
+                'masuk_benda_mulut' => $request->has('masuk_benda_mulut') ? ($request->masuk_benda_mulut === '1') : null,
+                'tiru_bunyi' => $request->has('tiru_bunyi') ? ($request->tiru_bunyi === '1') : null,
+                'sebut_2_suku_kata' => $request->has('sebut_2_suku_kata') ? ($request->sebut_2_suku_kata === '1') : null,
+                'eksplorasi_sekitar' => $request->has('eksplorasi_sekitar') ? ($request->eksplorasi_sekitar === '1') : null,
+                'reaksi_panggilan' => $request->has('reaksi_panggilan') ? ($request->reaksi_panggilan === '1') : null,
+                'bermain_cilukba' => $request->has('bermain_cilukba') ? ($request->bermain_cilukba === '1') : null,
+                'kenal_keluarga' => $request->has('kenal_keluarga') ? ($request->kenal_keluarga === '1') : null,
             ]
         );
 
@@ -897,15 +1108,15 @@ class DataKiaController extends Controller
         $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
 
         $data = [
-            'sesak_napas'      => $request->has('sesak_napas'),
-            'batuk'            => $request->has('batuk'),
-            'suhu_abnormal'    => $request->has('suhu_abnormal'),
-            'bab_sering'       => $request->has('bab_sering'),
-            'kencing_sedikit'  => $request->has('kencing_sedikit'),
+            'sesak_napas' => $request->has('sesak_napas'),
+            'batuk' => $request->has('batuk'),
+            'suhu_abnormal' => $request->has('suhu_abnormal'),
+            'bab_sering' => $request->has('bab_sering'),
+            'kencing_sedikit' => $request->has('kencing_sedikit'),
             'kulit_pucat_biru' => $request->has('kulit_pucat_biru'),
-            'aktivitas_lemah'  => $request->has('aktivitas_lemah'),
-            'telinga_cairan'   => $request->has('telinga_cairan'),
-            'tidak_makan'      => $request->has('tidak_makan'),
+            'aktivitas_lemah' => $request->has('aktivitas_lemah'),
+            'telinga_cairan' => $request->has('telinga_cairan'),
+            'tidak_makan' => $request->has('tidak_makan'),
         ];
 
         if ($request->has('paraf_kader_nakes')) {
@@ -931,13 +1142,13 @@ class DataKiaController extends Controller
             ['data_kia_id' => $dataKia->id],
             [
                 'berdiri_tanpa_pegangan' => $request->has('berdiri_tanpa_pegangan') ? ($request->berdiri_tanpa_pegangan === '1') : null,
-                'bungkuk_pungut_mainan'  => $request->has('bungkuk_pungut_mainan') ? ($request->bungkuk_pungut_mainan === '1') : null,
+                'bungkuk_pungut_mainan' => $request->has('bungkuk_pungut_mainan') ? ($request->bungkuk_pungut_mainan === '1') : null,
                 'jalan_mundur_5_langkah' => $request->has('jalan_mundur_5_langkah') ? ($request->jalan_mundur_5_langkah === '1') : null,
-                'panggil_papa_mama'      => $request->has('panggil_papa_mama') ? ($request->panggil_papa_mama === '1') : null,
-                'tumpuk_2_kubus'         => $request->has('tumpuk_2_kubus') ? ($request->tumpuk_2_kubus === '1') : null,
-                'masuk_kubus_kotak'      => $request->has('masuk_kubus_kotak') ? ($request->masuk_kubus_kotak === '1') : null,
-                'tunjuk_tanpa_nangis'    => $request->has('tunjuk_tanpa_nangis') ? ($request->tunjuk_tanpa_nangis === '1') : null,
-                'rasa_cemburu'           => $request->has('rasa_cemburu') ? ($request->rasa_cemburu === '1') : null,
+                'panggil_papa_mama' => $request->has('panggil_papa_mama') ? ($request->panggil_papa_mama === '1') : null,
+                'tumpuk_2_kubus' => $request->has('tumpuk_2_kubus') ? ($request->tumpuk_2_kubus === '1') : null,
+                'masuk_kubus_kotak' => $request->has('masuk_kubus_kotak') ? ($request->masuk_kubus_kotak === '1') : null,
+                'tunjuk_tanpa_nangis' => $request->has('tunjuk_tanpa_nangis') ? ($request->tunjuk_tanpa_nangis === '1') : null,
+                'rasa_cemburu' => $request->has('rasa_cemburu') ? ($request->rasa_cemburu === '1') : null,
             ]
         );
 
@@ -953,13 +1164,13 @@ class DataKiaController extends Controller
         $dataKia->perkembanganBayi24Bulan()->updateOrCreate(
             ['data_kia_id' => $dataKia->id],
             [
-                'berdiri_30_detik'       => $request->has('berdiri_30_detik') ? ($request->berdiri_30_detik === '1') : null,
-                'jalan_tanpa_huyung'     => $request->has('jalan_tanpa_huyung') ? ($request->jalan_tanpa_huyung === '1') : null,
-                'tumpuk_4_kubus'         => $request->has('tumpuk_4_kubus') ? ($request->tumpuk_4_kubus === '1') : null,
-                'pungut_benda_kecil'     => $request->has('pungut_benda_kecil') ? ($request->pungut_benda_kecil === '1') : null,
-                'gelinding_bola'         => $request->has('gelinding_bola') ? ($request->gelinding_bola === '1') : null,
-                'sebut_3_6_kata'         => $request->has('sebut_3_6_kata') ? ($request->sebut_3_6_kata === '1') : null,
-                'bantu_pekerjaan_rumah'  => $request->has('bantu_pekerjaan_rumah') ? ($request->bantu_pekerjaan_rumah === '1') : null,
+                'berdiri_30_detik' => $request->has('berdiri_30_detik') ? ($request->berdiri_30_detik === '1') : null,
+                'jalan_tanpa_huyung' => $request->has('jalan_tanpa_huyung') ? ($request->jalan_tanpa_huyung === '1') : null,
+                'tumpuk_4_kubus' => $request->has('tumpuk_4_kubus') ? ($request->tumpuk_4_kubus === '1') : null,
+                'pungut_benda_kecil' => $request->has('pungut_benda_kecil') ? ($request->pungut_benda_kecil === '1') : null,
+                'gelinding_bola' => $request->has('gelinding_bola') ? ($request->gelinding_bola === '1') : null,
+                'sebut_3_6_kata' => $request->has('sebut_3_6_kata') ? ($request->sebut_3_6_kata === '1') : null,
+                'bantu_pekerjaan_rumah' => $request->has('bantu_pekerjaan_rumah') ? ($request->bantu_pekerjaan_rumah === '1') : null,
                 'pegang_cangkir_sendiri' => $request->has('pegang_cangkir_sendiri') ? ($request->pegang_cangkir_sendiri === '1') : null,
             ]
         );
@@ -994,15 +1205,15 @@ class DataKiaController extends Controller
         $dataKia->perkembanganAnak36Bulan()->updateOrCreate(
             ['data_kia_id' => $dataKia->id],
             [
-                'naik_tangga'         => $request->has('naik_tangga') ? ($request->naik_tangga === '1') : null,
-                'tendang_bola'        => $request->has('tendang_bola') ? ($request->tendang_bola === '1') : null,
-                'coret_kertas'        => $request->has('coret_kertas') ? ($request->coret_kertas === '1') : null,
-                'bicara_2_kata'       => $request->has('bicara_2_kata') ? ($request->bicara_2_kata === '1') : null,
+                'naik_tangga' => $request->has('naik_tangga') ? ($request->naik_tangga === '1') : null,
+                'tendang_bola' => $request->has('tendang_bola') ? ($request->tendang_bola === '1') : null,
+                'coret_kertas' => $request->has('coret_kertas') ? ($request->coret_kertas === '1') : null,
+                'bicara_2_kata' => $request->has('bicara_2_kata') ? ($request->bicara_2_kata === '1') : null,
                 'tunjuk_bagian_tubuh' => $request->has('tunjuk_bagian_tubuh') ? ($request->tunjuk_bagian_tubuh === '1') : null,
-                'sebut_nama_benda'    => $request->has('sebut_nama_benda') ? ($request->sebut_nama_benda === '1') : null,
-                'pungut_mainan'       => $request->has('pungut_mainan') ? ($request->pungut_mainan === '1') : null,
-                'makan_nasi_sendiri'  => $request->has('makan_nasi_sendiri') ? ($request->makan_nasi_sendiri === '1') : null,
-                'lepas_pakaian'       => $request->has('lepas_pakaian') ? ($request->lepas_pakaian === '1') : null,
+                'sebut_nama_benda' => $request->has('sebut_nama_benda') ? ($request->sebut_nama_benda === '1') : null,
+                'pungut_mainan' => $request->has('pungut_mainan') ? ($request->pungut_mainan === '1') : null,
+                'makan_nasi_sendiri' => $request->has('makan_nasi_sendiri') ? ($request->makan_nasi_sendiri === '1') : null,
+                'lepas_pakaian' => $request->has('lepas_pakaian') ? ($request->lepas_pakaian === '1') : null,
             ]
         );
 
@@ -1018,18 +1229,18 @@ class DataKiaController extends Controller
         $dataKia->perkembanganAnak48Bulan()->updateOrCreate(
             ['data_kia_id' => $dataKia->id],
             [
-                'berdiri_1_kaki_2_detik'    => $request->has('berdiri_1_kaki_2_detik') ? ($request->berdiri_1_kaki_2_detik === '1') : null,
-                'lompat_kedua_kaki'         => $request->has('lompat_kedua_kaki') ? ($request->lompat_kedua_kaki === '1') : null,
-                'kayuh_sepeda_roda_3'       => $request->has('kayuh_sepeda_roda_3') ? ($request->kayuh_sepeda_roda_3 === '1') : null,
-                'gambar_garis_lurus'        => $request->has('gambar_garis_lurus') ? ($request->gambar_garis_lurus === '1') : null,
-                'tumpuk_8_kubus'            => $request->has('tumpuk_8_kubus') ? ($request->tumpuk_8_kubus === '1') : null,
-                'kenal_2_4_warna'           => $request->has('kenal_2_4_warna') ? ($request->kenal_2_4_warna === '1') : null,
-                'sebut_nama_umur_tempat'    => $request->has('sebut_nama_umur_tempat') ? ($request->sebut_nama_umur_tempat === '1') : null,
+                'berdiri_1_kaki_2_detik' => $request->has('berdiri_1_kaki_2_detik') ? ($request->berdiri_1_kaki_2_detik === '1') : null,
+                'lompat_kedua_kaki' => $request->has('lompat_kedua_kaki') ? ($request->lompat_kedua_kaki === '1') : null,
+                'kayuh_sepeda_roda_3' => $request->has('kayuh_sepeda_roda_3') ? ($request->kayuh_sepeda_roda_3 === '1') : null,
+                'gambar_garis_lurus' => $request->has('gambar_garis_lurus') ? ($request->gambar_garis_lurus === '1') : null,
+                'tumpuk_8_kubus' => $request->has('tumpuk_8_kubus') ? ($request->tumpuk_8_kubus === '1') : null,
+                'kenal_2_4_warna' => $request->has('kenal_2_4_warna') ? ($request->kenal_2_4_warna === '1') : null,
+                'sebut_nama_umur_tempat' => $request->has('sebut_nama_umur_tempat') ? ($request->sebut_nama_umur_tempat === '1') : null,
                 'mengerti_arti_kata_posisi' => $request->has('mengerti_arti_kata_posisi') ? ($request->mengerti_arti_kata_posisi === '1') : null,
-                'dengar_cerita'             => $request->has('dengar_cerita') ? ($request->dengar_cerita === '1') : null,
-                'cuci_tangan_sendiri'       => $request->has('cuci_tangan_sendiri') ? ($request->cuci_tangan_sendiri === '1') : null,
-                'bermain_dengan_teman'      => $request->has('bermain_dengan_teman') ? ($request->bermain_dengan_teman === '1') : null,
-                'pakai_sepatu_sendiri'      => $request->has('pakai_sepatu_sendiri') ? ($request->pakai_sepatu_sendiri === '1') : null,
+                'dengar_cerita' => $request->has('dengar_cerita') ? ($request->dengar_cerita === '1') : null,
+                'cuci_tangan_sendiri' => $request->has('cuci_tangan_sendiri') ? ($request->cuci_tangan_sendiri === '1') : null,
+                'bermain_dengan_teman' => $request->has('bermain_dengan_teman') ? ($request->bermain_dengan_teman === '1') : null,
+                'pakai_sepatu_sendiri' => $request->has('pakai_sepatu_sendiri') ? ($request->pakai_sepatu_sendiri === '1') : null,
                 'pakai_celana_baju_sendiri' => $request->has('pakai_celana_baju_sendiri') ? ($request->pakai_celana_baju_sendiri === '1') : null,
             ]
         );
@@ -1046,20 +1257,20 @@ class DataKiaController extends Controller
         $dataKia->perkembanganAnak60Bulan()->updateOrCreate(
             ['data_kia_id' => $dataKia->id],
             [
-                'berdiri_1_kaki_6_detik'      => $request->has('berdiri_1_kaki_6_detik') ? ($request->berdiri_1_kaki_6_detik === '1') : null,
-                'lompat_1_kaki'               => $request->has('lompat_1_kaki') ? ($request->lompat_1_kaki === '1') : null,
-                'menari'                      => $request->has('menari') ? ($request->menari === '1') : null,
-                'gambar_tanda_silang'         => $request->has('gambar_tanda_silang') ? ($request->gambar_tanda_silang === '1') : null,
-                'gambar_lingkaran'            => $request->has('gambar_lingkaran') ? ($request->gambar_lingkaran === '1') : null,
-                'gambar_orang_3_bagian'       => $request->has('gambar_orang_3_bagian') ? ($request->gambar_orang_3_bagian === '1') : null,
-                'kancing_baju_boneka'         => $request->has('kancing_baju_boneka') ? ($request->kancing_baju_boneka === '1') : null,
-                'sebut_nama_lengkap'          => $request->has('sebut_nama_lengkap') ? ($request->sebut_nama_lengkap === '1') : null,
-                'senang_sebut_kata_baru'      => $request->has('senang_sebut_kata_baru') ? ($request->senang_sebut_kata_baru === '1') : null,
-                'senang_bertanya'             => $request->has('senang_bertanya') ? ($request->senang_bertanya === '1') : null,
+                'berdiri_1_kaki_6_detik' => $request->has('berdiri_1_kaki_6_detik') ? ($request->berdiri_1_kaki_6_detik === '1') : null,
+                'lompat_1_kaki' => $request->has('lompat_1_kaki') ? ($request->lompat_1_kaki === '1') : null,
+                'menari' => $request->has('menari') ? ($request->menari === '1') : null,
+                'gambar_tanda_silang' => $request->has('gambar_tanda_silang') ? ($request->gambar_tanda_silang === '1') : null,
+                'gambar_lingkaran' => $request->has('gambar_lingkaran') ? ($request->gambar_lingkaran === '1') : null,
+                'gambar_orang_3_bagian' => $request->has('gambar_orang_3_bagian') ? ($request->gambar_orang_3_bagian === '1') : null,
+                'kancing_baju_boneka' => $request->has('kancing_baju_boneka') ? ($request->kancing_baju_boneka === '1') : null,
+                'sebut_nama_lengkap' => $request->has('sebut_nama_lengkap') ? ($request->sebut_nama_lengkap === '1') : null,
+                'senang_sebut_kata_baru' => $request->has('senang_sebut_kata_baru') ? ($request->senang_sebut_kata_baru === '1') : null,
+                'senang_bertanya' => $request->has('senang_bertanya') ? ($request->senang_bertanya === '1') : null,
                 'jawab_pertanyaan_kata_benar' => $request->has('jawab_pertanyaan_kata_benar') ? ($request->jawab_pertanyaan_kata_benar === '1') : null,
-                'bicara_mudah_dimengerti'     => $request->has('bicara_mudah_dimengerti') ? ($request->bicara_mudah_dimengerti === '1') : null,
-                'banding_ukuran_bentuk'       => $request->has('banding_ukuran_bentuk') ? ($request->banding_ukuran_bentuk === '1') : null,
-                'sebut_angka_hitung_jari'     => $request->has('sebut_angka_hitung_jari') ? ($request->sebut_angka_hitung_jari === '1') : null,
+                'bicara_mudah_dimengerti' => $request->has('bicara_mudah_dimengerti') ? ($request->bicara_mudah_dimengerti === '1') : null,
+                'banding_ukuran_bentuk' => $request->has('banding_ukuran_bentuk') ? ($request->banding_ukuran_bentuk === '1') : null,
+                'sebut_angka_hitung_jari' => $request->has('sebut_angka_hitung_jari') ? ($request->sebut_angka_hitung_jari === '1') : null,
             ]
         );
 
@@ -1075,19 +1286,19 @@ class DataKiaController extends Controller
         $dataKia->perkembanganAnak72Bulan()->updateOrCreate(
             ['data_kia_id' => $dataKia->id],
             [
-                'berjalan_lurus'                => $request->has('berjalan_lurus') ? ($request->berjalan_lurus === '1') : null,
-                'berdiri_1_kaki_11_detik'       => $request->has('berdiri_1_kaki_11_detik') ? ($request->berdiri_1_kaki_11_detik === '1') : null,
+                'berjalan_lurus' => $request->has('berjalan_lurus') ? ($request->berjalan_lurus === '1') : null,
+                'berdiri_1_kaki_11_detik' => $request->has('berdiri_1_kaki_11_detik') ? ($request->berdiri_1_kaki_11_detik === '1') : null,
                 'gambar_6_bagian_orang_lengkap' => $request->has('gambar_6_bagian_orang_lengkap') ? ($request->gambar_6_bagian_orang_lengkap === '1') : null,
-                'tangkap_bola_kecil'            => $request->has('tangkap_bola_kecil') ? ($request->tangkap_bola_kecil === '1') : null,
-                'gambar_segi_empat'             => $request->has('gambar_segi_empat') ? ($request->gambar_segi_empat === '1') : null,
-                'mengerti_lawan_kata'           => $request->has('mengerti_lawan_kata') ? ($request->mengerti_lawan_kata === '1') : null,
-                'mengerti_pembicaraan_7_kata'   => $request->has('mengerti_pembicaraan_7_kata') ? ($request->mengerti_pembicaraan_7_kata === '1') : null,
-                'jawab_bahan_guna_benda'        => $request->has('jawab_bahan_guna_benda') ? ($request->jawab_bahan_guna_benda === '1') : null,
-                'kenal_angka_hitung_5_10'       => $request->has('kenal_angka_hitung_5_10') ? ($request->kenal_angka_hitung_5_10 === '1') : null,
-                'kenal_warna_warni'             => $request->has('kenal_warna_warni') ? ($request->kenal_warna_warni === '1') : null,
-                'ungkapkan_simpati'             => $request->has('ungkapkan_simpati') ? ($request->ungkapkan_simpati === '1') : null,
-                'ikut_aturan_permainan'         => $request->has('ikut_aturan_permainan') ? ($request->ikut_aturan_permainan === '1') : null,
-                'pakaian_sendiri_tanpa_bantu'   => $request->has('pakaian_sendiri_tanpa_bantu') ? ($request->pakaian_sendiri_tanpa_bantu === '1') : null,
+                'tangkap_bola_kecil' => $request->has('tangkap_bola_kecil') ? ($request->tangkap_bola_kecil === '1') : null,
+                'gambar_segi_empat' => $request->has('gambar_segi_empat') ? ($request->gambar_segi_empat === '1') : null,
+                'mengerti_lawan_kata' => $request->has('mengerti_lawan_kata') ? ($request->mengerti_lawan_kata === '1') : null,
+                'mengerti_pembicaraan_7_kata' => $request->has('mengerti_pembicaraan_7_kata') ? ($request->mengerti_pembicaraan_7_kata === '1') : null,
+                'jawab_bahan_guna_benda' => $request->has('jawab_bahan_guna_benda') ? ($request->jawab_bahan_guna_benda === '1') : null,
+                'kenal_angka_hitung_5_10' => $request->has('kenal_angka_hitung_5_10') ? ($request->kenal_angka_hitung_5_10 === '1') : null,
+                'kenal_warna_warni' => $request->has('kenal_warna_warni') ? ($request->kenal_warna_warni === '1') : null,
+                'ungkapkan_simpati' => $request->has('ungkapkan_simpati') ? ($request->ungkapkan_simpati === '1') : null,
+                'ikut_aturan_permainan' => $request->has('ikut_aturan_permainan') ? ($request->ikut_aturan_permainan === '1') : null,
+                'pakaian_sendiri_tanpa_bantu' => $request->has('pakaian_sendiri_tanpa_bantu') ? ($request->pakaian_sendiri_tanpa_bantu === '1') : null,
             ]
         );
 
@@ -1101,15 +1312,15 @@ class DataKiaController extends Controller
         $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
 
         $data = [
-            'sesak_napas'      => $request->has('sesak_napas'),
-            'batuk'            => $request->has('batuk'),
-            'suhu_abnormal'    => $request->has('suhu_abnormal'),
-            'bab_sering'       => $request->has('bab_sering'),
-            'kencing_sedikit'  => $request->has('kencing_sedikit'),
+            'sesak_napas' => $request->has('sesak_napas'),
+            'batuk' => $request->has('batuk'),
+            'suhu_abnormal' => $request->has('suhu_abnormal'),
+            'bab_sering' => $request->has('bab_sering'),
+            'kencing_sedikit' => $request->has('kencing_sedikit'),
             'kulit_pucat_biru' => $request->has('kulit_pucat_biru'),
-            'aktivitas_lemah'  => $request->has('aktivitas_lemah'),
-            'telinga_cairan'   => $request->has('telinga_cairan'),
-            'tidak_makan'      => $request->has('tidak_makan'),
+            'aktivitas_lemah' => $request->has('aktivitas_lemah'),
+            'telinga_cairan' => $request->has('telinga_cairan'),
+            'tidak_makan' => $request->has('tidak_makan'),
         ];
 
         if ($request->has('paraf_kader_nakes')) {
