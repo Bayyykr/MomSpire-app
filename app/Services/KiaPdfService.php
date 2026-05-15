@@ -110,6 +110,7 @@ class KiaPdfService
      */
     public function generate(DataKia $dataKia)
     {
+        ini_set('memory_limit', '1024M'); // Tingkatkan memory limit untuk menangani PDF besar
         $originalPath = resource_path('views/buku/Buku KIA (Permenkes).pdf');
         $convertedPath = storage_path('app/buku_kia_converted.pdf');
         $scriptPath = base_path('scripts/convert_pdf_fpdi.py');
@@ -2578,88 +2579,100 @@ class KiaPdfService
                 if ($pemeriksaan) {
                     // Gambar USG
                     if ($pemeriksaan->gambar_usg) {
-                        $imagePath = public_path($pemeriksaan->gambar_usg);
+                        // Bersihkan path dari prefix 'storage/' atau 'public/' jika ada
+                        $cleanPath = str_replace(['storage/', 'public/', 'storage\\', 'public\\'], '', $pemeriksaan->gambar_usg);
+                        
+                        // Cek di storage/app/public (Disk Public)
+                        $imagePath = storage_path('app/public/' . $cleanPath);
+                        
+                        // Fallback: Cek jika tersimpan di private (disk local default yang salah sebelumnya)
+                        if (!file_exists($imagePath)) {
+                            $imagePath = storage_path('app/private/public/' . $cleanPath);
+                        }
+                        
                         if (file_exists($imagePath)) {
                             // X=25, Y=25, Lebar=110, Tinggi=90
-                            $pdf->Image($imagePath, 25, 25, 110, 90);
+                            $pdf->Image($imagePath, 44, 52, 110, 90);
                         }
                     }
 
                     // Pemeriksaan Laboratorium
                     if ($pemeriksaan->tgl_periksa_lab) {
-                        $pdf->Text(100, 142.5, date('d   /   m   /   Y', strtotime($pemeriksaan->tgl_periksa_lab)));
+                        $tgl = strtotime($pemeriksaan->tgl_periksa_lab);
+                        $pdf->Text(142, 152.5, date('d', $tgl)); // Hari
+                        $pdf->Text(151.5, 152.5, date('m', $tgl)); // Bulan
+                        $pdf->Text(166, 152.5, date('y', $tgl)); // Tahun
                     }
                     if ($pemeriksaan->lab_hemoglobin) {
-                        $pdf->Text(75, 153.5, $pemeriksaan->lab_hemoglobin);
+                        $pdf->Text(71, 166.5, $pemeriksaan->lab_hemoglobin);
                     }
                     if ($pemeriksaan->lab_gol_darah) {
-                        $pdf->Text(75, 161.5, $pemeriksaan->lab_gol_darah);
+                        $pdf->Text(71, 172.5, $pemeriksaan->lab_gol_darah);
                     }
                     if ($pemeriksaan->lab_gula_darah) {
-                        $pdf->Text(75, 169.5, $pemeriksaan->lab_gula_darah);
+                        $pdf->Text(71, 178.5, $pemeriksaan->lab_gula_darah);
                     }
 
                     $pdf->SetDrawColor(0, 0, 0);
-                    $pdf->SetLineWidth(0.5);
+                    $pdf->SetLineWidth(0.3);
 
-                    // Tripel Eliminasi (coret yang TIDAK dipilih)
+                    // Tripel Eliminasi (Lingkari yang DIPILIH)
                     if ($pemeriksaan->lab_tripel_h) {
                         if ($pemeriksaan->lab_tripel_h === 'Reaktif') {
-                            $pdf->Line(103, 185.5, 128, 185.5);
-                        } // Coret Non reaktif
-                        else {
-                            $pdf->Line(75, 185.5, 95, 185.5);
-                        } // Coret Reaktif
+                            $pdf->Ellipse(75.5, 188.5, 6, 3);
+                        } else {
+                            $pdf->Ellipse(93, 188.5, 9, 3);
+                        }
                     }
                     if ($pemeriksaan->lab_tripel_s) {
                         if ($pemeriksaan->lab_tripel_s === 'Reaktif') {
-                            $pdf->Line(103, 193.5, 128, 193.5);
+                            $pdf->Ellipse(75.5, 194.5, 6, 3);
                         } else {
-                            $pdf->Line(75, 193.5, 95, 193.5);
+                            $pdf->Ellipse(93, 194.5, 9, 3);
                         }
                     }
                     if ($pemeriksaan->lab_tripel_hep_b) {
                         if ($pemeriksaan->lab_tripel_hep_b === 'Reaktif') {
-                            $pdf->Line(103, 201.5, 128, 201.5);
+                            $pdf->Ellipse(75.5, 200.5, 6, 3);
                         } else {
-                            $pdf->Line(75, 201.5, 95, 201.5);
+                            $pdf->Ellipse(93, 200.5, 9, 3);
                         }
                     }
 
                     // Skrining Kesehatan Jiwa
                     if ($pemeriksaan->tgl_skrining_jiwa) {
-                        $pdf->Text(100, 216, date('d   /   m   /   Y', strtotime($pemeriksaan->tgl_skrining_jiwa)));
+                        $tglS = strtotime($pemeriksaan->tgl_skrining_jiwa);
+                        $pdf->Text(142, 209.5, date('d', $tglS)); // Hari
+                        $pdf->Text(151.5, 209.5, date('m', $tglS)); // Bulan
+                        $pdf->Text(166, 209.5, date('y', $tglS)); // Tahun
                     }
                     if ($pemeriksaan->skrining_jiwa) {
                         if ($pemeriksaan->skrining_jiwa === 'Ya') {
-                            $pdf->Line(108, 227.5, 120, 227.5);
-                        } // Coret Tidak
-                        else {
-                            $pdf->Line(82, 227.5, 90, 227.5);
-                        } // Coret Ya
+                            $pdf->Ellipse(118, 215, 6, 3);
+                        } else {
+                            $pdf->Ellipse(153, 215, 8, 3);
+                        }
                     }
                     if ($pemeriksaan->tindak_lanjut_jiwa) {
                         if ($pemeriksaan->tindak_lanjut_jiwa === 'Edukasi') {
-                            $pdf->Line(108, 235.5, 125, 235.5);
-                        } // Coret Konseling
-                        else {
-                            $pdf->Line(82, 235.5, 98, 235.5);
-                        } // Coret Edukasi
+                            $pdf->Ellipse(118, 221, 10, 3);
+                        } else {
+                            $pdf->Ellipse(153, 221.5, 10, 3);
+                        }
                     }
                     if ($pemeriksaan->rujukan_jiwa) {
                         if ($pemeriksaan->rujukan_jiwa === 'Ya') {
-                            $pdf->Line(108, 243.5, 120, 243.5);
-                        } // Coret Tidak
-                        else {
-                            $pdf->Line(82, 243.5, 90, 243.5);
-                        } // Coret Ya
+                            $pdf->Ellipse(118, 227, 6, 3);
+                        } else {
+                            $pdf->Ellipse(153, 228, 8, 3);
+                        }
                     }
 
                     if ($pemeriksaan->kesimpulan) {
-                        $pdf->Text(45, 258, $pemeriksaan->kesimpulan);
+                        $pdf->Text(47, 239, $pemeriksaan->kesimpulan);
                     }
                     if ($pemeriksaan->rekomendasi) {
-                        $pdf->Text(45, 266, $pemeriksaan->rekomendasi);
+                        $pdf->Text(50, 245.5, $pemeriksaan->rekomendasi);
                     }
                 }
 
@@ -2667,24 +2680,24 @@ class KiaPdfService
                 $catatanList = $dataKia->catatanPelayananTrimester1;
                 if ($catatanList && $catatanList->count() > 0) {
                     $pdf->SetFont('Arial', '', 9);
-                    $currentY = 40; // Y awal untuk tabel catatan
-                    $maxY = 280; // Batas bawah
+                    $currentY = 61; // Y awal untuk tabel catatan
+                    $maxY = 249; // Batas bawah
 
                     foreach ($catatanList as $cat) {
                         if ($currentY > $maxY - 20) {
                             break; // Jika melebihi batas bawah, berhenti (karena keterbatasan 1 halaman PDF)
                         }
 
-                        $pdf->SetXY(155, $currentY);
+                        $pdf->SetXY(206, $currentY);
                         $tglPeriksa = $cat->tanggal_periksa ? date('d/m/Y', strtotime($cat->tanggal_periksa)) : '';
                         $pdf->MultiCell(25, 5, $tglPeriksa, 0, 'C');
 
                         $startY = $pdf->GetY();
-                        $pdf->SetXY(182, $currentY);
+                        $pdf->SetXY(236, $currentY);
                         $pdf->MultiCell(72, 5, $cat->catatan, 0, 'L');
                         $endYCatatan = $pdf->GetY();
 
-                        $pdf->SetXY(256, $currentY);
+                        $pdf->SetXY(315, $currentY);
                         $tglKembali = $cat->tanggal_kembali ? date('d/m/Y', strtotime($cat->tanggal_kembali)) : '';
                         $pdf->MultiCell(25, 5, $tglKembali, 0, 'C');
                         $endYKembali = $pdf->GetY();
@@ -2693,7 +2706,7 @@ class KiaPdfService
                         $currentY = max($startY, $endYCatatan, $endYKembali) + 5;
 
                         // Garis pemisah antar baris
-                        $pdf->Line(152, $currentY - 2, 282, $currentY - 2);
+                        $pdf->Line(204, $currentY - 2, 348, $currentY - 2);
                     }
                 }
             }

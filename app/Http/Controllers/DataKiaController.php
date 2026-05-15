@@ -429,8 +429,12 @@ class DataKiaController extends Controller
 
         if ($request->hasFile('gambar_usg')) {
             $file = $request->file('gambar_usg');
-            $path = $file->store('public/usg_images');
-            $pemeriksaanModel->gambar_usg = str_replace('public/', 'storage/', $path);
+            // Gunakan disk 'public' agar tersimpan di storage/app/public/usg_images
+            $path = $file->store('usg_images', 'public');
+            if ($path) {
+                // Simpan path relatif yang bisa diakses (misal: storage/usg_images/nama.jpg)
+                $pemeriksaanModel->gambar_usg = 'storage/' . $path;
+            }
         }
 
         $pemeriksaanModel->save();
