@@ -45,4 +45,5 @@ class DataKia extends Model
     public function perkembanganAnak48Bulan() { return $this->hasOne(KiaPerkembanganAnak48Bulan::class, 'data_kia_id'); }
     public function perkembanganAnak60Bulan() { return $this->hasOne(KiaPerkembanganAnak60Bulan::class, 'data_kia_id'); }
     public function perkembanganAnak72Bulan() { return $this->hasOne(KiaPerkembanganAnak72Bulan::class, 'data_kia_id'); }
+    public function kesehatanLingkungan() { return $this->hasOne(KiaKesehatanLingkungan::class, 'data_kia_id'); }
 }

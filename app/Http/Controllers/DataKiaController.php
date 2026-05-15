@@ -133,11 +133,11 @@ class DataKiaController extends Controller
         $user = auth()->user();
         abort_unless($user, 403);
 
-        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s', 'perkembanganBayi18Bulan', 'perkembanganBayi24Bulan', 'pemantauanBulananAnak72s'])
+        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s', 'perkembanganBayi18Bulan', 'perkembanganBayi24Bulan', 'pemantauanBulananAnak72s', 'kesehatanLingkungan'])
             ->findOrFail($id);
 
-        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, persiapanMelahirkan, pemantauanIbuNifas, keluargaBerencana, bayiBaruLahir, pemantauanBayis, warnaTinja, absenKelasBalitas, pemantauanMingguanBayis, perkembanganBayi, pemantauanBulananBayis, perkembanganBayi6Bulan, pemantauanBulananBayi12s, perkembanganBayi9Bulan, perkembanganBayi12Bulan, pemantauanBulananAnak24s, perkembanganBayi18Bulan, perkembanganBayi24Bulan, dan pemantauanBulananAnak72s selalu segar
-        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s', 'perkembanganBayi18Bulan', 'perkembanganBayi24Bulan', 'pemantauanBulananAnak72s']);
+        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, persiapanMelahirkan, pemantauanIbuNifas, keluargaBerencana, bayiBaruLahir, pemantauanBayis, warnaTinja, absenKelasBalitas, pemantauanMingguanBayis, perkembanganBayi, pemantauanBulananBayis, perkembanganBayi6Bulan, pemantauanBulananBayi12s, perkembanganBayi9Bulan, perkembanganBayi12Bulan, pemantauanBulananAnak24s, perkembanganBayi18Bulan, perkembanganBayi24Bulan, pemantauanBulananAnak72s, dan kesehatanLingkungan selalu segar
+        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s', 'perkembanganBayi18Bulan', 'perkembanganBayi24Bulan', 'pemantauanBulananAnak72s', 'kesehatanLingkungan']);
 
         if ($user->role === 'pengguna') {
             abort_unless($dataKia->user_id === $user->id, 403);
@@ -1081,6 +1081,73 @@ class DataKiaController extends Controller
         return back()->with('success', 'Catatan pemantauan bulanan anak bulan ke-' . $request->bulan_ke . ' berhasil disimpan.')
             ->with('active_tab', $activeTab)
             ->with('active_month', $request->bulan_ke);
+    }
+
+    public function kesehatanLingkunganIndex()
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::with('kesehatanLingkungan')->where('user_id', $userId)->first();
+
+        if (!$dataKia) {
+            return redirect()->route('pengguna.buku_kia')->with('info', 'Silakan lengkapi screening Buku KIA terlebih dahulu.');
+        }
+
+        $lingkungan = $dataKia->kesehatanLingkungan;
+
+        return view('pengguna.kia-kesehatan-lingkungan', compact('dataKia', 'lingkungan'));
+    }
+
+    public function kesehatanLingkunganStore(Request $request)
+    {
+        $userId = auth()->id();
+        $dataKia = DataKia::where('user_id', $userId)->firstOrFail();
+
+        $data = [
+            'bab_sembarangan' => $request->has('bab_sembarangan') ? ($request->bab_sembarangan === '1') : null,
+            'bab_jamban_sendiri' => $request->has('bab_jamban_sendiri') ? ($request->bab_jamban_sendiri === '1') : null,
+            'penampung_tangki_septik' => $request->has('penampung_tangki_septik') ? ($request->penampung_tangki_septik === '1') : null,
+            'penampung_cubluk' => $request->has('penampung_cubluk') ? ($request->penampung_cubluk === '1') : null,
+            'penampung_drainase' => $request->has('penampung_drainase') ? ($request->penampung_drainase === '1') : null,
+            'kloset_leher_angsa' => $request->has('kloset_leher_angsa') ? ($request->kloset_leher_angsa === '1') : null,
+            'ctps_sarana' => $request->has('ctps_sarana') ? ($request->ctps_sarana === '1') : null,
+            'ctps_air_mengalir' => $request->has('ctps_air_mengalir') ? ($request->ctps_air_mengalir === '1') : null,
+            'ctps_sabun' => $request->has('ctps_sabun') ? ($request->ctps_sabun === '1') : null,
+            'ctps_waktu_sebelum_makan' => $request->has('ctps_waktu_sebelum_makan') ? ($request->ctps_waktu_sebelum_makan === '1') : null,
+            'ctps_waktu_sebelum_mengolah' => $request->has('ctps_waktu_sebelum_mengolah') ? ($request->ctps_waktu_sebelum_mengolah === '1') : null,
+            'ctps_waktu_sebelum_menyusui' => $request->has('ctps_waktu_sebelum_menyusui') ? ($request->ctps_waktu_sebelum_menyusui === '1') : null,
+            'ctps_waktu_setelah_bab' => $request->has('ctps_waktu_setelah_bab') ? ($request->ctps_waktu_setelah_bab === '1') : null,
+            'sumber_air_pipa' => $request->has('sumber_air_pipa') ? ($request->sumber_air_pipa === '1') : null,
+            'sumber_air_kran' => $request->has('sumber_air_kran') ? ($request->sumber_air_kran === '1') : null,
+            'sumber_air_sumur_terlindungi' => $request->has('sumber_air_sumur_terlindungi') ? ($request->sumber_air_sumur_terlindungi === '1') : null,
+            'sumber_air_mata_air_terlindungi' => $request->has('sumber_air_mata_air_terlindungi') ? ($request->sumber_air_mata_air_terlindungi === '1') : null,
+            'sumber_air_sungai' => $request->has('sumber_air_sungai') ? ($request->sumber_air_sungai === '1') : null,
+            'sumber_air_danau' => $request->has('sumber_air_danau') ? ($request->sumber_air_danau === '1') : null,
+            'sumber_air_hujan' => $request->has('sumber_air_hujan') ? ($request->sumber_air_hujan === '1') : null,
+            'sumber_air_waduk' => $request->has('sumber_air_waduk') ? ($request->sumber_air_waduk === '1') : null,
+            'sumber_air_kolam' => $request->has('sumber_air_kolam') ? ($request->sumber_air_kolam === '1') : null,
+            'sumber_air_irigasi' => $request->has('sumber_air_irigasi') ? ($request->sumber_air_irigasi === '1') : null,
+            'kelola_air_rebus' => $request->has('kelola_air_rebus') ? ($request->kelola_air_rebus === '1') : null,
+            'kelola_air_endap_saring' => $request->has('kelola_air_endap_saring') ? ($request->kelola_air_endap_saring === '1') : null,
+            'kelola_air_wadah_tertutup' => $request->has('kelola_air_wadah_tertutup') ? ($request->kelola_air_wadah_tertutup === '1') : null,
+            'kelola_makanan_tertutup' => $request->has('kelola_makanan_tertutup') ? ($request->kelola_makanan_tertutup === '1') : null,
+            'kelola_makanan_jauh_bahan_berbahaya' => $request->has('kelola_makanan_jauh_bahan_berbahaya') ? ($request->kelola_makanan_jauh_bahan_berbahaya === '1') : null,
+            'kelola_makanan_baik_benar' => $request->has('kelola_makanan_baik_benar') ? ($request->kelola_makanan_baik_benar === '1') : null,
+            'sampah_tidak_berserakan' => $request->has('sampah_tidak_berserakan') ? ($request->sampah_tidak_berserakan === '1') : null,
+            'sampah_tempat_tertutup' => $request->has('sampah_tempat_tertutup') ? ($request->sampah_tempat_tertutup === '1') : null,
+            'sampah_dipilah' => $request->has('sampah_dipilah') ? ($request->sampah_dipilah === '1') : null,
+            'sampah_tidak_dibakar' => $request->has('sampah_tidak_dibakar') ? ($request->sampah_tidak_dibakar === '1') : null,
+            'sampah_tidak_dibuang_sembarangan' => $request->has('sampah_tidak_dibuang_sembarangan') ? ($request->sampah_tidak_dibuang_sembarangan === '1') : null,
+            'limbah_tidak_menggenang' => $request->has('limbah_tidak_menggenang') ? ($request->limbah_tidak_menggenang === '1') : null,
+            'limbah_saluran_tertutup' => $request->has('limbah_saluran_tertutup') ? ($request->limbah_saluran_tertutup === '1') : null,
+            'limbah_terhubung_resapan' => $request->has('limbah_terhubung_resapan') ? ($request->limbah_terhubung_resapan === '1') : null,
+        ];
+
+        $dataKia->kesehatanLingkungan()->updateOrCreate(
+            ['data_kia_id' => $dataKia->id],
+            $data
+        );
+
+        return back()->with('success', 'Checklist Kesehatan Lingkungan berhasil disimpan.');
     }
 }
 

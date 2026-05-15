@@ -255,6 +255,11 @@
 					<i class="bi bi-calendar3-range-fill"></i>
 					<span>Anak Umur 2 - 6 Tahun</span>
 				</a>
+				<a href="{{ route('pengguna.kesehatan_lingkungan') }}"
+					class="nav-link {{ request()->routeIs('pengguna.kesehatan_lingkungan') ? 'active' : '' }}">
+					<i class="bi bi-house-heart-fill"></i>
+					<span>Kesehatan Lingkungan</span>
+				</a>
 			</div>
 			<div class="nav-section">
 				<span class="nav-label">SISTEM</span>

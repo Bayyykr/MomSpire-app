@@ -1609,6 +1609,63 @@ class KiaPdfService
                     }
                 }
             }
+
+            // 28. KESEHATAN LINGKUNGAN (Halaman 47)
+            if ($pageNo === 47) {
+                $lingk = $dataKia->kesehatanLingkungan;
+                if ($lingk) {
+                    $pdf->SetTextColor(0, 0, 0);
+                    $pdf->SetFont('ZapfDingbats', '', 10);
+
+                    // Kolom Kiri (X = 30)
+                    if ($lingk->bab_sembarangan) { $pdf->Text(214, 67, chr(51)); }
+                    if ($lingk->bab_jamban_sendiri) { $pdf->Text(214, 71, chr(51)); }
+                    if ($lingk->penampung_tangki_septik) { $pdf->Text(214, 84, chr(51)); }
+                    if ($lingk->penampung_cubluk) { $pdf->Text(214, 97, chr(51)); }
+                    if ($lingk->penampung_drainase) { $pdf->Text(214, 101, chr(51)); }
+                    if ($lingk->kloset_leher_angsa) { $pdf->Text(214, 118, chr(51)); }
+
+                    if ($lingk->ctps_sarana) { $pdf->Text(214, 142, chr(51)); }
+                    if ($lingk->ctps_air_mengalir) { $pdf->Text(214, 146.5, chr(51)); }
+                    if ($lingk->ctps_sabun) { $pdf->Text(214, 151, chr(51)); }
+
+                    if ($lingk->ctps_waktu_sebelum_makan) { $pdf->Text(214, 173, chr(51)); }
+                    if ($lingk->ctps_waktu_sebelum_mengolah) { $pdf->Text(214, 177.5, chr(51)); }
+                    if ($lingk->ctps_waktu_sebelum_menyusui) { $pdf->Text(214, 186, chr(51)); }
+                    if ($lingk->ctps_waktu_setelah_bab) { $pdf->Text(214, 194.5, chr(51)); }
+
+                    if ($lingk->sumber_air_pipa) { $pdf->Text(214, 209.5, chr(51)); }
+                    if ($lingk->sumber_air_kran) { $pdf->Text(214, 214, chr(51)); }
+                    if ($lingk->sumber_air_sumur_terlindungi) { $pdf->Text(214, 218, chr(51)); }
+                    if ($lingk->sumber_air_mata_air_terlindungi) { $pdf->Text(214, 226.5, chr(51)); }
+                    if ($lingk->sumber_air_sungai) { $pdf->Text(214, 230.5, chr(51)); }
+                    if ($lingk->sumber_air_danau) { $pdf->Text(214, 235, chr(51)); }
+                    if ($lingk->sumber_air_hujan) { $pdf->Text(214, 239.5, chr(51)); }
+                    if ($lingk->sumber_air_waduk) { $pdf->Text(214, 243.5, chr(51)); }
+
+                    // Kolom Kanan (X = 113)
+                    if ($lingk->sumber_air_kolam) { $pdf->Text(284, 57.5, chr(51)); }
+                    if ($lingk->sumber_air_irigasi) { $pdf->Text(284, 61.5, chr(51)); }
+
+                    if ($lingk->kelola_air_rebus) { $pdf->Text(284, 75, chr(51)); }
+                    if ($lingk->kelola_air_endap_saring) { $pdf->Text(284, 79, chr(51)); }
+                    if ($lingk->kelola_air_wadah_tertutup) { $pdf->Text(284, 87.5, chr(51)); }
+
+                    if ($lingk->kelola_makanan_tertutup) { $pdf->Text(284, 109.5, chr(51)); }
+                    if ($lingk->kelola_makanan_jauh_bahan_berbahaya) { $pdf->Text(284, 118, chr(51)); }
+                    if ($lingk->kelola_makanan_baik_benar) { $pdf->Text(284, 130.5, chr(51)); }
+
+                    if ($lingk->sampah_tidak_berserakan) { $pdf->Text(284, 167, chr(51)); }
+                    if ($lingk->sampah_tempat_tertutup) { $pdf->Text(284, 175.5, chr(51)); }
+                    if ($lingk->sampah_dipilah) { $pdf->Text(284, 184, chr(51)); }
+                    if ($lingk->sampah_tidak_dibakar) { $pdf->Text(284, 188, chr(51)); }
+                    if ($lingk->sampah_tidak_dibuang_sembarangan) { $pdf->Text(284, 192, chr(51)); }
+
+                    if ($lingk->limbah_tidak_menggenang) { $pdf->Text(284, 221, chr(51)); }
+                    if ($lingk->limbah_saluran_tertutup) { $pdf->Text(284, 225, chr(51)); }
+                    if ($lingk->limbah_terhubung_resapan) { $pdf->Text(284, 233.5, chr(51)); }
+                }
+            }
         }
 
         return $pdf->Output('S');
