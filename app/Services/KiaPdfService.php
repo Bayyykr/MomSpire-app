@@ -1666,6 +1666,109 @@ class KiaPdfService
                     if ($lingk->limbah_terhubung_resapan) { $pdf->Text(284, 233.5, chr(51)); }
                 }
             }
+
+            // 29. PELAYANAN KESEHATAN IBU (Halaman 50)
+            if ($pageNo === 50) {
+                $pelayanan = $dataKia->pelayananKesehatanIbu;
+                if ($pelayanan && $pelayanan->count() > 0) {
+                    $pdf->SetTextColor(0, 0, 0);
+                    $pdf->SetFont('Arial', '', 7);
+
+                    // Estimasi koordinat X untuk Kunjungan 1-6
+                    $xMap = [
+                        1 => 66,
+                        2 => 84,
+                        3 => 102,
+                        4 => 120,
+                        5 => 138,
+                        6 => 156,
+                    ];
+
+                    $yMap = [
+                        'tanggal_periksa' => 87,
+                        'tempat_periksa' => 94,
+                        'berat_badan' => 111,
+                        'tinggi_badan' => 120.5,
+                        'lingkar_lengan_atas' => 129.5,
+                        'tekanan_darah' => 137.5,
+                        'tinggi_rahim' => 145,
+                        'letak_denyut_jantung' => 154,
+                        'status_imunisasi_tt' => 164,
+                        'konseling' => 174,
+                        'skrining_dokter' => 183,
+                        'tablet_tambah_darah' => 191.5,
+                        'tes_lab_hb' => 200,
+                        'tes_golongan_darah' => 208,
+                        'tes_lab_protein_urine' => 216,
+                        'tes_lab_gula_darah' => 224.5,
+                        'usg' => 232.5,
+                        'tripel_eliminasi' => 241,
+                        'tata_laksana_kasus' => 249,
+                    ];
+
+                    foreach ($pelayanan as $p) {
+                        $x = $xMap[$p->kunjungan_ke] ?? null;
+                        if (!$x) continue;
+
+                        if ($p->tanggal_periksa) { $pdf->Text($x, $yMap['tanggal_periksa'], date('d/m/Y', strtotime($p->tanggal_periksa))); }
+                        if ($p->tempat_periksa) { 
+                            $pdf->SetXY($x, $yMap['tempat_periksa'] - 2);
+                            $pdf->MultiCell(18, 3, $p->tempat_periksa, 0, 'L'); 
+                        }
+                        if ($p->berat_badan) { $pdf->Text($x, $yMap['berat_badan'], $p->berat_badan); }
+                        
+                        if ($p->tinggi_badan && in_array($p->kunjungan_ke, [1])) { 
+                            $pdf->Text($x, $yMap['tinggi_badan'], $p->tinggi_badan); 
+                        }
+                        
+                        if ($p->lingkar_lengan_atas) { $pdf->Text($x, $yMap['lingkar_lengan_atas'], $p->lingkar_lengan_atas); }
+                        if ($p->tekanan_darah) { $pdf->Text($x, $yMap['tekanan_darah'], $p->tekanan_darah); }
+                        if ($p->tinggi_rahim) { $pdf->Text($x, $yMap['tinggi_rahim'], $p->tinggi_rahim); }
+                        
+                        $letakDenyut = trim(($p->letak_janin ?? '') . ' / ' . ($p->denyut_jantung_bayi ?? ''), ' /');
+                        if ($letakDenyut) { $pdf->Text($x, $yMap['letak_denyut_jantung'], substr($letakDenyut, 0, 15)); }
+
+                        if ($p->status_imunisasi_tt) { $pdf->Text($x, $yMap['status_imunisasi_tt'], substr($p->status_imunisasi_tt, 0, 15)); }
+                        if ($p->konseling) { $pdf->Text($x, $yMap['konseling'], substr($p->konseling, 0, 15)); }
+                        if ($p->skrining_dokter) { $pdf->Text($x, $yMap['skrining_dokter'], substr($p->skrining_dokter, 0, 15)); }
+                        if ($p->tablet_tambah_darah) { $pdf->Text($x, $yMap['tablet_tambah_darah'], $p->tablet_tambah_darah); }
+                        
+                        if ($p->tes_lab_hb && in_array($p->kunjungan_ke, [1, 4, 5])) { 
+                            $pdf->Text($x, $yMap['tes_lab_hb'], $p->tes_lab_hb); 
+                        }
+                        
+                        if ($p->tes_golongan_darah && in_array($p->kunjungan_ke, [1])) { 
+                            $pdf->Text($x, $yMap['tes_golongan_darah'], $p->tes_golongan_darah); 
+                        }
+                        
+                        if ($p->tes_lab_protein_urine && in_array($p->kunjungan_ke, [2, 3, 4, 5, 6])) { 
+                            $pdf->Text($x, $yMap['tes_lab_protein_urine'], $p->tes_lab_protein_urine); 
+                        }
+                        
+                        if ($p->tes_lab_gula_darah && in_array($p->kunjungan_ke, [4, 5, 6])) { 
+                            $pdf->Text($x, $yMap['tes_lab_gula_darah'], $p->tes_lab_gula_darah); 
+                        }
+                        
+                        if ($p->usg && in_array($p->kunjungan_ke, [1, 5])) { 
+                            $pdf->Text($x, $yMap['usg'], substr($p->usg, 0, 10)); 
+                        }
+                        
+                        if ($p->tripel_eliminasi) { 
+                            // Split value by comma, space, or slash
+                            $tripelArr = preg_split('/[,\s\/]+/', $p->tripel_eliminasi);
+                            $h = $tripelArr[0] ?? '';
+                            $s = $tripelArr[1] ?? '';
+                            $hepB = $tripelArr[2] ?? '';
+                            
+                            $pdf->Text($x, $yMap['tripel_eliminasi'], substr($h, 0, 3));
+                            $pdf->Text($x + 6, $yMap['tripel_eliminasi'], substr($s, 0, 3));
+                            $pdf->Text($x + 12, $yMap['tripel_eliminasi'], substr($hepB, 0, 3));
+                        }
+                        
+                        if ($p->tata_laksana_kasus) { $pdf->Text($x, $yMap['tata_laksana_kasus'], substr($p->tata_laksana_kasus, 0, 15)); }
+                    }
+                }
+            }
         }
 
         return $pdf->Output('S');

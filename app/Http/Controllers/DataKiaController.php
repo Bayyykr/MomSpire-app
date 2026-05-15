@@ -133,11 +133,11 @@ class DataKiaController extends Controller
         $user = auth()->user();
         abort_unless($user, 403);
 
-        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s', 'perkembanganBayi18Bulan', 'perkembanganBayi24Bulan', 'pemantauanBulananAnak72s', 'kesehatanLingkungan'])
+        $dataKia = DataKia::with(['ibu', 'suami', 'anak', 'layanan', 'riwayat', 'ttdTrackings', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s', 'perkembanganBayi18Bulan', 'perkembanganBayi24Bulan', 'pemantauanBulananAnak72s', 'kesehatanLingkungan', 'pelayananKesehatanIbu'])
             ->findOrFail($id);
 
-        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, persiapanMelahirkan, pemantauanIbuNifas, keluargaBerencana, bayiBaruLahir, pemantauanBayis, warnaTinja, absenKelasBalitas, pemantauanMingguanBayis, perkembanganBayi, pemantauanBulananBayis, perkembanganBayi6Bulan, pemantauanBulananBayi12s, perkembanganBayi9Bulan, perkembanganBayi12Bulan, pemantauanBulananAnak24s, perkembanganBayi18Bulan, perkembanganBayi24Bulan, pemantauanBulananAnak72s, dan kesehatanLingkungan selalu segar
-        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s', 'perkembanganBayi18Bulan', 'perkembanganBayi24Bulan', 'pemantauanBulananAnak72s', 'kesehatanLingkungan']);
+        // Pastikan relasi ttdTrackings, pemantauanMingguans, absenKelasIbuHamils, persiapanMelahirkan, pemantauanIbuNifas, keluargaBerencana, bayiBaruLahir, pemantauanBayis, warnaTinja, absenKelasBalitas, pemantauanMingguanBayis, perkembanganBayi, pemantauanBulananBayis, perkembanganBayi6Bulan, pemantauanBulananBayi12s, perkembanganBayi9Bulan, perkembanganBayi12Bulan, pemantauanBulananAnak24s, perkembanganBayi18Bulan, perkembanganBayi24Bulan, pemantauanBulananAnak72s, kesehatanLingkungan, dan pelayananKesehatanIbu selalu segar
+        $dataKia->load(['ttdTrackings', 'pemantauanMingguans', 'absenKelasIbuHamils', 'persiapanMelahirkan', 'pemantauanIbuNifas', 'keluargaBerencana', 'bayiBaruLahir', 'pemantauanBayis', 'warnaTinja', 'absenKelasBalitas', 'pemantauanMingguanBayis', 'perkembanganBayi', 'pemantauanBulananBayis', 'perkembanganBayi6Bulan', 'pemantauanBulananBayi12s', 'perkembanganBayi9Bulan', 'perkembanganBayi12Bulan', 'pemantauanBulananAnak24s', 'perkembanganBayi18Bulan', 'perkembanganBayi24Bulan', 'pemantauanBulananAnak72s', 'kesehatanLingkungan', 'pelayananKesehatanIbu']);
 
         if ($user->role === 'pengguna') {
             abort_unless($dataKia->user_id === $user->id, 403);
@@ -191,6 +191,58 @@ class DataKiaController extends Controller
 
         $role = auth()->user()->role;
         return redirect()->route($role . '.kia')->with('success', 'Riwayat kesehatan berhasil diperbarui.');
+    }
+
+    public function editPelayanan($id)
+    {
+        $role = auth()->user()->role;
+        $dataKia = DataKia::with(['ibu', 'pelayananKesehatanIbu'])->findOrFail($id);
+        $pelayanan = $dataKia->pelayananKesehatanIbu->keyBy('kunjungan_ke');
+
+        return view('nakes.kia-edit-pelayanan', compact('dataKia', 'role', 'pelayanan'));
+    }
+
+    public function savePelayanan(Request $request, $id)
+    {
+        $dataKia = DataKia::findOrFail($id);
+
+        $kunjunganKe = $request->kunjungan_ke;
+        $tripelCombined = null;
+        if ($request->has('tripel_eliminasi_h') || $request->has('tripel_eliminasi_s') || $request->has('tripel_eliminasi_hep_b')) {
+            $tripelCombined = ($request->tripel_eliminasi_h ?? '') . ',' . ($request->tripel_eliminasi_s ?? '') . ',' . ($request->tripel_eliminasi_hep_b ?? '');
+            if ($tripelCombined === ',,') $tripelCombined = null;
+        }
+
+        $dataKia->pelayananKesehatanIbu()->updateOrCreate(
+            [
+                'data_kia_id' => $dataKia->id,
+                'kunjungan_ke' => $kunjunganKe,
+            ],
+            [
+                'tanggal_periksa' => $request->tanggal_periksa,
+                'tempat_periksa' => $request->tempat_periksa,
+                'berat_badan' => $request->berat_badan,
+                'tinggi_badan' => $request->tinggi_badan,
+                'lingkar_lengan_atas' => $request->lingkar_lengan_atas,
+                'tekanan_darah' => $request->tekanan_darah,
+                'tinggi_rahim' => $request->tinggi_rahim,
+                'letak_janin' => $request->letak_janin,
+                'denyut_jantung_bayi' => $request->denyut_jantung_bayi,
+                'status_imunisasi_tt' => $request->status_imunisasi_tt,
+                'konseling' => $request->konseling,
+                'skrining_dokter' => $request->skrining_dokter,
+                'tablet_tambah_darah' => $request->tablet_tambah_darah,
+                'tes_lab_hb' => $request->tes_lab_hb,
+                'tes_golongan_darah' => $request->tes_golongan_darah,
+                'tes_lab_protein_urine' => $request->tes_lab_protein_urine,
+                'tes_lab_gula_darah' => $request->tes_lab_gula_darah,
+                'usg' => $request->usg,
+                'tripel_eliminasi' => $tripelCombined,
+                'tata_laksana_kasus' => $request->tata_laksana_kasus,
+            ]
+        );
+
+        return back()->with('success', 'Pelayanan Kesehatan Ibu kunjungan ke-' . $kunjunganKe . ' berhasil disimpan.')->with('active_tab', 'kunjungan' . $kunjunganKe);
     }
     public function ttdIndex()
     {

@@ -33,10 +33,13 @@
                             </td>
                             <td>{{ $kia->updated_at ? \Illuminate\Support\Carbon::parse($kia->updated_at)->diffForHumans() : '-' }}</td>
                             <td class="text-end">
-                                <a href="{{ route($role . '.kia.edit_riwayat', $kia->id) }}" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-pencil-square me-1"></i> Riwayat Kesehatan
+                                <a href="{{ route($role . '.kia.edit_riwayat', $kia->id) }}" class="btn btn-sm btn-outline-primary mb-1">
+                                    <i class="bi bi-pencil-square me-1"></i> Riwayat
                                 </a>
-                                <a href="{{ route('admin.kia.export_pdf', $kia->id) }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                <a href="{{ route($role . '.kia.edit_pelayanan', $kia->id) }}" class="btn btn-sm btn-outline-info mb-1">
+                                    <i class="bi bi-journal-medical me-1"></i> Pelayanan
+                                </a>
+                                <a href="{{ route('admin.kia.export_pdf', $kia->id) }}" target="_blank" class="btn btn-sm btn-outline-success mb-1">
                                     <i class="bi bi-file-earmark-pdf me-1"></i> PDF
                                 </a>
                             </td>

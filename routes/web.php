@@ -397,6 +397,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/bidan/kia', [\App\Http\Controllers\DataKiaController::class, 'indexNakes'])->name('bidan.kia');
     Route::get('/bidan/kia/{id}/edit-riwayat', [\App\Http\Controllers\DataKiaController::class, 'editRiwayat'])->name('bidan.kia.edit_riwayat');
     Route::post('/bidan/kia/{id}/save-riwayat', [\App\Http\Controllers\DataKiaController::class, 'saveRiwayat'])->name('bidan.kia.save_riwayat');
+    Route::get('/bidan/kia/{id}/edit-pelayanan', [\App\Http\Controllers\DataKiaController::class, 'editPelayanan'])->name('bidan.kia.edit_pelayanan');
+    Route::post('/bidan/kia/{id}/save-pelayanan', [\App\Http\Controllers\DataKiaController::class, 'savePelayanan'])->name('bidan.kia.save_pelayanan');
 
     Route::get('/dokter/dashboard', function () use ($ensureRole) {
         $ensureRole('dokter');
@@ -413,6 +415,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dokter/kia', [\App\Http\Controllers\DataKiaController::class, 'indexNakes'])->name('dokter.kia');
     Route::get('/dokter/kia/{id}/edit-riwayat', [\App\Http\Controllers\DataKiaController::class, 'editRiwayat'])->name('dokter.kia.edit_riwayat');
     Route::post('/dokter/kia/{id}/save-riwayat', [\App\Http\Controllers\DataKiaController::class, 'saveRiwayat'])->name('dokter.kia.save_riwayat');
+    Route::get('/dokter/kia/{id}/edit-pelayanan', [\App\Http\Controllers\DataKiaController::class, 'editPelayanan'])->name('dokter.kia.edit_pelayanan');
+    Route::post('/dokter/kia/{id}/save-pelayanan', [\App\Http\Controllers\DataKiaController::class, 'savePelayanan'])->name('dokter.kia.save_pelayanan');
 
     Route::get('/bidan/settings', function () use ($ensureRole) {
         $ensureRole('bidan');
